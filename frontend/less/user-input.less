@@ -15,9 +15,13 @@
   .user-input();
 }
 
-#user-input::placeholder {
+.placeholder() {
   font-family: @secondary-font;
   text-align: center;
   font-size: @default-font-size;
   overflow: visible;
+}
+
+#user-input::placeholder {
+  .placeholder();
 }

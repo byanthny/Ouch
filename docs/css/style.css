@@ -129,7 +129,6 @@ html {
   max-width: 400px;
 }
 #exist-input.login {
-  margin-top: 5vh;
   width: 90%;
   max-width: 400px;
 }
@@ -158,6 +157,12 @@ html {
   transition: all 1s!important;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
   margin-top: 10px;
+}
+#exist-input::placeholder {
+  font-family: "Arial";
+  text-align: center;
+  font-size: 1em;
+  overflow: visible;
 }
 #help {
   width: 90vw;

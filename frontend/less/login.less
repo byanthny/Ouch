@@ -1,10 +1,10 @@
 .input-login() {
-  margin-top: @login-top;
   width: @login-width;
   max-width: @max-login-width;
 }
 
 #user-input.login {
+  margin-top: @login-top;
   .input-login();
 }
 
@@ -30,4 +30,8 @@
 #exist-input {
   .user-input();
   margin-top: 10px;
+}
+
+#exist-input::placeholder {
+  .placeholder();
 }

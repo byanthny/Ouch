@@ -16,9 +16,10 @@
         <h1 class="ouch" id="ouch">Ouch</h1>
         <div id="commands">
             <form>
-                <input id="user-input" type="text" placeholder="Enter your username"> <!--placeholder="What are you feeling?"-->
-                <input id="exist-input" class="opacity disappear" type="text" placeholder="Enter your username">
-                <button type="button" class="submit-button hidden" id="submit-button">></button>
+                <input id="user-input" type="text" placeholder="username"> <!--placeholder="What are you feeling?"-->
+                <input id="exist-input" class="opacity disappear" type="text" placeholder="existence">
+                <br><br>
+                <button type="button" class="submit-button hidden" id="submit-button">submit</button>
             <form>
             <div class="search" id="search">
                 <!-- <div class="search-item"><button type="button">Search Item 1</button></div> -->
@@ -32,7 +33,7 @@
         </div>
     </div>
 
-    <div id="help">
+    <div id="help" class="hidden">
         <div class="panel">
             <span class="close">&times;</span>
         </div>
@@ -40,9 +41,11 @@
 
     <script src="js/brains.js"></script>
 
-
+<
     <script>
         // Testing
+        switchState();
+        /*
         (function() {
            switchState();
             switchDark();
@@ -50,6 +53,6 @@
                 switchState();
                 switchDark();
             }, 2000);
-        })();
+        })();*/
     </script>
 </body>
