@@ -3,15 +3,16 @@ body {
     margin: 0;
 }
 
-.header {
+#header {
     padding-top: 30vh;
     width: 100vw;
     height: 70vh;
     text-align: center;
+    transition: all 1s!important;
     background: linear-gradient(-130deg, rgb(181, 248, 255) 50%, rgb(156, 214, 222) 100%);
 }
 
-.indicator {
+#indicator {
     position: absolute;
     top: 0;
     right: 0;
@@ -21,15 +22,15 @@ body {
     margin: 17px;
 }
 
-.indicator.connected {
+#indicator.connected {
     background: lightgreen;
 }
 
-.indicator.offline {
+#indicator.offline {
     background: red;
 }
 
-.level {
+#level {
     padding: 10px;
     padding-left: 15px;
     padding-right: 15px;
@@ -45,7 +46,7 @@ body {
     box-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
 }
 
-.ouch {
+#ouch {
     padding: 10px;
     padding-bottom: 0;
     margin-bottom: 0;
@@ -53,14 +54,15 @@ body {
     font-family: 'Mrs Sheppards', cursive;
     font-size: 5em;
     text-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
+    transition: all 1s!important;
 }
 
-.commands {
+#commands {
     width: 90vw;
     margin: 0 auto;
 }
 
-.user-input {
+#user-input {
     width: 100%;
     max-width: 500px;
     height: 40px;
@@ -70,17 +72,19 @@ body {
     padding-left: 12px;
     color: #262626;
     outline: none;
+    transition: all 1s!important;
     font-size: 16px;
 }
 
-.user-input::placeholder {
+#user-input::placeholder {
     font-family: "Arial";
     text-align: center;
     font-size: 16px;
     overflow: visible;
+    transition: all 1s!important;
 }
 
-.search {
+#search {
     width: 100%;
     max-width: 500px;
     max-height: 20vh;
@@ -91,6 +95,7 @@ body {
     box-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
     overflow-y: scroll;
     padding: 6px;
+    transition: all 1s!important;
 }
 
 .search-item {
@@ -100,18 +105,17 @@ body {
 }
 
 /* Styling for dark mode */
-.header.dark {
+#header.dark {
     background: linear-gradient(-130deg, #262626 50%, #191919 100%);
 }
 
-.ouch.dark {
+#ouch.dark {
     color: white;
 }
 
 /* For login */
 
-.submit-button {
-    margin-top: 5vh;
+#submit-button {
     height: 43px;
     border-width: 0px;
     border-radius: 5px;
@@ -121,13 +125,14 @@ body {
     font-size: 16px;
 }
 
-.user-input.login {
+#user-input.login {
+    margin-top: 5vh;
     width: 90%;
     margin-top: 5vh;
     max-width: 400px;
 }
 
-.header.login {
+#header.login {
     padding-top: 20vh;
     height: 80vh;
 }
@@ -136,6 +141,6 @@ body {
     display: none!important;
 }
 
-#transition {
-    transition: all .5s;
+.opacity {
+    opacity: 0;
 }

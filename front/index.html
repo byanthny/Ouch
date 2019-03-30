@@ -8,17 +8,17 @@
 </head>
 <body>
 
-    <div class="header" id="transition">
-        <p class="level">100
-            <div class="indicator offline" id="transition"></div>
+    <div class="header" id="header">
+        <p id="level">100
+            <div class="indicator offline" id="indicator"></div>
         </p>
-        <h1 class="ouch" id="transition">Ouch</h1>
+        <h1 class="ouch" id="ouch">Ouch</h1>
         <div class="commands">
             <form>
-                <input class="user-input" id="transition" type="text" placeholder="Enter your username"> <!--placeholder="What are you feeling?"-->
-                <button type="button" class="submit-button hidden">></button>
+                <input class="user-input" id="user-input" type="text" placeholder="Enter your username"> <!--placeholder="What are you feeling?"-->
+                <button type="button" class="submit-button hidden" id="submit-button">></button>
             <form>
-            <div class="search" id="transition">
+            <div class="search" id="search">
                 <div class="search-item">Search Item 1</div>
                 <div class="search-item">Search Item 2</div>
                 <div class="search-item">Search Item 3</div>
@@ -30,4 +30,17 @@
     </div>
 
     <script src="js/brains.js"></script>
+
+    <!--
+    <script>
+        // Testing
+        (function() {
+           switchState();
+            switchDark();
+            setTimeout(function(){
+                switchState();
+                switchDark();
+            }, 2000);
+        })();
+    </script>-->
 </body>
