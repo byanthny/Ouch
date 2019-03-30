@@ -1,5 +1,3 @@
-#Ouch
-
 <p align="center">
 <img src="site/imgs/logo.png" width="250"/>
 </p>
