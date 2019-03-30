@@ -137,12 +137,15 @@ html {
   height: calc(100vh - 20vh);
 }
 #submit-button {
-  height: 43px;
   border-width: 0;
   border-radius: 5px;
   color: #262626;
   background: #ffffff;
   font-size: 1em;
+  display: block;
+  margin: 0 auto;
+  margin-top: 20px;
+  padding: 10px 20px;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
 }
 #exist-input {

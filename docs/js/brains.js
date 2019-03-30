@@ -13,8 +13,6 @@ function switchDark() {
     document.getElementById("header").classList.toggle("dark");
 }
 
-var span = document.getElementsByClassName("close")[0];
-
 function togglePopUp() {
     document.getElementById("help").classList.toggle("opacity");
     setTimeout(function () {
@@ -22,6 +20,10 @@ function togglePopUp() {
     }, 1000);
 }
 
-span.onclick = function() {
+document.getElementsByClassName("close")[0].onclick = function() {
     togglePopUp();
+};
+
+document.getElementById("submit-button").onclick = function() {
+    alert("Hello\nHow are you?");
 };

@@ -5,14 +5,13 @@ function switchState() {
     document.getElementById("exist-input").classList.toggle("login");
     document.getElementById("header").classList.toggle("login");
     document.getElementById("exist-input").classList.toggle("opacity");
+    document.getElementById("exist-input").classList.toggle("disappear");
 }
 
 function switchDark() {
     document.getElementById("ouch").classList.toggle("dark");
     document.getElementById("header").classList.toggle("dark");
 }
-
-var span = document.getElementsByClassName("close")[0];
 
 function togglePopUp() {
     document.getElementById("help").classList.toggle("opacity");
@@ -21,6 +20,10 @@ function togglePopUp() {
     }, 1000);
 }
 
-span.onclick = function() {
+document.getElementsByClassName("close")[0].onclick = function() {
     togglePopUp();
+};
+
+document.getElementById("submit-button").onclick = function() {
+    alert("Submit button works");
 };
