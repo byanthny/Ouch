@@ -15,6 +15,9 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0-alpha")
+
+    // Backend Web
+    implementation("io.javalin:javalin:2.8.0")
 }
 
 tasks.withType<KotlinCompile> {
