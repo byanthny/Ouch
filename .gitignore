@@ -25,5 +25,6 @@
 hs_err_pid*
 
 .idea/
-/.gradle/
-/build/
+/backend/build/
+/backend/.gradle/
+
