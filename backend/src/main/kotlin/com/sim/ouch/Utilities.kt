@@ -52,3 +52,5 @@ fun List<Any>.toFile(name: String = "file") : File {
     }
     return file
 }
+
+val Any.unit get() = Unit

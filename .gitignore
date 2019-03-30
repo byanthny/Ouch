@@ -25,6 +25,9 @@
 hs_err_pid*
 
 .idea/
+/backend/build/
+/backend/.gradle/
+
 /.gradle/
 /build/
 .DS_Store
