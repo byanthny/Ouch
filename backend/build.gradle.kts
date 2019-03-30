@@ -20,6 +20,9 @@ dependencies {
     implementation("io.javalin:javalin:2.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.0-alpha")
 
+    //
+    implementation("org.slf4j:slf4j-simple:1.7.26")
+
 }
 
 tasks.withType<KotlinCompile> {

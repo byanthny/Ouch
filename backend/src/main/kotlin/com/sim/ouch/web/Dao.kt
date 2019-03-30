@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class Dao {
     val existences = ConcurrentHashMap<String, Existence>()
-    val sessions = ConcurrentHashMap<Existence, List<WsSession>>()
+    val sessions = ConcurrentHashMap<Existence, MutableList<WsSession>>()
     fun getEx(id: String) = existences[id]
     fun getSessions(existence: Existence) = sessions[existence]
     fun getSession(existence: Existence, index: Int) =
