@@ -1,0 +1,145 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+
+#header {
+    padding-top: 30vh;
+    width: 100vw;
+    height: 70vh;
+    text-align: center;
+    transition: all 1s!important;
+    background: linear-gradient(-130deg, rgb(181, 248, 255) 50%, rgb(156, 214, 222) 100%);
+}
+
+#indicator {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin: 17px;
+}
+
+#indicator.connected {
+    background: lightgreen;
+}
+
+#indicator.offline {
+    background: red;
+}
+
+#level {
+    padding: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 20px;
+    background: #ffffff;
+    color: #262626;
+    font-weight: bold;
+    border-radius: 5px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-family: "Arial";
+    box-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
+}
+
+#ouch {
+    padding: 10px;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    color: #262626;
+    font-family: 'Mrs Sheppards', cursive;
+    font-size: 5em;
+    text-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
+    transition: all 1s!important;
+}
+
+#commands {
+    width: 90vw;
+    margin: 0 auto;
+}
+
+#user-input {
+    width: 100%;
+    max-width: 500px;
+    height: 40px;
+    border-width: 0px;
+    border-radius: 5px;
+    box-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
+    padding-left: 12px;
+    color: #262626;
+    outline: none;
+    transition: all 1s!important;
+    font-size: 16px;
+}
+
+#user-input::placeholder {
+    font-family: "Arial";
+    text-align: center;
+    font-size: 16px;
+    overflow: visible;
+    transition: all 1s!important;
+}
+
+#search {
+    width: 100%;
+    max-width: 500px;
+    max-height: 20vh;
+    background: white;
+    margin: 0 auto;
+    margin-top: 10px;
+    border-radius: 5px;
+    box-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
+    overflow-y: scroll;
+    padding: 6px;
+    transition: all 1s!important;
+}
+
+.search-item {
+    padding: 10px;
+    font-family: "Arial";
+    border-bottom: 1px solid lightgrey;
+}
+
+/* Styling for dark mode */
+#header.dark {
+    background: linear-gradient(-130deg, #262626 50%, #191919 100%);
+}
+
+#ouch.dark {
+    color: white;
+}
+
+/* For login */
+
+#submit-button {
+    height: 43px;
+    border-width: 0px;
+    border-radius: 5px;
+    box-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
+    color: #262626;
+    background: white;
+    font-size: 16px;
+}
+
+#user-input.login {
+    margin-top: 5vh;
+    width: 90%;
+    max-width: 400px;
+}
+
+#header.login {
+    padding-top: 20vh;
+    height: 80vh;
+}
+
+.hidden {
+    display: none!important;
+}
+
+.opacity {
+    opacity: 0;
+}
