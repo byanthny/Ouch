@@ -33,3 +33,7 @@ tasks.withType<KotlinCompile> {
 }
 
 application { mainClassName = "com.sim.ouch.LauncherKt" }
+
+task("stage") {
+    dependsOn("build", "clean")
+}
