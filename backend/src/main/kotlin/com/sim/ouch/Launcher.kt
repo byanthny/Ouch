@@ -42,7 +42,7 @@ fun main() = javalin.apply {
             }
         }}
 
-    start(8080)
+    start(300)
 }.unit
 
 sealed class SocketAction(val name: String) {
