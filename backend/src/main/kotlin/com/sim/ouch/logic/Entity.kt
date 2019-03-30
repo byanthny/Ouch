@@ -10,7 +10,7 @@ sealed class Entity {
 }
 
 /** The essence of... */
-class Quidity : Entity() {
+open class Quidity : Entity() {
     /** The gradial state of Ouchies. */
     open var ouch: Ouch = Ouch()
     open fun love() = ouch--
