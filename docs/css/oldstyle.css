@@ -1,3 +1,4 @@
+/*
 body {
     padding: 0;
     margin: 0;
@@ -11,7 +12,8 @@ body {
     transition: all 1s!important;
     background: linear-gradient(-130deg, rgb(181, 248, 255) 50%, rgb(156, 214, 222) 100%);
 }
-
+*/
+/*
 #indicator {
     position: absolute;
     top: 0;
@@ -56,7 +58,7 @@ body {
     text-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
     transition: all 1s!important;
 }
-
+*/
 #commands {
     width: 90vw;
     margin: 0 auto;
@@ -124,7 +126,7 @@ body {
     background: white;
     font-size: 16px;
 }
-
+/*
 #user-input.login {
     margin-top: 5vh;
     width: 90%;
@@ -142,4 +144,4 @@ body {
 
 .opacity {
     opacity: 0;
-}
+}*/

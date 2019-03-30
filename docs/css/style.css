@@ -1,4 +1,8 @@
 /* Ouch Stylesheet */
+body {
+  padding: 0;
+  margin: 0;
+}
 .hidden {
   display: none!important;
 }
@@ -29,6 +33,21 @@
 }
 #world {
   left: 0;
+}
+#indicator {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin: 17px;
+}
+#indicator.connected {
+  background: lightgreen;
+}
+#indicator.offline {
+  background: red;
 }
 #header.dark {
   background: linear-gradient(-130deg, #262626 50%, #0c0c0c 100%);
