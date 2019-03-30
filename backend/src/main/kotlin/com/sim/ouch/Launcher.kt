@@ -1,6 +1,7 @@
-package com.sim.ouch.web
+package com.sim.ouch
 
 import com.sim.ouch.logic.*
+import com.sim.ouch.web.Dao
 import io.javalin.Javalin
 import io.javalin.json.JavalinJson
 
@@ -15,28 +16,34 @@ fun main() {
 
     javalin = Javalin.create().apply {
 
-        ws(SOCKET) {
+        post(LOGIN) {
+            println(it)
+        }
+
+        ws(SOCKET) { ws -> ws.apply {
             var valid: Boolean = false
 
-            it.onConnect { session ->
+            onConnect { session ->
                 val name: String = session.queryParam("name")
                         ?: return@onConnect session.close(4004, "No Name")
                 val exist: Existence = session.queryParam("exID")?.let {
-                    DAO.existences[it]
+                    DAO.getEx(it)
                         ?: return@onConnect session.close(4005, "Unknown ID")
                 } ?: DefaultExistence("$name's Existence", -1, Quidity())
                 DAO.sessions.getOrPut(exist) { mutableListOf() }.add(session)
                 session.send(JavalinJson.toJson(exist))
             }
 
-            it.onMessage { session, msg ->
+            onMessage { session, msg ->
                 val action = JavalinJson.fromJson(msg, SocketAction::class.java)
+                println(session)
                 TODO()
             }
-            it.onClose { session, statusCode, reason ->
+            onClose { session, statusCode, reason ->
+                println(session)
                 TODO()
             }
-        }
+        }}
 
     }
 
