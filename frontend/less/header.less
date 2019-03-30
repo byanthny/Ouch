@@ -1,0 +1,29 @@
+//Header and Heading
+
+.heading() {
+  padding: @heading-padding;
+  margin-bottom: 0;
+  color: @dark-color;
+  font-family: @main-font, cursive;
+  font-size: @heading-font-size;
+  .transition();
+}
+
+#commands {
+  width: @commands-width;
+  max-width: @commands-max-width;
+  margin: 0 auto;
+}
+
+#header {
+  width: 100vw;
+  padding-top: @header-height;
+  height: calc(~"100vh - @{header-height}");
+  text-align: center;
+  background: @default-gradient;
+  .transition();
+}
+
+#ouch {
+  .heading();
+}
