@@ -9,10 +9,12 @@ version = "0.0.0"
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0-alpha")
 }
 
 tasks.withType<KotlinCompile> {
