@@ -1,5 +1,8 @@
 package com.sim.ouch
 
+import java.io.BufferedWriter
+import java.io.File
+import java.nio.file.FileAlreadyExistsException
 import java.util.*
 import kotlin.streams.asSequence
 
@@ -22,4 +25,30 @@ open class IDGenerator(var idLeng: Long = 7L, val prefix: String = "") {
         return prefix + RAND.ints(idLeng, 0, alphaDigi.length)
             .asSequence().map(alphaDigi::get).joinToString("")
     }
+}
+
+/**
+ * Print the List to file, each index its own line.
+ *
+ * @param name The name of the file.
+ * @return The [File] made or `null` if unable to create.
+ * @throws FileAlreadyExistsException
+ */
+@Throws(FileAlreadyExistsException::class)
+fun List<Any>.toFile(name: String = "file") : File {
+    fun BufferedWriter.writeLn(line: Any) {
+        this.write(line.toString())
+        this.newLine()
+    }
+    val file = File(name)
+    //Leave if the file already exists
+    if (file.exists()) {
+        throw FileAlreadyExistsException("File '$name' already exists.")
+    } else {
+        file.createNewFile()
+        val bw = file.bufferedWriter()
+        this.forEach { bw.writeLn(it) }
+        bw.close()
+    }
+    return file
 }
