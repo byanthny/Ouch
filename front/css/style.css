@@ -1,0 +1,56 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+
+#header {
+    padding-top: 30vh;
+    width: 100vw;
+    height: 70vh;
+    text-align: center;
+    background: linear-gradient(-130deg, rgb(181, 248, 255) 50%, rgb(156, 214, 222) 100%);
+}
+
+.indicator {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin: 17px;
+}
+
+.indicator.connected {
+    background: lightgreen;
+}
+
+.indicator.offline {
+    background: red;
+}
+
+.level {
+    padding: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 20px;
+    background: #ffffff;
+    color: #262626;
+    font-weight: bold;
+    border-radius: 5px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-family: "Arial";
+    box-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
+}
+
+.ouch {
+    padding: 10px;
+    color: #262626;
+    font-family: 'Mrs Sheppards', cursive;
+    font-size: 5em;
+    text-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
+}
+
+
