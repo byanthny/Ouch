@@ -69,9 +69,11 @@ body {
 }
 #indicator.connected {
   background: lightgreen;
+  box-shadow: 0 0 3px lightgreen;
 }
 #indicator.offline {
   background: red;
+  box-shadow: 0 0 3px red;
 }
 #user-input {
   width: 100%;
@@ -131,7 +133,6 @@ body {
   background: #ffffff;
   font-size: 16px;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
-  transition: all 1s!important;
 }
 #help {
   width: 90vw;

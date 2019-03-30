@@ -12,9 +12,13 @@ function switchDark() {
 
 var span = document.getElementsByClassName("close")[0];
 
-span.onclick = function() {
+function togglePopUp() {
     document.getElementById("help").classList.toggle("opacity");
-    setTimeout(function (){
+    setTimeout(function () {
         document.getElementById("help").classList.toggle("hidden");
     }, 1000);
 }
+
+span.onclick = function() {
+    togglePopUp();
+};
