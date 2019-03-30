@@ -9,20 +9,19 @@
   .transition();
 }
 
+#commands {
+  width: @commands-width;
+  margin: 0 auto;
+}
+
 #header {
   width: 100vw;
   padding-top: @header-height;
   height: calc(~"100vh - @{header-height}");
   text-align: center;
   background: @default-gradient;
-  .transition();
 }
 
 #ouch {
   .heading();
-}
-
-#commands {
-  width: @commands-width;
-  margin: 0 auto;
 }

@@ -34,13 +34,16 @@ body {
 #world {
   left: 0;
 }
+#commands {
+  width: 90vw;
+  margin: 0 auto;
+}
 #header {
   width: 100vw;
   padding-top: 30vh;
-  height: calc(100vh-30vh);
+  height: calc(100vh - 30vh);
   text-align: center;
   background: linear-gradient(-130deg, #b5f8ff 50%, #82f3ff 100%);
-  transition: all 1s!important;
 }
 #ouch {
   padding: 10px 10px 0px 10px;
@@ -65,6 +68,25 @@ body {
 #indicator.offline {
   background: red;
 }
+#user-input {
+  width: 100%;
+  max-width: 500px;
+  height: 40px;
+  border-radius: 5px;
+  padding-left: 12px;
+  color: #262626;
+  border-width: 0;
+  outline: none;
+  font-size: 16px;
+  transition: all 1s!important;
+  box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
+}
+#user-input::placeholder {
+  font-family: "Arial";
+  text-align: center;
+  font-size: 16px;
+  overflow: visible;
+}
 #header.dark {
   background: linear-gradient(-130deg, #262626 50%, #0c0c0c 100%);
 }
@@ -78,5 +100,5 @@ body {
 }
 #header.login {
   padding-top: 20vh;
-  height: calc(100vh-20vh);
+  height: calc(100vh - 20vh);
 }
