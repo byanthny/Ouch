@@ -36,6 +36,7 @@ body {
 }
 #commands {
   width: 90vw;
+  max-width: 500px;
   margin: 0 auto;
 }
 #header {
@@ -70,7 +71,6 @@ body {
 }
 #user-input {
   width: 100%;
-  max-width: 500px;
   height: 40px;
   border-radius: 5px;
   padding-left: 12px;
@@ -87,6 +87,23 @@ body {
   font-size: 16px;
   overflow: visible;
 }
+#search {
+  width: 100%;
+  max-height: 20vh;
+  background: #ffffff;
+  margin: 0 auto;
+  margin-top: 10px;
+  border-radius: 5px;
+  overflow-y: scroll;
+  padding: 6px;
+  transition: all 1s!important;
+  box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
+}
+.search-item {
+  padding: 10px;
+  font-family: "Arial";
+  border-bottom: 1px solid lightgrey;
+}
 #header.dark {
   background: linear-gradient(-130deg, #262626 50%, #0c0c0c 100%);
 }
@@ -101,4 +118,13 @@ body {
 #header.login {
   padding-top: 20vh;
   height: calc(100vh - 20vh);
+}
+#submit-button {
+  height: 43px;
+  border-width: 0;
+  border-radius: 5px;
+  color: #262626;
+  background: #ffffff;
+  font-size: 16px;
+  box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
 }
