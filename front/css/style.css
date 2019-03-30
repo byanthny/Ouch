@@ -60,7 +60,7 @@ body {
     margin: 0 auto;
 }
 
-.command-input {
+.user-input {
     width: 100%;
     max-width: 500px;
     height: 40px;
@@ -73,7 +73,7 @@ body {
     font-size: 16px;
 }
 
-.command-input::placeholder {
+.user-input::placeholder {
     font-family: "Arial";
     text-align: center;
     font-size: 16px;
@@ -106,4 +106,36 @@ body {
 
 .ouch.dark {
     color: white;
+}
+
+/* For login */
+
+.submit-button {
+    margin-top: 5vh;
+    height: 43px;
+    border-width: 0px;
+    border-radius: 5px;
+    box-shadow:0px 0px 24px -7px rgba(0,0,0,.4);
+    color: #262626;
+    background: white;
+    font-size: 16px;
+}
+
+.user-input.login {
+    width: 90%;
+    margin-top: 5vh;
+    max-width: 400px;
+}
+
+.header.login {
+    padding-top: 20vh;
+    height: 80vh;
+}
+
+.hidden {
+    display: none!important;
+}
+
+#transition {
+    transition: all .5s;
 }
