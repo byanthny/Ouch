@@ -9,11 +9,15 @@ body {
 html {
   font-size: 16px;
 }
+.disappear {
+  height: 0px!important;
+  margin: 0px!important;
+}
 .hidden {
   display: none!important;
 }
 .opacity {
-  opacity: 0;
+  opacity: 0!important;
 }
 .box-shadow,
 .data,
@@ -101,7 +105,7 @@ html {
   max-height: 20vh;
   background: #ffffff;
   margin: 0 auto;
-  margin-top: 10px;
+  margin-top: -10px;
   border-radius: 5px;
   overflow-y: scroll;
   padding: 6px;
@@ -123,19 +127,58 @@ html {
   margin-top: 5vh;
   width: 90%;
   max-width: 400px;
+  opacity: 0.7;
+}
+#user-input.login:focus {
+  opacity: 1;
+}
+#exist-input.login {
+  width: 90%;
+  max-width: 400px;
+  opacity: 0.7;
+}
+#exist-input.login:focus {
+  opacity: 1;
 }
 #header.login {
   padding-top: 20vh;
   height: calc(100vh - 20vh);
 }
 #submit-button {
-  height: 43px;
   border-width: 0;
   border-radius: 5px;
   color: #262626;
   background: #ffffff;
   font-size: 1em;
+  display: block;
+  margin: 0 auto;
+  margin-top: 20px;
+  padding: 10px 20px;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
+  transition: all 1s!important;
+  opacity: 0.7;
+}
+#submit-button:hover {
+  opacity: 1;
+}
+#exist-input {
+  width: 100%;
+  height: 40px;
+  border-radius: 5px;
+  padding-left: 12px;
+  color: #262626;
+  border-width: 0;
+  outline: none;
+  font-size: 1em;
+  transition: all 1s!important;
+  box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
+  margin-top: 10px;
+}
+#exist-input::placeholder {
+  font-family: "Arial";
+  text-align: center;
+  font-size: 1em;
+  overflow: visible;
 }
 #help {
   width: 90vw;

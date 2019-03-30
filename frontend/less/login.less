@@ -1,7 +1,20 @@
-#user-input.login {
-  margin-top: @login-top;
+.input-login() {
   width: @login-width;
   max-width: @max-login-width;
+  opacity: .7;
+
+  &:focus {
+    opacity: 1;
+  }
+}
+
+#user-input.login {
+  margin-top: @login-top;
+  .input-login();
+}
+
+#exist-input.login {
+  .input-login();
 }
 
 #header.login {
@@ -10,11 +23,29 @@
 }
 
 #submit-button {
-  height: @submit-btn-height;
   border-width: 0;
   border-radius: @default-rounded;
   color: @dark-color;
   background: @white-color;
-  font-size: @default-font-size;
+  font-size: @button-font-size;
+  display: block;
+  margin: 0 auto;
+  margin-top: @submit-btn-margin;
+  padding: @submit-btn-padding;
   .box-shadow;
+  .transition();
+  opacity: .7;
+
+  &:hover{
+    opacity: 1;
+  }
+}
+
+#exist-input {
+  .user-input();
+  margin-top: 10px;
+}
+
+#exist-input::placeholder {
+  .placeholder();
 }
