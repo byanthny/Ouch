@@ -1,5 +1,5 @@
 <p align="center">
-<img src="front/imgs/logo.png" width="250"/>
+<img src="docs/imgs/logo.png" width="250"/>
 </p>
 
 ## Quiddity 

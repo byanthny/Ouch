@@ -9,13 +9,10 @@ const val LOGIN = "/login"
 const val SOCKET = "/ws"
 
 val DAO: Dao by lazy { Dao() }
-lateinit var javalin: Javalin
+val javalin: Javalin by lazy { Javalin.create() }
 
 
-fun main() {
-
-    javalin = Javalin.create().apply {
-
+fun main() = javalin.apply {
         post(LOGIN) {
             println(it)
         }
@@ -45,10 +42,8 @@ fun main() {
             }
         }}
 
-    }
-
-    javalin.start(8080)
-}
+    start(8080)
+}.unit
 
 sealed class SocketAction(val name: String) {
 
