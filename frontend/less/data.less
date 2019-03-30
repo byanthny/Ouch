@@ -1,0 +1,22 @@
+.data {
+  &:extend(.box-shadow);
+  position: absolute;
+  top: 0;
+  padding: @data-padding;
+  margin: @default-margin;
+  background: @data-background;
+  color:  @data-text-color;
+  font-weight: @data-text-weight;
+  border-radius: @data-rounded;
+  font-family: @secondary-font;
+}
+
+#level {
+  &:extend(.data);
+  right: 0;
+}
+
+#world {
+  &:extend(.data);
+  left: 0;
+}
