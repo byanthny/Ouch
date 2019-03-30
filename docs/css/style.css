@@ -37,6 +37,7 @@ html {
   font-weight: bold;
   border-radius: 5px;
   font-family: "Arial";
+  transition: all 1s!important;
 }
 #level {
   left: 0;
