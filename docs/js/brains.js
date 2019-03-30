@@ -1,3 +1,5 @@
+var login = false; //Current state being displayed
+
 function switchState() {
     document.getElementById("submit-button").classList.toggle("hidden");
     document.getElementById("search").classList.toggle("opacity");
@@ -6,6 +8,7 @@ function switchState() {
     document.getElementById("header").classList.toggle("login");
     document.getElementById("exist-input").classList.toggle("opacity");
     document.getElementById("exist-input").classList.toggle("disappear");
+    login = !login;
 }
 
 function switchDark() {
@@ -25,5 +28,5 @@ document.getElementsByClassName("close")[0].onclick = function() {
 };
 
 document.getElementById("submit-button").onclick = function() {
-    alert("Hello\nHow are you?");
+    alert("Submit button works");
 };

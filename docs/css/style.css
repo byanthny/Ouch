@@ -85,6 +85,7 @@ html {
 #user-input {
   width: 100%;
   height: 40px;
+  opacity: 0.7;
   border-radius: 5px;
   padding-left: 12px;
   color: #262626;
@@ -93,6 +94,9 @@ html {
   font-size: 1em;
   transition: all 1s!important;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
+}
+#user-input:focus {
+  opacity: 1;
 }
 #user-input::placeholder {
   font-family: "Arial";
@@ -147,10 +151,16 @@ html {
   margin-top: 20px;
   padding: 10px 20px;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
+  transition: all 1s!important;
+  opacity: 0.7;
+}
+#submit-button:hover {
+  opacity: 1;
 }
 #exist-input {
   width: 100%;
   height: 40px;
+  opacity: 0.7;
   border-radius: 5px;
   padding-left: 12px;
   color: #262626;
@@ -160,6 +170,9 @@ html {
   transition: all 1s!important;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
   margin-top: 10px;
+}
+#exist-input:focus {
+  opacity: 1;
 }
 #exist-input::placeholder {
   font-family: "Arial";
