@@ -106,15 +106,6 @@ body {
     border-bottom: 1px solid lightgrey;
 }
 
-/* Styling for dark mode */
-#header.dark {
-    background: linear-gradient(-130deg, #262626 50%, #191919 100%);
-}
-
-#ouch.dark {
-    color: white;
-}
-
 /* For login */
 
 #submit-button {
@@ -145,3 +136,12 @@ body {
 .opacity {
     opacity: 0;
 }*/
+
+/* Styling for dark mode */
+#header.dark {
+    background: linear-gradient(-130deg, #262626 50%, #191919 100%);
+}
+
+#ouch.dark {
+    color: white;
+}
