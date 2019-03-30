@@ -96,6 +96,7 @@ body {
 .search-item {
     padding: 10px;
     font-family: "Arial";
+    border-bottom: 1px solid lightgrey;
 }
 
 /* Styling for dark mode */
