@@ -17,7 +17,7 @@ html {
   display: none!important;
 }
 .opacity {
-  opacity: 0;
+  opacity: 0!important;
 }
 .box-shadow,
 .data,
@@ -85,7 +85,6 @@ html {
 #user-input {
   width: 100%;
   height: 40px;
-  opacity: 0.7;
   border-radius: 5px;
   padding-left: 12px;
   color: #262626;
@@ -94,9 +93,6 @@ html {
   font-size: 1em;
   transition: all 1s!important;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
-}
-#user-input:focus {
-  opacity: 1;
 }
 #user-input::placeholder {
   font-family: "Arial";
@@ -131,10 +127,18 @@ html {
   margin-top: 5vh;
   width: 90%;
   max-width: 400px;
+  opacity: 0.7;
+}
+#user-input.login:focus {
+  opacity: 1;
 }
 #exist-input.login {
   width: 90%;
   max-width: 400px;
+  opacity: 0.7;
+}
+#exist-input.login:focus {
+  opacity: 1;
 }
 #header.login {
   padding-top: 20vh;
@@ -160,7 +164,6 @@ html {
 #exist-input {
   width: 100%;
   height: 40px;
-  opacity: 0.7;
   border-radius: 5px;
   padding-left: 12px;
   color: #262626;
@@ -170,9 +173,6 @@ html {
   transition: all 1s!important;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
   margin-top: 10px;
-}
-#exist-input:focus {
-  opacity: 1;
 }
 #exist-input::placeholder {
   font-family: "Arial";

@@ -1,6 +1,11 @@
 .input-login() {
   width: @login-width;
   max-width: @max-login-width;
+  opacity: .7;
+
+  &:focus {
+    opacity: 1;
+  }
 }
 
 #user-input.login {
