@@ -131,6 +131,7 @@ body {
   background: #ffffff;
   font-size: 16px;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
+  transition: all 1s!important;
 }
 #help {
   width: 90vw;
@@ -140,6 +141,7 @@ body {
   top: 0;
   left: 0;
   background: rgba(0, 0, 0, 0.38);
+  transition: all 1s!important;
 }
 #help .panel {
   background: #ffffff;
@@ -151,4 +153,13 @@ body {
 }
 #help .panel .close {
   float: right;
+  font-weight: bold;
+  color: #9d9d9d;
+  padding: 3px 10px;
+  font-size: 28px;
+  cursor: pointer;
+  transition: all 1s!important;
+}
+#help .panel .close:hover {
+  color: #262626;
 }
