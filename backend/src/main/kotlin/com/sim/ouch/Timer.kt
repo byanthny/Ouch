@@ -1,7 +1,7 @@
 package com.sim.ouch
 
 /**
- * Timer and Time-related functions, classes, and variables.
+ * com.sim.ouch.Timer and Time-related functions, classes, and variables.
  *
  * @author Jonathan Augustine
  * @since 3.0
@@ -48,7 +48,7 @@ fun Long.formatTime() : String {
 }
 
 /**
- * A Timer object contains a start-time (millisec) that is defined upon creation.
+ * A com.sim.ouch.Timer object contains a start-time (millisec) that is defined upon creation.
  *
  * @author Jonathan Augustine
  * @since 2.0
@@ -58,10 +58,10 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
     /** If the timer is running or not */
     private var running: Boolean = true
 
-    /** The time elapsed since the Timer started (-1 the timer is running) */
+    /** The time elapsed since the com.sim.ouch.Timer started (-1 the timer is running) */
     private var elapsedTime: Long = -1
 
-    /** @return The time since the Timer started or was stopped */
+    /** @return The time since the com.sim.ouch.Timer started or was stopped */
     fun getElapsedTime() : Long {
         return if (running) {
             System.currentTimeMillis() - startTime
@@ -97,7 +97,7 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
     /** @return The current duration of the timer's run time in HH:MMM:SS */
     override fun toString(): String = format(this.getElapsedTime())
 
-    /** Start the Timer if it is not running */
+    /** Start the com.sim.ouch.Timer if it is not running */
     fun start() {
         this.running = true
         this.elapsedTime -1L

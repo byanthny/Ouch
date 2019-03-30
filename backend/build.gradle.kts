@@ -18,6 +18,8 @@ dependencies {
 
     // Backend Web
     implementation("io.javalin:javalin:2.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.0-alpha")
+
 }
 
 tasks.withType<KotlinCompile> {
