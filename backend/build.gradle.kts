@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    java
+    application
     kotlin("jvm") version "1.3.21"
-    `java`
-    `application`
 }
 
 group = "com.sim"
