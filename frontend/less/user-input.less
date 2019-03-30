@@ -1,4 +1,4 @@
-#user-input {
+.user-input() {
   width: 100%;
   height: @usr-input-height;
   border-radius: @default-rounded;
@@ -9,7 +9,10 @@
   font-size: @default-font-size;
   .transition();
   .box-shadow;
+}
 
+#user-input {
+  .user-input();
 }
 
 #user-input::placeholder {

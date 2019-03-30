@@ -2,7 +2,10 @@ function switchState() {
     document.getElementById("submit-button").classList.toggle("hidden");
     document.getElementById("search").classList.toggle("opacity");
     document.getElementById("user-input").classList.toggle("login");
+    document.getElementById("exist-input").classList.toggle("login");
     document.getElementById("header").classList.toggle("login");
+    document.getElementById("exist-input").classList.toggle("opacity");
+    document.getElementById("exist-input").classList.toggle("disappear");
 }
 
 function switchDark() {
@@ -12,9 +15,13 @@ function switchDark() {
 
 var span = document.getElementsByClassName("close")[0];
 
-span.onclick = function() {
+function togglePopUp() {
     document.getElementById("help").classList.toggle("opacity");
-    setTimeout(function (){
+    setTimeout(function () {
         document.getElementById("help").classList.toggle("hidden");
     }, 1000);
 }
+
+span.onclick = function() {
+    togglePopUp();
+};

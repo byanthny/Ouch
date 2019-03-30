@@ -1,7 +1,15 @@
-#user-input.login {
+.input-login() {
   margin-top: @login-top;
   width: @login-width;
   max-width: @max-login-width;
+}
+
+#user-input.login {
+  .input-login();
+}
+
+#exist-input.login {
+  .input-login();
 }
 
 #header.login {
@@ -17,4 +25,9 @@
   background: @white-color;
   font-size: @default-font-size;
   .box-shadow;
+}
+
+#exist-input {
+  .user-input();
+  margin-top: 10px;
 }
