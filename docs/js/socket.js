@@ -30,6 +30,8 @@ function play() {
 
         //document.getElementById("world-value").innerHTML = id;
         //document.getElementById('indicator').reset();
+
+        connection.send("{\"dataType\":\"CHAT\",\"data\":\"MESSAGE TEXT\"}");
     };
 
     connection.onerror = error => {
@@ -38,13 +40,29 @@ function play() {
     };
 
     connection.onmessage = e => {
-        msg++;
-        if (msg == 1) {
-            usr = JSON.parse(e.data);
-            document.getElementById("level").innerHTML = nickname+'<span id="world-value" style="font-weight: normal;"> '+usr.initialQuidity.ouch.degree+'</span>';
-        }
-        else {
 
+        var JSONdata = JSON.parse(e.data);
+
+        msg++;
+        if (JSONdata.dataType == "EXISTENCE") {
+            usr = JSONdata;
+            alert(JSONdata.toString());
+            document.getElementById("level").innerHTML = nickname+'<span id="world-value" style="font-weight: normal;"> '+usr.initialQuidity.ouch.degree+'</span>';
+            //load in chat history
+            //load in users
+            //load in levels
+
+        }
+        else if (JSONdata.dataType == "CHAT"){
+            //do something with chart message
+
+            if(JSONdata.data.authorID == usr.initialQuidity.id) { //is current user make right
+                document.getElementById('chat').innerHTML += '<p class="chat-msg right">'+JSONdata.data.content+'</p>';
+            } else { //make left
+                document.getElementById('chat').innerHTML += '<p class="chat-msg">'+JSONdata.data.content+'</p>';
+            }
+        } else {
+            alert("idk wtf is going on");
         }
         //alert(e.data);
     };
