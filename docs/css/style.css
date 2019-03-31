@@ -21,15 +21,16 @@ html {
 }
 .box-shadow,
 .data,
+.data-leaderboard,
 #level,
 #world {
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
 }
 .data,
+.data-leaderboard,
 #level,
 #world {
-  position: absolute;
-  top: 0;
+  height: 18px;
   padding: 10px 15px;
   margin: 20px;
   background: #ffffff;
@@ -39,11 +40,28 @@ html {
   font-family: "Arial";
   transition: all 1s!important;
 }
+.data-leaderboard {
+  display: table;
+  margin: 8px;
+}
 #level {
+  position: absolute;
+  top: 0;
   left: 0;
 }
 #world {
+  position: absolute;
+  top: 0;
   right: 0;
+}
+.leaderboard {
+  max-height: 30vh!important;
+  max-width: 25vw;
+  overflow-y: scroll;
+  position: absolute;
+  top: 0;
+  margin-top: calc(18px + 50px);
+  right: calc(20px - 8px);
 }
 #commands {
   width: 90vw;

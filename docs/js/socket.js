@@ -25,6 +25,9 @@ function play() {
         msg = 0;
         switchState();
         document.getElementById("indicator").classList.toggle("connected");
+
+        //get actions to action var
+
         //document.getElementById("world-value").innerHTML = id;
         //document.getElementById('indicator').reset();
     };

@@ -1,7 +1,11 @@
-.data {
-  &:extend(.box-shadow);
+.top() {
   position: absolute;
   top: 0;
+}
+
+.data {
+  &:extend(.box-shadow);
+  height: 18px;
   padding: @data-padding;
   margin: @default-margin;
   background: @data-background;
@@ -12,12 +16,29 @@
   .transition();
 }
 
+.data-leaderboard {
+  &:extend(.data);
+  display: table;
+  margin: @data-leaderbaord-margin;
+}
+
 #level {
   &:extend(.data);
+  .top();
   left: 0;
 }
 
 #world {
   &:extend(.data);
+  .top();
   right: 0;
+}
+
+.leaderboard {
+  max-height: 30vh!important;
+  max-width: 25vw;
+  overflow-y: scroll;
+  .top();
+  margin-top: calc(~"@{data-height} + 50px");
+  right: calc(~"20px - @{data-leaderbaord-margin}");
 }

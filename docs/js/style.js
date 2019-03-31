@@ -1,4 +1,5 @@
 var login = false; //Current state being displayed
+var action;
 
 function switchState() {
     document.getElementById("submit-button").classList.toggle("hidden");
