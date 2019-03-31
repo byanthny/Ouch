@@ -2,7 +2,6 @@ var nickname = 'user';
 var id = 'id';
 
 var usr;
-var msg = 0;
 
 var url = 'wss://sim-ouch.herokuapp.com/ws?name=user';//&exID=id';
 
@@ -22,7 +21,6 @@ function play() {
     var connection = new WebSocket(url);
 
     connection.onopen = () => {
-        msg = 0;
         switchState();
         document.getElementById("indicator").classList.toggle("connected");
 
@@ -31,6 +29,7 @@ function play() {
         //document.getElementById("world-value").innerHTML = id;
         //document.getElementById('indicator').reset();
 
+        //test sending message
         connection.send("{\"dataType\":\"CHAT\",\"data\":\"MESSAGE TEXT\"}");
     };
 
@@ -41,9 +40,10 @@ function play() {
 
     connection.onmessage = e => {
 
+        //parse the data
         var JSONdata = JSON.parse(e.data);
 
-        msg++;
+        //IF begining then save user and update stuff
         if (JSONdata.dataType == "EXISTENCE") {
             usr = JSONdata;
             alert(JSONdata.toString());
@@ -53,18 +53,18 @@ function play() {
             //load in levels
 
         }
+        //if chat then add items
         else if (JSONdata.dataType == "CHAT"){
-            //do something with chart message
 
+            //if message is from current user
             if(JSONdata.data.authorID == usr.initialQuidity.id) { //is current user make right
                 document.getElementById('chat').innerHTML += '<p class="chat-msg right">'+JSONdata.data.content+'</p>';
-            } else { //make left
+            } else { //if message is from new user
                 document.getElementById('chat').innerHTML += '<p class="chat-msg">'+JSONdata.data.content+'</p>';
             }
         } else {
             alert("idk wtf is going on");
         }
-        //alert(e.data);
     };
 
     connection.onclose = () => {
