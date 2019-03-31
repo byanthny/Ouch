@@ -13,19 +13,17 @@ val javalin: Javalin by lazy { Javalin.create() }
 
 
 fun main() = javalin.apply {
-        post(LOGIN) {
-            println(it)
-        }
 
-        ws(SOCKET) { ws -> ws.apply {
+    ws(SOCKET) { ws ->
+        ws.apply {
             var valid: Boolean = false
 
             onConnect { session ->
                 val name: String = session.queryParam("name")
                         ?: return@onConnect session.close(4004, "No Name")
                 val exist: Existence = session.queryParam("exID")?.let {
-                    DAO.getEx(it)
-                        ?: return@onConnect session.close(4005, "Unknown ID")
+                    DAO.getEx(it) ?: return@onConnect session.close(4005,
+                        "Unknown ID")
                 } ?: DefaultExistence("$name's Existence", -1, Quidity())
                 DAO.sessions.getOrPut(exist) { mutableListOf() }.add(session)
                 session.send(JavalinJson.toJson(exist))
@@ -40,9 +38,10 @@ fun main() = javalin.apply {
                 println(session)
                 TODO()
             }
-        }}
+        }
+    }
 
-    start(300)
+    start(System.getenv("PORT")?.toInt() ?: 7000)
 }.unit
 
 sealed class SocketAction(val name: String) {
