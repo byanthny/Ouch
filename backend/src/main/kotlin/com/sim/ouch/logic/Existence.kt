@@ -1,9 +1,13 @@
 package com.sim.ouch.logic
 
 import com.sim.ouch.IDGenerator
+import io.javalin.websocket.WsSession
 
 /** The simulation. */
 sealed class Existence {
+
+    @Transient val sessions = mutableListOf<WsSession>()
+
     open val id = EXISTENCE_ID_GEN.next()
     var status: Status = Status.DRY
 
@@ -35,7 +39,11 @@ class DefaultExistence(
         override val name: String,
         override val capacity: Long = -1,
         override val initialQuidity: Quidity
-) : Existence()
+) : Existence() {
+    init {
+        quidities[initialQuidity.id] = initialQuidity
+    }
+}
 
 /** That which possess the [Existence]. */
 interface Simulator {

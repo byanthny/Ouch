@@ -6,8 +6,9 @@ import io.javalin.Javalin
 import io.javalin.json.JavalinJson
 import io.javalin.websocket.WsSession
 
-const val LOGIN = "/login"
-const val SOCKET = "/ws"
+enum class EndPoints(val point: String) {
+    ACTIONS("/actions"), SOCKET("/ws")
+}
 
 val ER_NO_NAME = 4004 to "no name"
 val ER_BAD_ID  = 4005 to "unknown ID"
@@ -18,18 +19,25 @@ val javalin: Javalin by lazy { Javalin.create() }
 
 fun main() = javalin.apply {
 
-    ws(SOCKET) { ws ->
+    get(EndPoints.ACTIONS.point) {
+        it.result(JavalinJson.toJson(listOf()))
+    }
+
+    ws(EndPoints.SOCKET.point) { ws ->
         ws.apply {
             onConnect { session ->
-
+                // Attempt to parse name
                 val name: String? = session.queryParam("name")
                 if (name.isNullOrBlank())
                     return@onConnect session.close(ER_NO_NAME)
-
+                // Attempt to get an existence
                 val exist: Existence = session.queryParam("exID")?.let {
+                    // With an invalid ID, close
                     DAO.getEx(it) ?: return@onConnect session.close(ER_BAD_ID)
-                } ?: DefaultExistence("$name's Existence", -1, Quidity())
-                DAO.sessions.getOrPut(exist) { mutableListOf() }.add(session)
+                    // with no ID, make new Existence
+                } ?: DefaultExistence("$name's Existence", -1, Quidity(name))
+                DAO.
+
 
                 session.send(JavalinJson.toJson(exist))
             }
@@ -53,7 +61,5 @@ fun main() = javalin.apply {
 
     start(System.getenv("PORT")?.toInt() ?: 7000)
 }.unit
-
-data class OuchAction(val name: String)
 
 fun WsSession.close(pair: Pair<Int, String>) = close(pair.first, pair.second)
