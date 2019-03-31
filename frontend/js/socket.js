@@ -21,6 +21,7 @@ function play() {
     connection.onopen = () => {
         switchState();
         document.getElementById("indicator").classList.toggle("connected");
+        document.getElementById("world-value").innerHTML = "existence: <span style='font-weight: normal;'>"+id+"</span>";
         //document.getElementById('indicator').reset();
     };
 
@@ -37,6 +38,7 @@ function play() {
     connection.onclose = () => {
         switchState();
         document.getElementById("indicator").classList.toggle("connected");
+        document.getElementById("world-value").innerHTML = "not connected";
         //document.getElementById('user-input').reset();
     }
 
