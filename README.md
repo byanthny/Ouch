@@ -23,3 +23,28 @@
         * Ouch plays music and has "leaderboard"   
     * Make a web app
         * Multiplayer
+
+---
+## Internal
+
+Login: 
+    
+        C -> Name, exID? => wss://sim-ouch.herokuapp.com/ws?name=user&exID=id
+        S -> when: {
+                no name     => close(4004, "No Name")
+                invalid ID  => close(4005, "Unknown ID")
+                no ID       => generate new DefaultExistence
+                valid ID    => live existence
+            }
+            InitPacket as JSON 
+            {
+                existence: {...}
+                actions: {...}
+                (other data?...)
+            }
+            send(InitPacket)
+
+Action: 
+    
+        C -> Action Name
+        S -> updated Quidity (if actions affect Existence then send that)
