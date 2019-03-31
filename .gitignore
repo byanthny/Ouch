@@ -30,3 +30,6 @@ hs_err_pid*
 /.gradle/
 /build/
 .DS_Store
+
+package-lock.json
+/node_modules/
