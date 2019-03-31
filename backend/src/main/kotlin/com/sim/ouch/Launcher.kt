@@ -25,12 +25,7 @@ fun main() = javalin.apply {
 
     get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
 
-    get(EndPoints.STATUS.point) {
-        it.result(
-            Packet(INTERNAL, (DAO.getExistences() to DAO.getSessions().size))
-                .pack()
-        )
-    }
+    get(EndPoints.STATUS.point) { it.result(DAO.statusPacket().pack()) }
 
     get(EndPoints.ACTIONS.point) {
         it.result(Quidity.Action.values().json())

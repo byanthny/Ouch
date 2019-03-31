@@ -49,7 +49,14 @@ class Dao {
 
     fun getEx(id: String) = existences[id]
 
-    fun getExistences() = existences.values
-    fun getSessions() = sessions.keys().toList()
+    fun getExistences() = existences.map { it.value }
+    fun getSessions() = sessions.map { it.key }
+
+    fun statusPacket() =
+            Packet(Packet.DataType.INTERNAL, StatusPacket(
+                getExistences(), sessions.size
+            ))
 
 }
+
+data class StatusPacket(val ex: List<Existence>, val ses: Int)
