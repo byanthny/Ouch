@@ -31,7 +31,8 @@
                 <input id="exist-input" class="opacity disappear" type="text" placeholder="existence">
                 <button type="button" class="submit-button hidden" id="submit-button">enter</button>
             <form>
-            <div id="search">
+                <div id="box">
+            <div id="search" class="disappear opacity">
                 <!-- <div class="search-item"><button type="button">Search Item 1</button></div> -->
                 <!--TODO create search items to buttons so they can be clicked-->
                 <div class="search-item">Search Item 2</div>
@@ -41,9 +42,10 @@
                 <div class="search-item">Search Item 6</div>
             </div>
 
-                <div id="chat" class="opacity disappear">
+                <div id="chat">
                     <div class="chat-item">Chat Item 1</div>
                     <div class="chat-item">Chat Item 2</div>
+                </div>
                 </div>
         </div>
     </div>
@@ -59,6 +61,7 @@
     <script>
         // Testing
         //switchDark();
+        switchState();
 /*
         (function() {
            //switchState();
