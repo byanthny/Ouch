@@ -27,6 +27,16 @@ open class IDGenerator(var idLeng: Long = 7L, val prefix: String = "") {
     }
 }
 
+val DefaultNameGenerator = NameGenerator()
+
+// TODO
+class NameGenerator(val lengthRange: IntRange = 2..7) {
+    fun next(): String {
+        return RAND.ints(lengthRange.random().toLong(), 0, alpha.length)
+            .asSequence().map(alpha.toLowerCase()::get).joinToString("")
+    }
+}
+
 /**
  * Print the List to file, each index its own line.
  *
@@ -52,5 +62,8 @@ fun List<Any>.toFile(name: String = "file") : File {
     }
     return file
 }
+
+/** Remove and return the last entry of the [list][MutableList]. `null` if empty. */
+internal fun <E> MutableList<E>.removeLastOrNull() = if (isEmpty()) null else removeAt(this.size - 1)
 
 val Any.unit get() = Unit
