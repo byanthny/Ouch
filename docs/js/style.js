@@ -29,7 +29,3 @@ function togglePopUp() {
 document.getElementsByClassName("close")[0].onclick = function() {
     togglePopUp();
 };
-
-document.getElementById("submit-button").onclick = function() {
-    alert("Submit button works");
-};
