@@ -49,4 +49,7 @@ class Dao {
 
     fun getEx(id: String) = existences[id]
 
+    fun getExistences() = existences.values
+    fun getSessions() = sessions.keys().toList()
+
 }

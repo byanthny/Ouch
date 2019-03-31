@@ -5,7 +5,7 @@ import com.sim.ouch.logic.Existence
 class Chat(@Transient val existence: Existence) {
 
     inner class Message internal constructor(
-            val authorID: String,
+            val authorID: String, // Add username TODO
             // val dateTime: OffsetDateTime?, TODO
             val content: String
     )

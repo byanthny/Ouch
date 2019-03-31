@@ -8,7 +8,7 @@ import io.javalin.websocket.WsSession
 
 
 enum class EndPoints(val point: String) {
-    ACTIONS("/actions"), SOCKET("/ws")
+    ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status")
 }
 
 val ER_NO_NAME = 4004 to "no name"
@@ -24,6 +24,13 @@ fun main() = javalin.apply {
     }
 
     get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
+
+    get(EndPoints.STATUS.point) {
+        it.result(
+            Packet(INTERNAL, (DAO.getExistences() to DAO.getSessions().size))
+                .pack()
+        )
+    }
 
     get(EndPoints.ACTIONS.point) {
         it.result(Quidity.Action.values().json())

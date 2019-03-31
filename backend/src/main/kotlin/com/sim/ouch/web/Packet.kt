@@ -29,7 +29,7 @@ data class Packet(
         @Transient val prebuild: Boolean = false
 ) {
 
-    enum class DataType { QUIDITY, EXISTENCE, ACTION, CHAT }
+    enum class DataType { QUIDITY, EXISTENCE, ACTION, CHAT, INTERNAL }
 
     init {
         data = if (prebuild) data else gson.toJson(data)!!
