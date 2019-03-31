@@ -37,6 +37,7 @@ html {
   font-weight: bold;
   border-radius: 5px;
   font-family: "Arial";
+  transition: all 1s!important;
 }
 #level {
   left: 0;
@@ -51,8 +52,8 @@ html {
 }
 #header {
   width: 100vw;
-  padding-top: 30vh;
-  height: calc(100vh - 30vh);
+  padding-top: 20vh;
+  height: calc(100vh - 20vh);
   text-align: center;
   background: linear-gradient(-130deg, #b5f8ff 50%, #82f3ff 100%);
   transition: all 1s!important;
