@@ -1,18 +1,18 @@
 .box() {
   width: 100%;
-  max-height: @search-max-height;
-  background: @white-color;
+  max-height: @box-max-height;
   margin: 0 auto;
   border-radius: @default-rounded;
+  margin-top: @box-margin;
+  padding: @box-padding;
   overflow-y: scroll;
   .transition();
-  .box-shadow;
 }
 
 #search {
+  background: @white-color;
+  .box-shadow;
   .box();
-  margin-top: @search-margin;
-  padding: @search-padding;
 }
 
 .search-item {
@@ -23,11 +23,20 @@
 
 #chat {
   .box();
-  margin-top: @search-margin;
-  padding: @search-padding;
+  display: block;
 }
-.chat-item {
-  padding: @search-itm-padding;
-  font-family: @secondary-font;
-  border-bottom: @search-itm-border;
+
+.chat-msg {
+  .data;
+  margin: 0;
+  margin-bottom: @chat-itm-padding;
+  display: table;
+  font-weight: normal;
+
+  &.right {
+    background: @dark-color;
+    color: @white-color;
+    text-align: right;
+    float: right;
+  }
 }

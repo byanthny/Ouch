@@ -24,6 +24,8 @@ function switchSearch() {
 function switchDark() {
     document.getElementById("ouch").classList.toggle("dark");
     document.getElementById("header").classList.toggle("dark");
+
+    //TODO update all chat to dark
 }
 
 function togglePopUp() {

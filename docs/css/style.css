@@ -21,6 +21,7 @@ html {
 }
 .box-shadow,
 .data,
+.chat-msg,
 .data-leaderboard,
 #level,
 #world {
@@ -119,16 +120,16 @@ html {
   overflow: visible;
 }
 #search {
+  background: #ffffff;
+  box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
   width: 100%;
   max-height: 20vh;
-  background: #ffffff;
   margin: 0 auto;
   border-radius: 5px;
-  overflow-y: scroll;
-  transition: all 1s!important;
-  box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
   margin-top: -10px;
   padding: 6px;
+  overflow-y: scroll;
+  transition: all 1s!important;
 }
 .search-item {
   padding: 10px;
@@ -138,25 +139,44 @@ html {
 #chat {
   width: 100%;
   max-height: 20vh;
-  background: #ffffff;
   margin: 0 auto;
   border-radius: 5px;
-  overflow-y: scroll;
-  transition: all 1s!important;
-  box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
   margin-top: -10px;
   padding: 6px;
+  overflow-y: scroll;
+  transition: all 1s!important;
+  display: block;
 }
-.chat-item {
-  padding: 10px;
+.chat-msg {
+  height: 18px;
+  padding: 10px 15px;
+  margin: 20px;
+  background: #ffffff;
+  color: #262626;
+  font-weight: bold;
+  border-radius: 5px;
   font-family: "Arial";
-  border-bottom: 1px solid lightgrey;
+  transition: all 1s!important;
+  margin: 0;
+  margin-bottom: 8px;
+  display: table;
+  font-weight: normal;
+}
+.chat-msg.right {
+  background: #262626;
+  color: #ffffff;
+  text-align: right;
+  float: right;
 }
 #header.dark {
   background: linear-gradient(-130deg, #262626 50%, #0c0c0c 100%);
 }
 #ouch.dark {
   color: white;
+}
+.right.dark {
+  background: #b5f8ff;
+  color: #262626;
 }
 #user-input.login {
   margin-top: 5vh;
