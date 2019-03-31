@@ -1,7 +1,5 @@
 var login = false; //Current state being displayed
 
-//TODO turn getElementbyId to variables.
-
 function switchState() {
     document.getElementById("submit-button").classList.toggle("hidden");
     document.getElementById("search").classList.toggle("opacity");
@@ -10,9 +8,7 @@ function switchState() {
     document.getElementById("header").classList.toggle("login");
     document.getElementById("exist-input").classList.toggle("opacity");
     document.getElementById("exist-input").classList.toggle("disappear");
-    document.getElementById("world").classList.toggle("opacity");
     document.getElementById("level").classList.toggle("opacity");
-    document.getElementById("indicator").classList.toggle("opacity");
     login = !login;
 }
 

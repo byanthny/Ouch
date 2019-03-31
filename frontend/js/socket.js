@@ -12,18 +12,33 @@ document.getElementById("submit-button").onclick = function() {
     //alert(url);
 };
 
+var elements;
+
 function play() {
 
     var connection = new WebSocket(url);
 
     connection.onopen = () => {
         switchState();
-        document.getElementById('user-input').reset();
-    }
+        document.getElementById("indicator").classList.toggle("connected");
+        //document.getElementById('indicator').reset();
+    };
 
     connection.onerror = error => {
         //create error message
         alert(`WebSocket error: ${error}`);
+    };
+
+    connection.onmessage = e => {
+
+        alert(e.data);
+    };
+
+    connection.onclose = () => {
+        switchState();
+        document.getElementById("indicator").classList.toggle("connected");
+        //document.getElementById('user-input').reset();
     }
+
 }
 

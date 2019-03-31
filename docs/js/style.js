@@ -8,9 +8,7 @@ function switchState() {
     document.getElementById("header").classList.toggle("login");
     document.getElementById("exist-input").classList.toggle("opacity");
     document.getElementById("exist-input").classList.toggle("disappear");
-    document.getElementById("world").classList.toggle("opacity");
     document.getElementById("level").classList.toggle("opacity");
-    document.getElementById("indicator").classList.toggle("opacity");
     login = !login;
 }
 
