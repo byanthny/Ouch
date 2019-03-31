@@ -46,7 +46,7 @@ function play() {
         else {
 
         }
-        alert(e.data);
+        //alert(e.data);
     };
 
     connection.onclose = () => {

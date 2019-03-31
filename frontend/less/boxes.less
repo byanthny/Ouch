@@ -1,0 +1,41 @@
+.box() {
+  width: 100%;
+  max-height: @box-max-height;
+  margin: 0 auto;
+  border-radius: @default-rounded;
+  margin-top: @box-margin;
+  padding: @box-padding;
+  overflow-y: scroll;
+  .transition();
+}
+
+#search {
+  background: @white-color;
+  .box-shadow;
+  .box();
+}
+
+.search-item {
+  padding: @search-itm-padding;
+  font-family: @secondary-font;
+  border-bottom: @search-itm-border;
+}
+
+#chat {
+  .box();
+  display: block;
+}
+
+.chat-msg {
+  .data;
+  margin: 0;
+  margin-bottom: @chat-itm-padding;
+  display: table;
+  font-weight: normal;
+
+  &.right {
+    background: @dark-color;
+    color: @white-color;
+    //float: right;
+  }
+}

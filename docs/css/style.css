@@ -12,6 +12,8 @@ html {
 .disappear {
   height: 0px!important;
   margin: 0px!important;
+  overflow: hidden;
+  z-index: -1;
 }
 .hidden {
   display: none!important;
@@ -21,10 +23,14 @@ html {
 }
 .box-shadow,
 .data,
+.chat-msg,
 .data-leaderboard,
 #level,
 #world {
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
+}
+.normal {
+  font-weight: normal;
 }
 .data,
 .data-leaderboard,
@@ -42,7 +48,8 @@ html {
 }
 .data-leaderboard {
   display: table;
-  margin: 8px;
+  margin: 4px;
+  float: right;
 }
 #level {
   position: absolute;
@@ -60,8 +67,8 @@ html {
   overflow-y: scroll;
   position: absolute;
   top: 0;
-  margin-top: calc(18px + 50px);
-  right: calc(20px - 8px);
+  margin-top: calc(18px + 54px);
+  right: calc(20px - 4px);
 }
 #commands {
   width: 90vw;
@@ -118,27 +125,61 @@ html {
   overflow: visible;
 }
 #search {
+  background: #ffffff;
+  box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
   width: 100%;
   max-height: 20vh;
-  background: #ffffff;
   margin: 0 auto;
-  margin-top: -10px;
   border-radius: 5px;
-  overflow-y: scroll;
+  margin-top: -10px;
   padding: 6px;
+  overflow-y: scroll;
   transition: all 1s!important;
-  box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
 }
 .search-item {
   padding: 10px;
   font-family: "Arial";
   border-bottom: 1px solid lightgrey;
 }
+#chat {
+  width: 100%;
+  max-height: 20vh;
+  margin: 0 auto;
+  border-radius: 5px;
+  margin-top: -10px;
+  padding: 6px;
+  overflow-y: scroll;
+  transition: all 1s!important;
+  display: block;
+}
+.chat-msg {
+  height: 18px;
+  padding: 10px 15px;
+  margin: 20px;
+  background: #ffffff;
+  color: #262626;
+  font-weight: bold;
+  border-radius: 5px;
+  font-family: "Arial";
+  transition: all 1s!important;
+  margin: 0;
+  margin-bottom: 8px;
+  display: table;
+  font-weight: normal;
+}
+.chat-msg.right {
+  background: #262626;
+  color: #ffffff;
+}
 #header.dark {
   background: linear-gradient(-130deg, #262626 50%, #0c0c0c 100%);
 }
 #ouch.dark {
   color: white;
+}
+.right.dark {
+  background: #b5f8ff;
+  color: #262626;
 }
 #user-input.login {
   margin-top: 5vh;
