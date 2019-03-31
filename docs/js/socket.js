@@ -50,6 +50,11 @@ function play() {
             document.getElementById("level").innerHTML = nickname+'<span id="world-value" style="font-weight: normal;"> '+usr.initialQuidity.ouch.degree+'</span>';
             //load in chat history
             //load in users
+
+            for(int i = 0; i < usr.data.) {
+
+            }
+
             //load in levels
 
         }
