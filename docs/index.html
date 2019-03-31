@@ -13,12 +13,13 @@
         <p id="world">existence: <span id="world-value" style="font-weight: normal;">something</span>
             <div class="indicator" id="indicator"></div>
         <div class="leaderboard">
+            <!--
             <div class="data-leaderboard">somethign</div>
             <div class="data-leaderboard">Longer something</div>
             <div class="data-leaderboard">short something</div>
             <div class="data-leaderboard">i dont know what this is</div>
-            <div class="data-leaderboard">what is your name so got damn long</div>
-            <div class="data-leaderboard">bitch</div>
+            <div class="data-leaderboard">what is your name so got damn long</div>-->
+            <div class="data-leaderboard">Quiddity 1</div>
         </div>
         </p>
 
@@ -30,7 +31,7 @@
                 <input id="exist-input" class="opacity disappear" type="text" placeholder="existence">
                 <button type="button" class="submit-button hidden" id="submit-button">enter</button>
             <form>
-            <div class="search hidden" id="search">
+            <div id="search">
                 <!-- <div class="search-item"><button type="button">Search Item 1</button></div> -->
                 <!--TODO create search items to buttons so they can be clicked-->
                 <div class="search-item">Search Item 2</div>
@@ -39,6 +40,11 @@
                 <div class="search-item">Search Item 5</div>
                 <div class="search-item">Search Item 6</div>
             </div>
+
+                <div id="chat" class="opacity disappear">
+                    <div class="chat-item">Chat Item 1</div>
+                    <div class="chat-item">Chat Item 2</div>
+                </div>
         </div>
     </div>
 
@@ -53,13 +59,14 @@
     <script>
         // Testing
         //switchDark();
-        switchState();
 /*
         (function() {
            //switchState();
+            //switchSearch();
             switchDark();
             setTimeout(function(){
-                switchState();
+                switchSearch();
+                //switchState();
                 //switchDark();
             }, 5000);
         })();*/

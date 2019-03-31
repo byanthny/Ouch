@@ -14,6 +14,13 @@ function switchState() {
     login = !login;
 }
 
+function switchSearch() {
+    document.getElementById("search").classList.toggle("opacity");
+    document.getElementById("search").classList.toggle("disappear");
+    document.getElementById("chat").classList.toggle("opacity");
+    document.getElementById("chat").classList.toggle("disappear");
+}
+
 function switchDark() {
     document.getElementById("ouch").classList.toggle("dark");
     document.getElementById("header").classList.toggle("dark");

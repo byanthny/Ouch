@@ -123,14 +123,31 @@ html {
   max-height: 20vh;
   background: #ffffff;
   margin: 0 auto;
-  margin-top: -10px;
   border-radius: 5px;
   overflow-y: scroll;
-  padding: 6px;
   transition: all 1s!important;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
+  margin-top: -10px;
+  padding: 6px;
 }
 .search-item {
+  padding: 10px;
+  font-family: "Arial";
+  border-bottom: 1px solid lightgrey;
+}
+#chat {
+  width: 100%;
+  max-height: 20vh;
+  background: #ffffff;
+  margin: 0 auto;
+  border-radius: 5px;
+  overflow-y: scroll;
+  transition: all 1s!important;
+  box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
+  margin-top: -10px;
+  padding: 6px;
+}
+.chat-item {
   padding: 10px;
   font-family: "Arial";
   border-bottom: 1px solid lightgrey;
