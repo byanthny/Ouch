@@ -4,9 +4,13 @@ import com.sim.ouch.logic.*
 import com.sim.ouch.web.Dao
 import io.javalin.Javalin
 import io.javalin.json.JavalinJson
+import io.javalin.websocket.WsSession
 
 const val LOGIN = "/login"
 const val SOCKET = "/ws"
+
+val ER_NO_NAME = 4004 to "no name"
+val ER_BAD_ID  = 4005 to "unknown ID"
 
 val DAO: Dao by lazy { Dao() }
 val javalin: Javalin by lazy { Javalin.create() }
@@ -16,27 +20,33 @@ fun main() = javalin.apply {
 
     ws(SOCKET) { ws ->
         ws.apply {
-            var valid: Boolean = false
-
             onConnect { session ->
-                val name: String = session.queryParam("name")
-                        ?: return@onConnect session.close(4004, "No Name")
+
+                val name: String? = session.queryParam("name")
+                if (name.isNullOrBlank())
+                    return@onConnect session.close(ER_NO_NAME)
+
                 val exist: Existence = session.queryParam("exID")?.let {
-                    DAO.getEx(it) ?: return@onConnect session.close(4005,
-                        "Unknown ID")
+                    DAO.getEx(it) ?: return@onConnect session.close(ER_BAD_ID)
                 } ?: DefaultExistence("$name's Existence", -1, Quidity())
                 DAO.sessions.getOrPut(exist) { mutableListOf() }.add(session)
+
                 session.send(JavalinJson.toJson(exist))
             }
 
             onMessage { session, msg ->
-                val action = JavalinJson.fromJson(msg, SocketAction::class.java)
-                println(session)
-                TODO()
+                println("Message from: ${session.host()}\n\t$msg")
+                val a = JavalinJson.fromJson(msg, OuchAction::class.java)
+                println("Actions: $a")
+                session.send("{\"name\":\"penis\"}")
             }
+
             onClose { session, statusCode, reason ->
-                println(session)
-                TODO()
+                when (statusCode) {
+                    ER_NO_NAME.first -> { println("no name") }
+                    ER_BAD_ID.first -> { println("bad id") }
+                    else -> { println("close on $statusCode=$reason") }
+                }
             }
         }
     }
@@ -44,6 +54,6 @@ fun main() = javalin.apply {
     start(System.getenv("PORT")?.toInt() ?: 7000)
 }.unit
 
-sealed class SocketAction(val name: String) {
+data class OuchAction(val name: String)
 
-}
+fun WsSession.close(pair: Pair<Int, String>) = close(pair.first, pair.second)
