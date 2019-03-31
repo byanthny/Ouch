@@ -1,5 +1,7 @@
 var login = false; //Current state being displayed
 
+//TODO turn getElementbyId to variables.
+
 function switchState() {
     document.getElementById("submit-button").classList.toggle("hidden");
     document.getElementById("search").classList.toggle("opacity");
