@@ -10,6 +10,7 @@ function switchState() {
     document.getElementById("exist-input").classList.toggle("opacity");
     document.getElementById("exist-input").classList.toggle("disappear");
     document.getElementById("level").classList.toggle("opacity");
+    document.getElementsByClassName("leaderboard")[0].classList.toggle("opacity");
     login = !login;
 }
 

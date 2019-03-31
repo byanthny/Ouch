@@ -42,7 +42,8 @@ html {
 }
 .data-leaderboard {
   display: table;
-  margin: 8px;
+  margin: 4px;
+  float: right;
 }
 #level {
   position: absolute;
@@ -60,8 +61,8 @@ html {
   overflow-y: scroll;
   position: absolute;
   top: 0;
-  margin-top: calc(18px + 50px);
-  right: calc(20px - 8px);
+  margin-top: calc(18px + 54px);
+  right: calc(20px - 4px);
 }
 #commands {
   width: 90vw;
