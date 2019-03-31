@@ -1,60 +1,73 @@
 package com.sim.ouch
 
 import com.sim.ouch.logic.*
-import com.sim.ouch.web.Dao
-import io.javalin.Javalin
-import io.javalin.json.JavalinJson
+import com.sim.ouch.web.*
+import com.sim.ouch.web.Packet.DataType.*
+import io.javalin.*
 import io.javalin.websocket.WsSession
 
+
 enum class EndPoints(val point: String) {
-    ACTIONS("/actions"), SOCKET("/ws")
+    ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status")
 }
 
 val ER_NO_NAME = 4004 to "no name"
 val ER_BAD_ID  = 4005 to "unknown ID"
 
-val DAO: Dao by lazy { Dao() }
 val javalin: Javalin by lazy { Javalin.create() }
 
 
 fun main() = javalin.apply {
 
+    exception(Exception::class.java) { e, _ ->
+        e.printStackTrace()
+    }
+
+    get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
+
+    get(EndPoints.STATUS.point) { it.result(DAO.statusPacket().pack()) }
+
     get(EndPoints.ACTIONS.point) {
-        it.result(JavalinJson.toJson(listOf()))
+        it.result(Quidity.Action.values().json())
     }
 
     ws(EndPoints.SOCKET.point) { ws ->
-        ws.apply {
-            onConnect { session ->
-                // Attempt to parse name
-                val name: String? = session.queryParam("name")
-                if (name.isNullOrBlank())
-                    return@onConnect session.close(ER_NO_NAME)
-                // Attempt to get an existence
-                val exist: Existence = session.queryParam("exID")?.let {
-                    // With an invalid ID, close
-                    DAO.getEx(it) ?: return@onConnect session.close(ER_BAD_ID)
-                    // with no ID, make new Existence
-                } ?: DefaultExistence("$name's Existence", -1, Quidity(name))
-                DAO.
 
-
-                session.send(JavalinJson.toJson(exist))
+        ws.onConnect { session ->
+            // Attempt to parse name
+            val name: String? = session.queryParam("name")
+            if (name.isNullOrBlank()) return@onConnect session.close(ER_NO_NAME)
+            // Attempt to get an existence
+            val exist: Existence = session.queryParam("exID")?.let { id ->
+                // With an invalid ID, close
+                DAO.getEx(id)?.also { DAO.addSession(session, it, name) }
+                        ?: return@onConnect session.close(ER_BAD_ID)
+            } ?: let {
+                // with no ID, make new Existence
+                DAO.newExistence(session, DefaultExistence(Quidity(name)))
             }
 
-            onMessage { session, msg ->
-                println("Message from: ${session.host()}\n\t$msg")
-                val a = JavalinJson.fromJson(msg, OuchAction::class.java)
-                println("Actions: $a")
-                session.send("{\"name\":\"penis\"}")
-            }
+            session.send(Packet(EXISTENCE, exist).pack())
+        }
 
-            onClose { session, statusCode, reason ->
-                when (statusCode) {
-                    ER_NO_NAME.first -> { println("no name") }
-                    ER_BAD_ID.first -> { println("bad id") }
-                    else -> { println("close on $statusCode=$reason") }
-                }
+        ws.onMessage { session, msg ->
+            val packet = readPacket(msg)
+            val ex = DAO.getExistence(session.id)
+            when (packet.dataType) {
+                QUIDITY -> TODO()
+                EXISTENCE -> TODO()
+                ACTION -> TODO()
+                CHAT -> ex?.chat?.`update and distrubute`(
+                    session.quidity!!.id, packet.data as String
+                )
+            }
+        }
+
+        ws.onClose { _, statusCode, reason ->
+            when (statusCode) {
+                ER_NO_NAME.first -> println("no name")
+                ER_BAD_ID.first -> println("bad id")
+                else -> println("close on $statusCode=$reason")
             }
         }
     }
