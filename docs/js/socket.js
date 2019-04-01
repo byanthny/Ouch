@@ -113,9 +113,9 @@ function play() {
         document.getElementById("indicator").classList.toggle("connected");
         document.getElementById("world-value").innerHTML = "offline";
         if (closeEvent.code == close_code.ER_BAD_ID) {
-            document.getElementById('exist-input').value = "Unknown ID";
+            document.getElementById('exist-input').placeholder = "Unknown ID";
         } else if (closeEvent.code == close_code.ER_NO_NAME) {
-            document.getElementById('user-input').value = "Must provide a name";
+            document.getElementById('user-input').placeholder = "Must provide a name";
         }
         connection = null;
         leaderboard.innerHTML = "";
