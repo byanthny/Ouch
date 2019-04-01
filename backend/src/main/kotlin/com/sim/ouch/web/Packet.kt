@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quidity
+import io.javalin.websocket.WsSession
 
 val gson: Gson by lazy { GsonBuilder().create() }
 
@@ -31,7 +32,9 @@ data class Packet(
         @Transient val prebuild: Boolean = false
 ) {
 
-    enum class DataType { INIT, QUIDITY, EXISTENCE, ACTION, CHAT, INTERNAL }
+    enum class DataType {
+        INIT, QUIDITY, EXISTENCE, ENTER, EXIT, ACTION, CHAT, INTERNAL
+    }
 
     init {
         data = if (prebuild) data else gson.toJson(data)!!
@@ -49,3 +52,10 @@ data class Packet(
 // Special Packets
 
 data class InitPacket(val existence: Existence, val quidity: Quidity)
+
+fun Iterable<WsSession>.broadcast(
+    dataType: Packet.DataType,
+    data: Any,
+    vararg excludeIDs: String
+) = filterNot { it.id in excludeIDs }.
+    forEach { it.send(Packet(dataType, data).pack()) }

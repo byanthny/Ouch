@@ -14,13 +14,11 @@ class Chat(@Transient val existence: Existence) {
     private var nextID = 0L
     private val history = mutableListOf<Message>()
 
-    /** (User ->)? Server -> All Users */
-    fun `update and distrubute`(quidity: Quidity, content: String): Message {
+    /** update from client */
+    fun update(quidity: Quidity, content: String): Message {
         historySizing()
         return Message(quidity.id, quidity.name, content).also {
             history.add(it)
-            Packet(Packet.DataType.CHAT, it).pack()
-                .also { existence.sessions.forEach { _, wss -> wss.send(it) } }
         }
     }
 

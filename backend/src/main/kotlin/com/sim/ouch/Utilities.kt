@@ -1,5 +1,6 @@
 package com.sim.ouch
 
+import io.javalin.Javalin
 import java.io.BufferedWriter
 import java.io.File
 import java.nio.file.FileAlreadyExistsException
@@ -67,3 +68,7 @@ fun List<Any>.toFile(name: String = "file") : File {
 internal fun <E> MutableList<E>.removeLastOrNull() = if (isEmpty()) null else removeAt(this.size - 1)
 
 val Any.unit get() = Unit
+
+fun secret(javalin: Javalin) {
+    javalin.get("/ph") { it.redirect("https://pornhub.com/random") }
+}

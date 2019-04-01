@@ -18,14 +18,8 @@ fun main() = javalin.apply {
     get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
 
     get(EndPoints.STATUS.point) { it.result(DAO.statusPacket().pack()) }
-
-    get(EndPoints.ACTIONS.point) {
-        it.result(Quidity.Action.values().json())
-    }
-
-    get(EndPoints.ENDPOINTS.point) {
-        it.html(ENDPONT_MAP)
-    }
+    get(EndPoints.ACTIONS.point) { it.result(Quidity.Action.values().json()) }
+    get(EndPoints.ENDPOINTS.point) { it.html(ENDPONT_MAP) }
 
     ws(EndPoints.SOCKET.point) { ws ->
 
@@ -35,15 +29,17 @@ fun main() = javalin.apply {
             if (name.isNullOrBlank()) return@onConnect session.close(ER_NO_NAME)
             lateinit var quidity: Quidity
             // Attempt to get an existence
-            val exist: Existence = session.queryParam("exID")?.let { id ->
+            val exist = session.queryParam("exID")?.let { id ->
                 // With an invalid ID, close
-                DAO.getEx(id)?.also { quidity = DAO.addSession(session, it, name) }
-                        ?: return@onConnect session.close(ER_BAD_ID)
+                DAO.getEx(id)?.also {
+                    quidity = DAO.addSession(session, it, name)
+                    // Broadcast the join event to all sessions but this one
+                    it.sessions.values.broadcast(ENTER, quidity, session.id)
+                } ?: return@onConnect session.close(ER_BAD_ID)
             } ?: let {
                 // with no ID, make new Existence
-                DAO.newExistence(session, DefaultExistence(Quidity(name))).also {
-                    quidity = it.initialQuidity
-                }
+                DAO.newExistence(session, DefaultExistence(Quidity(name)))
+                    .also { quidity = it.initialQuidity }
             }
 
             session.send(Packet(INIT, InitPacket(exist, quidity)).pack())
@@ -56,20 +52,29 @@ fun main() = javalin.apply {
                 QUIDITY -> TODO()
                 EXISTENCE -> TODO()
                 ACTION -> TODO()
-                CHAT -> ex?.chat?.`update and distrubute`(
+                CHAT -> ex?.chat?.update(
                     session.quidity!!, packet.data as String
+                )?.let { ex.sessions.values.broadcast(CHAT, it) }
+                else -> throw UnauthorizedResponse(
+                    "Client cannot make ${packet.dataType} requests."
                 )
             }
         }
 
-        ws.onClose { _, statusCode, reason ->
+        ws.onClose { session, statusCode, reason ->
             when (statusCode) {
                 ER_NO_NAME.first -> println("no name")
                 ER_BAD_ID.first -> println("bad id")
                 else -> println("close on $statusCode=$reason")
             }
+            session.quidity?.also {
+                session.existence?.sessions?.values?.broadcast(EXIT, it, session.id)
+            }
+            DAO.removeSession(session)
         }
     }
+
+    secret(this)
 
     start(System.getenv("PORT")?.toInt() ?: 7000)
 }.unit

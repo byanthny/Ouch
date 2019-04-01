@@ -1,5 +1,7 @@
 package com.sim.ouch
 
+import java.util.concurrent.ConcurrentHashMap
+
 /**
  * A Caching Interface which presents a framework for abstracting away from a [Map], allowing for more detailed
  * internal control over caching behavior.
@@ -39,7 +41,7 @@ class LruKache<K, V>(
         val minSize: Int = DEFAULT_MIN,
         val trashSize: Int = DEFAULT_TRASH_SIZE
 ) : UsagePriorityKache<K, V>() {
-    private val map = mutableMapOf<K, V>()
+    private val map = ConcurrentHashMap<K, V>()
     override val size get() = map.size
     override val entries = map.entries
     override val keys = map.keys
