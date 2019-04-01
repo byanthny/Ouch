@@ -2,6 +2,16 @@
 <img src="docs/imgs/logo.png" width="250"/>
 </p>
 
+## Table of Contents
+* [The Simulation](#the-simulation)
+* [Project Description](#description)
+* [Commands](#commands)
+* [Technical Stuff](#technical-stuff)
+    * [File Structure](#file-organization)
+    * [Client-Server Communication](#client-server-communcation)
+* [Future Ideas](#future-ideas)
+---
+
 ## The Simulation
   Ah yes...there comes a point in person life were the simulation doesn't treat you so well. Sometimes I wonder what the `simulators` were thinking. 
   
@@ -24,40 +34,20 @@
   Now why does this matter? Let's go back to feeling... *Ouch*. The feeling of *Ouch* is part of a `Quiddities` life, yes.
   
   ---
-  
-  Welcome to Ouch, a web app build like a simulation where you and your friends can exist in an `Existence` together. 
+  #### Description
+  Welcome to Ouch, a web app built like a simulation where you and your friends can exist in an `Existence` together. 
   
   In this `Existence` you can chat to each other and perform commands.. that well associate with your feeling of Ouch.
   
   You can increase you Ouch level and race up the leaderboard to see who is the most....yeah I know and much more!
-  
-  ---
-  
+ 
   ## Commands
   
-    "-darmode" Toggles dark mode.
-    "-exit" Exit the simulation
-    "-something"
-    
+  | Commands  | Description |
+  | ------------- | ------------- |
+  | -darkmode  | Toggles dark mode.  |
+  | -exit  | Exit the simulation  |
 
-## Quiddity 
-   * Love state/function
-   * You can set ouch up only and set love to whatever.
-   * A state of Ouch that can't be turned off.
-        * Max ouch, nothing works...
-        * Ouch achievements
-        * Ouch is a gradient
-        * Play random Ouch Music (" **ouch** -music")
-            * The Ouch Music should be to the varying degrees
-        * Silence
-        * A shower |||||
-        * :(
-        * Cry
-
-## Future Ideas
- * Ouch is increased by keywords and songs played
- 
----
 ## Technical Stuff
 
 #### File Organization
@@ -87,3 +77,21 @@ Action:
     
         C -> Action Name
         S -> updated Quidity (if actions affect Existence then send that)
+        
+    
+## Future Ideas
+ * Ouch is increased by keywords and songs played
+* Love state/function
+* You can set ouch up only and set love to whatever.
+* A state of Ouch that can't be turned off.
+    * Max ouch, nothing works...
+    * Ouch achievements
+    * Ouch is a gradient
+    * Play random Ouch Music (" **ouch** -music")
+        * The Ouch Music should be to the varying degrees
+    * Silence
+    * A shower |||||
+    * :(
+    * Cry
+ 
+---
