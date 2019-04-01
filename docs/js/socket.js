@@ -119,5 +119,9 @@ function play() {
 
         connection = null;
     }
+}
 
+//disconnect from server on page close or refresh
+window.onbeforeunload = function(){
+    connection.close();
 }
