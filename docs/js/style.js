@@ -60,3 +60,17 @@ function reset() {
     chat.innerHTML = "";
     document.getElementById('user-input').value = "";
 }
+
+function shakeUsername() {
+    user_input.classList.add("shake");
+    setTimeout(function () {
+        user_input.classList.remove("shake");
+    }, 1000);
+}
+
+function shakeExist() {
+    exist_input.classList.add("shake");
+    setTimeout(function () {
+        exist_input.classList.remove("shake");
+    }, 1000);
+}
