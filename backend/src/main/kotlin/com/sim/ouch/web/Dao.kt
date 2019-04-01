@@ -4,6 +4,7 @@ import com.sim.ouch.LruKache
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quidity
 import io.javalin.websocket.WsSession
+import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -76,6 +77,16 @@ class Dao {
     fun statusPacket() = Packet(Packet.DataType.INTERNAL, StatusPacket(
         getExistences() + dormantExistences.map { it.value }, sessions.size
     ))
+
+    val cleaner = GlobalScope.launch {
+        while (true) {
+            delay(1_000 * 60)
+            val exs = existences.filterValues { it.sessions.isEmpty() }.values
+            exs.forEach {
+                dormantExistences[it.id] = existences.remove(it.id)!!
+            }
+        }
+    }
 
 }
 
