@@ -58,10 +58,10 @@ function play() {
 
             //Add quids to leaderboard
             for (var quid in usersArray) {
-                leaderboard.innerHTML += '<div class="data-leaderboard ' + usersArray[quid].id +
+                leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + usersArray[quid].id +
                     '">' + usersArray[quid].name +
                     ' <span class="normal">' + usersArray[quid].ouch.degree +
-                    '</span></div>';
+                    '</span></p></div>';
             }
 
         }
@@ -83,7 +83,7 @@ function play() {
             //New user has entered
         } else if (JSONdata.dataType === "ENTER") {
             //Add new user to leaderboard
-            leaderboard.innerHTML += '<div class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></div>';
+            leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></p></div>';
 
             document.getElementById('chat').innerHTML +=
                 '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">' +
