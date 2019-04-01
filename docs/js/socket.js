@@ -26,6 +26,11 @@ document.getElementById("submit-button").onclick = function() {
 
 var elements;
 
+var close_code = {
+    ER_NO_NAME: 4004,
+    ER_BAD_ID: 4005
+};
+
 function play() {
 
     connection = new WebSocket(url);
@@ -103,10 +108,15 @@ function play() {
         }
     };
 
-    connection.onclose = () => {
+    connection.onclose = (closeEvent) => {
         switchState();
         document.getElementById("indicator").classList.toggle("connected");
         document.getElementById("world-value").innerHTML = "offline";
+        if (closeEvent.code == close_code.ER_BAD_ID) {
+            document.getElementById('exist-input').value = "Unknown ID";
+        } else if (closeEvent.code == close_code.ER_NO_NAME) {
+            document.getElementById('user-input').value = "Must provide a name";
+        }
         connection = null;
         leaderboard.innerHTML = "";
         //document.getElementById('user-input').reset();
