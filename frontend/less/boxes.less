@@ -26,6 +26,11 @@
   display: block;
 }
 
+.chat-msg-cont {
+  width: 100%;
+  height: @chat-size;
+}
+
 .chat-msg {
   &:extend(.data);
   margin: 0;
@@ -36,7 +41,7 @@
   &.right {
     background: @dark-color;
     color: @white-color;
-    //float: right;
+    float: right;
   }
 
   &.system {

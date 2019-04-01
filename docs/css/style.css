@@ -175,15 +175,20 @@ html {
   transition: all 1s!important;
   display: block;
 }
+.chat-msg-cont {
+  width: 100%;
+  height: calc(6px + 18px + 1em + (10px 15px * 2));
+}
 .chat-msg {
   margin: 0;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   display: table;
   font-weight: normal;
 }
 .chat-msg.right {
   background: #262626;
   color: #ffffff;
+  float: right;
 }
 .chat-msg.system {
   background: #262626;

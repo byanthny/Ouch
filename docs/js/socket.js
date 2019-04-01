@@ -72,12 +72,12 @@ function play() {
             //if message is from current user
             if (parsedData.authorName === nickname) {
                 document.getElementById('chat').innerHTML +=
-                    '<p class="chat-msg right">' + parsedData.content + '</p>';
+                    '<div class="chat-msg-cont"><p class="chat-msg right">' + parsedData.content + '</p></div>';
             }
             //if message is from new user
             else {
                 document.getElementById('chat').innerHTML +=
-                    '<p class="chat-msg"><span style="font-weight: bold;">' + parsedData.authorName + ': </span>' + parsedData.content + '</p>';
+                    '<div class="chat-msg-cont"><p class="chat-msg"><span style="font-weight: bold;">' + parsedData.authorName + ': </span>' + parsedData.content + '</p></div>';
             }
 
             //New user has entered
@@ -86,16 +86,16 @@ function play() {
             leaderboard.innerHTML += '<div class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></div>';
 
             document.getElementById('chat').innerHTML +=
-                '<p class="chat-msg system"><span style="font-weight: bold;">' +
-                parsedData.name + '</span> has joined the Existence. </p>';
+                '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">' +
+                parsedData.name + '</span> has joined the Existence. </p></div>';
 
         } else if (JSONdata.dataType === "EXIT") {
             var quidleaderbaord = document.getElementByClassName(parsedData.id)[0]
             quidleaderbaord.parentNode.removeChild(quidleaderbaord);
 
             document.getElementById('chat').innerHTML +=
-                '<p class="chat-msg system"><span style="font-weight: bold;">' +
-                parsedData.name + '</span> has left the Existence.</p>';
+                '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">' +
+                parsedData.name + '</span> has left the Existence.</p></div>';
         }
 
         //Some unkown dataType
