@@ -1,16 +1,26 @@
 package com.sim.ouch.logic
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.sim.ouch.DefaultNameGenerator
 import com.sim.ouch.IDGenerator
 import com.sim.ouch.web.Chat
-import io.javalin.websocket.WsSession
+import com.sim.ouch.web.DAO
+import org.bson.codecs.pojo.annotations.BsonId
 
 /** The simulation. */
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.CLASS,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "@class"
+)
+@JsonSubTypes(
+    Type(value = DefaultExistence::class, name = "default")
+)
 sealed class Existence {
 
-    @Transient val sessions = mutableMapOf<String, WsSession>()
-
-    open val id = EXISTENCE_ID_GEN.next()
+    @BsonId open val _id = EXISTENCE_ID_GEN.next()
     var status: Status = Status.DRY
 
     abstract val name: String
@@ -33,12 +43,14 @@ sealed class Existence {
 
     operator fun get(id: String) = quidities[id] ?: infraQuidities[id]
 
-    enum class Status { OFF, WET, DRY }
+    enum class Status { DORMANT, WET, DRY }
 
     companion object {
         val EXISTENCE_ID_GEN = IDGenerator(10)
     }
 }
+
+val Existence.sessions get() = DAO.getSessions(_id)
 
 class DefaultExistence(
         override val initialQuidity: Quidity,
