@@ -1,6 +1,11 @@
 var login = false; //Current state being displayed
 var action;
 
+//HTML elemnts
+var exist_input = document.getElementById("exist-input");
+
+var leaderboard =     document.getElementsByClassName("leaderboard")[0];
+
 function switchState() {
     document.getElementById("submit-button").classList.toggle("hidden");
     document.getElementById("box").classList.toggle("opacity");
@@ -18,7 +23,7 @@ function switchSearch() {
     document.getElementById("search").classList.toggle("opacity");
     document.getElementById("search").classList.toggle("disappear");
     document.getElementById("chat").classList.toggle("opacity");
-    //document.getElementById("chat").classList.toggle("disappear");
+    document.getElementById("chat").classList.toggle("disappear");
 }
 
 function switchDark() {

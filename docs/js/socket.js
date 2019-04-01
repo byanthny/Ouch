@@ -7,11 +7,20 @@ var url = 'wss://sim-ouch.herokuapp.com/ws?name=user';//&exID=id';
 
 //On button click update connected and stuff
 document.getElementById("submit-button").onclick = function() {
+
     nickname = document.getElementById('user-input').value;
     id = document.getElementById('exist-input').value;
-    url = 'wss://sim-ouch.herokuapp.com/ws?name='+nickname;//+'&exID='+id;
+
+    document.getElementById('user-input').value = "";
+    document.getElementById('user-input').placeholder = "enter command or message";
+
+    if (id == "") {
+        url = 'wss://sim-ouch.herokuapp.com/ws?name='+nickname;
+    } else {
+        url = 'wss://sim-ouch.herokuapp.com/ws?name='+nickname+'&exID='+id;
+    }
+
     play();
-    //alert(url);
 };
 
 var elements;
@@ -24,9 +33,6 @@ function play() {
         switchState();
         document.getElementById("indicator").classList.toggle("connected");
 
-        //get actions to action var
-
-        //document.getElementById("world-value").innerHTML = id;
         //document.getElementById('indicator').reset();
 
         //test sending message
@@ -47,15 +53,23 @@ function play() {
         //IF begining then save user and update stuff
         if (JSONdata.dataType == "INIT") {
             usr = parsedData;
-            document.getElementById("level").innerHTML = nickname+'<span id="world-value" style="font-weight: normal;"> '+usr.existence.initialQuidity.ouch.degree+'</span>';
-            //load in chat history
-            //load in users
-/*
-            for(int i = 0; i < usr.data.) {
+            document.getElementById("level").innerHTML = nickname+'<span id="world-value" style="font-weight: normal;"> '+parsedData.existence.initialQuidity.ouch.degree+'</span>';
+            document.getElementById("world-value").innerHTML = parsedData.existence.id;
 
+            /*
+            //load in chat history
+            var chatHistory = parsedData.existence.quidities;
+
+            for(var quid in usersArray) {
+                leaderboard.innerHTML += '<div class="data-leaderboard">'+usersArray[quid].name+' <span class="normal">'+usersArray[quid].ouch.degree+'</span></div><br></br>';
             }*/
 
-            //load in levels
+            //load in users in leaderboard
+            var usersArray = parsedData.existence.quidities;
+
+            for(var quid in usersArray) {
+                leaderboard.innerHTML += '<div class="data-leaderboard">'+usersArray[quid].name+' <span class="normal">'+usersArray[quid].ouch.degree+'</span></div><br></br>';
+            }
 
         }
         //if chat then add items
@@ -67,7 +81,14 @@ function play() {
             } else { //if message is from new user
                 document.getElementById('chat').innerHTML += '<p class="chat-msg">'+parsedData.content+'</p>';
             }
-        } else {
+        } else if (JSONdata.dataType == "ENTER") {
+            leaderboard.innerHTML += '<div class="data-leaderboard">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div>';
+
+        } else if (JSONdata.dataType == "EXIT") {
+            for
+        }
+
+        else {
             alert("idk wtf is going on");
             alert(e.data);
         }
