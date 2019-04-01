@@ -41,7 +41,6 @@ function play() {
 
         //document.getElementById('indicator').reset();
 
-        //test sending message
         //connection.send("{\"dataType\":\"CHAT\",\"data\":\"MESSAGE TEXT\"}");
     };
 
@@ -95,7 +94,6 @@ function play() {
                 '<p class="chat-msg enter"><span style="font-weight: bold;">'+
                 parsedData.name+' has joined the Existence. </span> </p>';
         } else if (JSONdata.dataType == "EXIT") {
-            alert(parsedData.id + "Left");
             document.getElementByClassName(parsedData.id)[0].display = none;
             document.getElementById('chat').innerHTML +=
                 '<p class="chat-msg exit"><span style="font-weight: bold;">'+

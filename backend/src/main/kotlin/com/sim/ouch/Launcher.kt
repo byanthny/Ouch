@@ -43,6 +43,7 @@ fun main() = javalin.apply {
             }
 
             session.send(Packet(INIT, InitPacket(exist, quidity)).pack())
+            session.idleTimeout // TODO pinging
         }
 
         ws.onMessage { session, msg ->
