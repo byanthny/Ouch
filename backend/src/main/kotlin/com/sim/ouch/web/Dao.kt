@@ -57,18 +57,20 @@ class Dao {
     }
 
     fun removeSession(session: WsSession) {
-        val pair = sessions.remove(session.id)
-        val ex = pair?.first
-        val qd = pair?.second
+        val pair = sessions[session.id]
+        pair?.first?.sessions?.remove(session.id)
+        pair?.second // TODO Remove Quidity on exit?
 
         session.existence?.also { e ->
             if (e.sessions.isEmpty()) {
                 dormantExistences[e.id] = existences.remove(e.id)!!
             }
         }
+        sessions.remove(session.id)
     }
 
     fun getExistences() = existences.map { it.value }
+    fun getDormantEx() = dormantExistences.map { it.value }
     fun getSessions() = sessions.map { it.key }
 
     fun statusPacket() = Packet(Packet.DataType.INTERNAL, StatusPacket(

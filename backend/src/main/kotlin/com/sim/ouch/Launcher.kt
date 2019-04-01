@@ -1,10 +1,14 @@
 package com.sim.ouch
 
-import com.sim.ouch.logic.*
+import com.sim.ouch.logic.DefaultExistence
+import com.sim.ouch.logic.Quidity
 import com.sim.ouch.web.*
 import com.sim.ouch.web.Packet.DataType.*
-import io.javalin.*
+import io.javalin.Javalin
+import io.javalin.UnauthorizedResponse
 import io.javalin.websocket.WsSession
+import kotlinx.html.*
+import kotlinx.html.stream.createHTML
 
 
 val ER_NO_NAME = 4004 to "no name"
@@ -15,19 +19,15 @@ val javalin: Javalin by lazy { Javalin.create() }
 
 fun main() = javalin.apply {
 
-    get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
-
-    get(EndPoints.STATUS.point) { it.result(DAO.statusPacket().pack()) }
-    get(EndPoints.ACTIONS.point) { it.result(Quidity.Action.values().json()) }
-    get(EndPoints.ENDPOINTS.point) { it.html(ENDPONT_MAP) }
-
     ws(EndPoints.SOCKET.point) { ws ->
 
         ws.onConnect { session ->
+
             // Attempt to parse name
             val name: String? = session.queryParam("name")
             if (name.isNullOrBlank()) return@onConnect session.close(ER_NO_NAME)
             lateinit var quidity: Quidity
+
             // Attempt to get an existence
             val exist = session.queryParam("exID")?.let { id ->
                 // With an invalid ID, close
@@ -73,6 +73,39 @@ fun main() = javalin.apply {
             DAO.removeSession(session)
         }
     }
+
+    get(EndPoints.STATUS.point) {
+        val dex = DAO.getDormantEx()
+        val ex = DAO.getExistences()
+        val ss = DAO.getSessions()
+        val html = createHTML().apply {
+            body {
+                table {
+                    tr {
+                        th { text("Live Existences: ${ex.size}") }
+                        th { text("Dormant Existences: ${dex.size}") }
+                        th { text("Total Sessions: ${ss.size}") }
+                    }
+                    tr {
+                        th { text("Existence") }
+                        th { text("Quidity count") }
+                        th { text("Session Count") }
+                    }
+                    ex.forEach {
+                        tr {
+                            td { text(it.id) }
+                            td { text(it.quidities.size) }
+                            td { text(it.sessions.size) }
+                        }
+                    }
+                }
+            }
+        }.finalize()
+        it.html(html)
+    }
+    get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
+    get(EndPoints.ACTIONS.point) { it.result(Quidity.Action.values().json()) }
+    get(EndPoints.ENDPOINTS.point) { it.html(ENDPONT_MAP) }
 
     secret(this)
 
