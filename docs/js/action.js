@@ -5,7 +5,13 @@ user_input.addEventListener("keydown", function(event) {
             event.preventDefault();
             var input = user_input.value;
             if (input.charAt(0) === "-") {
-                console.log("action");
+                switch(input) {
+                    case "-darkmode":
+                        switchDark();
+                        break;
+                    default:
+                        console.log("action "+ input);
+                }
             } else {
                 //console.log("chat");
                 if(connection!=null) {
