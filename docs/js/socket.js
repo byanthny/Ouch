@@ -80,7 +80,7 @@ function play() {
             if(parsedData.authorName == nickname) { //is current user make right
                 document.getElementById('chat').innerHTML += '<p class="chat-msg right">'+parsedData.content+'</p>';
             } else { //if message is from new user
-                document.getElementById('chat').innerHTML += '<p class="chat-msg">'+parsedData.content+'</p>';
+                document.getElementById('chat').innerHTML += '<p class="chat-msg"><span style="font-weight: bold;">'+parsedData.authorName+': </span>'+parsedData.content+'</p>';
             }
         } else if (JSONdata.dataType == "ENTER") {
             leaderboard.innerHTML += '<div class="data-leaderboard '+parsedData.id+'">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div>';
