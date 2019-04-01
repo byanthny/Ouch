@@ -68,7 +68,7 @@ function play() {
             var usersArray = parsedData.existence.quidities;
 
             for(var quid in usersArray) {
-                leaderboard.innerHTML += '<div class="data-leaderboard">'+usersArray[quid].name+' <span class="normal">'+usersArray[quid].ouch.degree+'</span></div><br></br>';
+                leaderboard.innerHTML += '<div class="data-leaderboard '+usersArray[quid].id+'">'+usersArray[quid].name+' <span class="normal">'+usersArray[quid].ouch.degree+'</span></div><br></br>';
             }
 
         }
@@ -82,10 +82,10 @@ function play() {
                 document.getElementById('chat').innerHTML += '<p class="chat-msg">'+parsedData.content+'</p>';
             }
         } else if (JSONdata.dataType == "ENTER") {
-            leaderboard.innerHTML += '<div class="data-leaderboard">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div>';
+            leaderboard.innerHTML += '<div class="data-leaderboard '+parsedData.id+'">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div>';
 
         } else if (JSONdata.dataType == "EXIT") {
-            for
+            document.getElementByClassName(parsedData.id)[0].display = none;
         }
 
         else {
