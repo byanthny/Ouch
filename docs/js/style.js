@@ -1,7 +1,7 @@
 var login = false; //Current state being displayed
 var action;
 
-//HTML elemnts
+//HTML elements
 var exist_input = document.getElementById("exist-input");
 var user_input = document.getElementById("user-input");
 var chat = document.getElementById("chat");
@@ -45,13 +45,14 @@ document.getElementsByClassName("close")[0].onclick = function() {
     togglePopUp();
 };
 
-//autoscroll for chat
 //TODO MAKE SCROLL BETER
 //TODO Remove scroll bar
-window.setInterval(function() {
-    var elem = document.getElementById('chat');
-    elem.scrollTop = elem.scrollHeight;
-}, 0);
+
+//When called will scroll chat to bottom
+function scrollBottom() {
+    //make is so yoo don mess uo if scroll up
+    chat.scrollTop = chat.scrollHeight;
+}
 
 function reset() {
     switchState();

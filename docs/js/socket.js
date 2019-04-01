@@ -33,16 +33,16 @@ function play() {
         alert(`WebSocket error: ${error}`);
     };
 
-    //On message recieved from socket
+    //On message received from socket
     connection.onmessage = e => {
 
-        //parse the scoket data
+        //parse the socket data
         var JSONdata = JSON.parse(e.data);
         //parse JSONdata.data
         var parsedData = JSON.parse(JSONdata.data);
 
         //Check if datatype us INIT
-        if (JSONdata.dataType == "INIT") {
+        if (JSONdata.dataType === "INIT") {
             //Save init data to usr in case needed later
             usr = parsedData;
 
@@ -72,11 +72,13 @@ function play() {
             if (parsedData.authorName === nickname) {
                 document.getElementById('chat').innerHTML +=
                     '<div class="chat-msg-cont"><p class="chat-msg right">' + parsedData.content + '</p></div>';
+                scrollBottom();
             }
             //if message is from new user
             else {
                 document.getElementById('chat').innerHTML +=
                     '<div class="chat-msg-cont"><p class="chat-msg"><span style="font-weight: bold;">' + parsedData.authorName + ': </span>' + parsedData.content + '</p></div>';
+                    scrollBottom();
             }
 
             //New user has entered
@@ -87,19 +89,21 @@ function play() {
             document.getElementById('chat').innerHTML +=
                 '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">' +
                 parsedData.name + '</span> has joined the Existence. </p></div>';
+                scrollBottom();
 
         } else if (JSONdata.dataType === "EXIT") {
-            var quidleaderbaord = document.getElementsByClassName(parsedData.id)[0]
-            quidleaderbaord.parentNode.removeChild(quidleaderbaord);
+            var quidleaderboard = document.getElementsByClassName(parsedData.id)[0]
+            quidleaderboard.parentNode.removeChild(quidleaderboard);
 
             document.getElementById('chat').innerHTML +=
                 '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">' +
                 parsedData.name + '</span> has left the Existence.</p></div>';
+            scrollBottom();
         }
 
         //Some unknown dataType
         else {
-            console.log("Unkown dataType");
+            console.log("Unknown dataType");
             console.log(e.data);
         }
     };
