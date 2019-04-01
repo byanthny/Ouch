@@ -12,7 +12,6 @@ var close_code = {
 };
 
 //TODO  keep connection open
-//TODO enter on  username  or existence
 
 function play() {
 
