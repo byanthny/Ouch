@@ -32,6 +32,7 @@ function switchDark() {
     document.getElementById("header").classList.toggle("dark");
 
     //TODO update all chat to dark
+    //TODO RESET leaderbaord on log out
 }
 
 function togglePopUp() {

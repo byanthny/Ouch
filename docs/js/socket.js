@@ -65,6 +65,8 @@ function play() {
                 leaderboard.innerHTML += '<div class="data-leaderboard">'+usersArray[quid].name+' <span class="normal">'+usersArray[quid].ouch.degree+'</span></div><br></br>';
             }*/
 
+            //TODO MAKE SCROLL BETER
+
             //load in users in leaderboard
             var usersArray = parsedData.existence.quidities;
 
@@ -101,6 +103,7 @@ function play() {
         document.getElementById("indicator").classList.toggle("connected");
         document.getElementById("world-value").innerHTML = "offline";
         connection = null;
+        leaderboard.innerHTML = "";
         //document.getElementById('user-input').reset();
     }
 
