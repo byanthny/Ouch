@@ -4,6 +4,7 @@ import com.sim.ouch.LruKache
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quidity
 import io.javalin.websocket.WsSession
+import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -57,23 +58,35 @@ class Dao {
     }
 
     fun removeSession(session: WsSession) {
-        val pair = sessions.remove(session.id)
-        val ex = pair?.first
-        val qd = pair?.second
+        val pair = sessions[session.id]
+        pair?.first?.sessions?.remove(session.id)
+        pair?.second // TODO Remove Quidity on exit?
 
         session.existence?.also { e ->
             if (e.sessions.isEmpty()) {
                 dormantExistences[e.id] = existences.remove(e.id)!!
             }
         }
+        sessions.remove(session.id)
     }
 
     fun getExistences() = existences.map { it.value }
+    fun getDormantEx() = dormantExistences.map { it.value }
     fun getSessions() = sessions.map { it.key }
 
     fun statusPacket() = Packet(Packet.DataType.INTERNAL, StatusPacket(
         getExistences() + dormantExistences.map { it.value }, sessions.size
     ))
+
+    val cleaner = GlobalScope.launch {
+        while (true) {
+            delay(1_000 * 60)
+            val exs = existences.filterValues { it.sessions.isEmpty() }.values
+            exs.forEach {
+                dormantExistences[it.id] = existences.remove(it.id)!!
+            }
+        }
+    }
 
 }
 

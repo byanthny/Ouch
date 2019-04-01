@@ -171,6 +171,14 @@ html {
   background: #262626;
   color: #ffffff;
 }
+.chat-msg.enter {
+  background: #3AED93;
+  color: #ffffff;
+}
+.chat-msg.exit {
+  background: #F92020;
+  color: #ffffff;
+}
 #header.dark {
   background: linear-gradient(-130deg, #262626 50%, #0c0c0c 100%);
 }

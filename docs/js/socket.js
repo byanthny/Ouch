@@ -26,6 +26,11 @@ document.getElementById("submit-button").onclick = function() {
 
 var elements;
 
+var close_code = {
+    ER_NO_NAME: 4004,
+    ER_BAD_ID: 4005
+};
+
 function play() {
 
     connection = new WebSocket(url);
@@ -36,8 +41,7 @@ function play() {
 
         //document.getElementById('indicator').reset();
 
-        //test sending message
-        connection.send("{\"dataType\":\"CHAT\",\"data\":\"MESSAGE TEXT\"}");
+        //connection.send("{\"dataType\":\"CHAT\",\"data\":\"MESSAGE TEXT\"}");
     };
 
     connection.onerror = error => {
@@ -87,9 +91,17 @@ function play() {
         } else if (JSONdata.dataType == "ENTER") {
             leaderboard.innerHTML += '<div class="data-leaderboard '+parsedData.id+'">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div><br></br>';
 
+
+            leaderboard.innerHTML += '<div class="data-leaderboard '+parsedData.id+'">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div>';
+            document.getElementById('chat').innerHTML +=
+                '<p class="chat-msg enter"><span style="font-weight: bold;">'+
+                parsedData.name+' has joined the Existence. </span> </p>';
+
         } else if (JSONdata.dataType == "EXIT") {
-            alert(parsedData.id + "Left");
             document.getElementByClassName(parsedData.id)[0].display = none;
+            document.getElementById('chat').innerHTML +=
+                '<p class="chat-msg exit"><span style="font-weight: bold;">'+
+                parsedData.name+' has left the Existence. </span> </p>';
         }
 
         else {
@@ -98,10 +110,15 @@ function play() {
         }
     };
 
-    connection.onclose = () => {
+    connection.onclose = (closeEvent) => {
         switchState();
         document.getElementById("indicator").classList.toggle("connected");
         document.getElementById("world-value").innerHTML = "offline";
+        if (closeEvent.code == close_code.ER_BAD_ID) {
+            document.getElementById('exist-input').placeholder = "Unknown ID";
+        } else if (closeEvent.code == close_code.ER_NO_NAME) {
+            document.getElementById('user-input').placeholder = "Must provide a name";
+        }
         connection = null;
         leaderboard.innerHTML = "";
         //document.getElementById('user-input').reset();
