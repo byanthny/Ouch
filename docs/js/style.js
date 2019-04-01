@@ -44,3 +44,9 @@ function togglePopUp() {
 document.getElementsByClassName("close")[0].onclick = function() {
     togglePopUp();
 };
+
+//autoscroll for chat
+window.setInterval(function() {
+    var elem = document.getElementById('chat');
+    elem.scrollTop = elem.scrollHeight;
+}, 0);
