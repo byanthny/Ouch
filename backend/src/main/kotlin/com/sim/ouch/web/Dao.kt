@@ -1,9 +1,9 @@
 package com.sim.ouch.web
 
+import com.sim.ouch.LruKache
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quidity
 import io.javalin.websocket.WsSession
-import org.eclipse.jetty.websocket.api.Session
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -15,12 +15,13 @@ val WsSession.quidity get() = DAO.getQuidity(id)
 class Dao {
     /** [Existence.id] -> [Existence] */
     private val existences = ConcurrentHashMap<String, Existence>()
+    private val dormantExistences = LruKache<String, Existence>()
     /** [WsSession.id] -> <[Existence], [Quidity]> */
-    private val sessions =
-            ConcurrentHashMap<String, Pair<Existence, Quidity>>()
+    private val sessions = ConcurrentHashMap<String, Pair<Existence, Quidity>>()
 
     /** contains [Existence.id]. */
-    operator fun contains(exID: String) = existences.containsKey(exID)
+    operator fun contains(exID: String) =
+        existences.containsKey(exID) || dormantExistences.containsKey(exID)
 
     /**
      * Adds a new [WsSession] to an existing [Existence] and returns a new
@@ -47,15 +48,32 @@ class Dao {
 
     fun getQuidity(sessionID: String) = sessions[sessionID]?.second
 
-    fun getEx(id: String) = existences[id]
+    /**
+     * Returns the [Existence] matching the [id]. If the [Existence] is dormant,
+     * it is moved to the active map.
+     */
+    fun getEx(id: String) = existences[id] ?: dormantExistences[id]?.also {
+        dormantExistences.remove(id)!!.let { existences[id] = it }
+    }
+
+    fun removeSession(session: WsSession) {
+        val pair = sessions.remove(session.id)
+        val ex = pair?.first
+        val qd = pair?.second
+
+        session.existence?.also { e ->
+            if (e.sessions.isEmpty()) {
+                dormantExistences[e.id] = existences.remove(e.id)!!
+            }
+        }
+    }
 
     fun getExistences() = existences.map { it.value }
     fun getSessions() = sessions.map { it.key }
 
-    fun statusPacket() =
-            Packet(Packet.DataType.INTERNAL, StatusPacket(
-                getExistences(), sessions.size
-            ))
+    fun statusPacket() = Packet(Packet.DataType.INTERNAL, StatusPacket(
+        getExistences(), sessions.size
+    ))
 
 }
 
