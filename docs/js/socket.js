@@ -8,7 +8,8 @@ var connection;
 
 var close_code = {
     ER_NO_NAME: 4004,
-    ER_BAD_ID: 4005
+    ER_BAD_ID: 4005,
+    ER_INTERNAL_GENERIC: 4010
 };
 
 //TODO  keep connection open
@@ -108,16 +109,20 @@ function play() {
     connection.onclose = (closeEvent) => {
         //switch back to login
         reset();
-        if (closeEvent.code === close_code.ER_BAD_ID) {
-            document.getElementById('exist-input').placeholder = "Unknown ID";
-            document.getElementById('user-input').value = nickname;
-
-            shakeExist();
-
-        } else if (closeEvent.code === close_code.ER_NO_NAME) {
-            //document.getElementById('user-input').placeholder = "Must provide a name";
+        switch (closeEvent.code) {
+            case close_code.ER_NO_NAME:
+                //document.getElementById('user-input').placeholder = "Must provide a name";
+                break;
+            case close_code.ER_BAD_ID:
+                document.getElementById('exist-input').placeholder = "Unknown ID";
+                document.getElementById('user-input').value = nickname;
+                shakeExist();
+                break;
+            case close_code.ER_INTERNAL_GENERIC:
+                alert("Sorry, an internal error occurred. Please try again");
+                break;
+            default: break;
         }
-
         connection = null;
     }
 
