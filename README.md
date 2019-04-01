@@ -2,6 +2,9 @@
 <img src="docs/imgs/logo.png" width="250"/>
 </p>
 
+## Lore
+
+
 ## Quiddity 
    * Love state/function
    * You can set ouch up only and set love to whatever.
