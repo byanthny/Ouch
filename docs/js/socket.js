@@ -12,14 +12,13 @@ var close_code = {
     ER_INTERNAL_GENERIC: 4010
 };
 
-//TODO  keep connection open
-//TODO enter on  username  or existence
+//TODO keep connection open, close after a certain amount of time and when connection is closed
 
 function play() {
 
     connection = new WebSocket(url);
 
-    //On conncetion open
+    //On connection open
     connection.onopen = () => {
         switchState();
         document.getElementById("indicator").classList.toggle("connected");
@@ -91,7 +90,7 @@ function play() {
                 parsedData.name + '</span> has joined the Existence. </p></div>';
 
         } else if (JSONdata.dataType === "EXIT") {
-            var quidleaderbaord = document.getElementByClassName(parsedData.id)[0]
+            var quidleaderbaord = document.getElementsByClassName(parsedData.id)[0]
             quidleaderbaord.parentNode.removeChild(quidleaderbaord);
 
             document.getElementById('chat').innerHTML +=
@@ -99,7 +98,7 @@ function play() {
                 parsedData.name + '</span> has left the Existence.</p></div>';
         }
 
-        //Some unkown dataType
+        //Some unknown dataType
         else {
             console.log("Unkown dataType");
             console.log(e.data);
@@ -125,5 +124,9 @@ function play() {
         }
         connection = null;
     }
+}
 
+//disconnect from server on page close or refresh
+window.onbeforeunload = function(){
+    connection.close();
 }
