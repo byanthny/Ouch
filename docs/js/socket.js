@@ -93,7 +93,7 @@ function play() {
             alert(parsedData.id + "Left");
             document.getElementByClassName(parsedData.id)[0].display = none;
             document.getElementById('chat').innerHTML +=
-                '<p class="chat-msg.enter"><span style="font-weight: bold;">'+
+                '<p class="chat-msg.exit"><span style="font-weight: bold;">'+
                 parsedData.name+' has left the Existence. </span>';
         }
 
