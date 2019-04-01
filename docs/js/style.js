@@ -47,10 +47,11 @@ document.getElementsByClassName("close")[0].onclick = function() {
 
 //autoscroll for chat
 //TODO MAKE SCROLL BETER
+/*
 window.setInterval(function() {
     var elem = document.getElementById('chat');
     elem.scrollTop = elem.scrollHeight;
-}, 0);
+}, 0);*/
 
 function reset() {
     switchState();

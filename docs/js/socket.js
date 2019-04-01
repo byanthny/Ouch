@@ -59,10 +59,10 @@ function play() {
 
             //Add quids to leaderboard
             for (var quid in usersArray) {
-                leaderboard.innerHTML += '<div class="data-leaderboard ' + usersArray[quid].id +
+                leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + usersArray[quid].id +
                     '">' + usersArray[quid].name +
                     ' <span class="normal">' + usersArray[quid].ouch.degree +
-                    '</span></div>';
+                    '</span></p></div>';
             }
 
         }
@@ -73,30 +73,30 @@ function play() {
             //if message is from current user
             if (parsedData.authorName === nickname) {
                 document.getElementById('chat').innerHTML +=
-                    '<p class="chat-msg right">' + parsedData.content + '</p>';
+                    '<div class="chat-msg-cont"><p class="chat-msg right">' + parsedData.content + '</p></div>';
             }
             //if message is from new user
             else {
                 document.getElementById('chat').innerHTML +=
-                    '<p class="chat-msg"><span style="font-weight: bold;">' + parsedData.authorName + ': </span>' + parsedData.content + '</p>';
+                    '<div class="chat-msg-cont"><p class="chat-msg"><span style="font-weight: bold;">' + parsedData.authorName + ': </span>' + parsedData.content + '</p></div>';
             }
 
             //New user has entered
         } else if (JSONdata.dataType === "ENTER") {
             //Add new user to leaderboard
-            leaderboard.innerHTML += '<div class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></div>';
+            leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></p></div>';
 
             document.getElementById('chat').innerHTML +=
-                '<p class="chat-msg system"><span style="font-weight: bold;">' +
-                parsedData.name + '</span> has joined the Existence. </p>';
+                '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">' +
+                parsedData.name + '</span> has joined the Existence. </p></div>';
 
         } else if (JSONdata.dataType === "EXIT") {
             var quidleaderbaord = document.getElementByClassName(parsedData.id)[0]
             quidleaderbaord.parentNode.removeChild(quidleaderbaord);
 
             document.getElementById('chat').innerHTML +=
-                '<p class="chat-msg system"><span style="font-weight: bold;">' +
-                parsedData.name + '</span> has left the Existence.</p>';
+                '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">' +
+                parsedData.name + '</span> has left the Existence.</p></div>';
         }
 
         //Some unkown dataType
