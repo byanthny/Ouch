@@ -85,7 +85,7 @@ function play() {
                 document.getElementById('chat').innerHTML += '<p class="chat-msg"><span style="font-weight: bold;">'+parsedData.authorName+': </span>'+parsedData.content+'</p>';
             }
         } else if (JSONdata.dataType == "ENTER") {
-            leaderboard.innerHTML += '<div class="data-leaderboard '+parsedData.id+'">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div>';
+            leaderboard.innerHTML += '<div class="data-leaderboard '+parsedData.id+'">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div><br></br>';
 
         } else if (JSONdata.dataType == "EXIT") {
             alert(parsedData.id + "Left");
