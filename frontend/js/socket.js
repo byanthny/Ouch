@@ -51,7 +51,7 @@ function play() {
             document.getElementById("level").innerHTML = nickname + '<span id="world-value" style="font-weight: normal;"> '
                 + parsedData.existence.initialQuidity.ouch.degree + '</span>';
             //Set existence ID
-            document.getElementById("world-value").innerHTML = parsedData.existence.id;
+            document.getElementById("world-value").innerHTML = parsedData.existence._id;
 
             //load in quids in leaderboard
             var usersArray = parsedData.existence.quidities;
