@@ -9,6 +9,8 @@ user_input.addEventListener("keydown", function(event) {
                     case "-darkmode":
                         switchDark();
                         break;
+                    case "-exit":
+                        connection.close();
                     default:
                         console.log("action "+ input);
                 }

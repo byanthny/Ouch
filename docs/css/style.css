@@ -164,8 +164,8 @@ html {
   color: #ffffff;
 }
 .chat-msg.system {
-  background: #b5f8ff;
-  color: #262626;
+  background: #262626;
+  color: #b5f8ff;
 }
 #header.dark {
   background: linear-gradient(-130deg, #262626 50%, #0c0c0c 100%);
@@ -173,7 +173,7 @@ html {
 #ouch.dark {
   color: white;
 }
-.right.dark {
+chat-msg.right.dark {
   background: #b5f8ff;
   color: #262626;
 }
