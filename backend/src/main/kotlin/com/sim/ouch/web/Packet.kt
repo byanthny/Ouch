@@ -33,7 +33,7 @@ data class Packet(
 ) {
 
     enum class DataType {
-        INIT, QUIDITY, EXISTENCE, ENTER, EXIT, ACTION, CHAT, INTERNAL
+        INIT, QUIDITY, EXISTENCE, ENTER, EXIT, ACTION, CHAT, INTERNAL, PING
     }
 
     init {
