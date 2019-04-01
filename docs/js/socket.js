@@ -6,6 +6,14 @@ var usr;
 var url = 'wss://sim-ouch.herokuapp.com/ws?name=user';//&exID=id';
 var connection;
 
+var close_code = {
+    ER_NO_NAME: 4004,
+    ER_BAD_ID: 4005
+};
+
+//TODO  keep connection open
+//TODO enter on  username  or existence
+
 //On button click update connected and stuff
 document.getElementById("submit-button").onclick = function() {
 
@@ -24,105 +32,104 @@ document.getElementById("submit-button").onclick = function() {
     play();
 };
 
-var elements;
-
-var close_code = {
-    ER_NO_NAME: 4004,
-    ER_BAD_ID: 4005
-};
-
 function play() {
 
     connection = new WebSocket(url);
 
+    //On conncetion open
     connection.onopen = () => {
         switchState();
         document.getElementById("indicator").classList.toggle("connected");
 
-        //document.getElementById('indicator').reset();
-
-        //connection.send("{\"dataType\":\"CHAT\",\"data\":\"MESSAGE TEXT\"}");
     };
 
+    //If  there is an  error
     connection.onerror = error => {
         //create error message
         alert(`WebSocket error: ${error}`);
     };
 
+    //On message recieved from socket
     connection.onmessage = e => {
 
-        //parse the data
+        //parse the scoket data
         var JSONdata = JSON.parse(e.data);
+        //parse JSONdata.data
         var parsedData = JSON.parse(JSONdata.data);
 
-        //IF begining then save user and update stuff
+        //Check if datatype us INIT
         if (JSONdata.dataType == "INIT") {
+            //Save init data to usr in case needed later
             usr = parsedData;
-            document.getElementById("level").innerHTML = nickname+'<span id="world-value" style="font-weight: normal;"> '+parsedData.existence.initialQuidity.ouch.degree+'</span>';
+
+            //Update level with data received
+            document.getElementById("level").innerHTML = nickname+'<span id="world-value" style="font-weight: normal;"> '
+                +parsedData.existence.initialQuidity.ouch.degree+'</span>';
+            //Set existence ID
             document.getElementById("world-value").innerHTML = parsedData.existence.id;
 
-            /*
-            //load in chat history
-            var chatHistory = parsedData.existence.quidities;
-
-            for(var quid in usersArray) {
-                leaderboard.innerHTML += '<div class="data-leaderboard">'+usersArray[quid].name+' <span class="normal">'+usersArray[quid].ouch.degree+'</span></div><br></br>';
-            }*/
-
-            //TODO MAKE SCROLL BETER
-
-            //load in users in leaderboard
+            //load in quids in leaderboard
             var usersArray = parsedData.existence.quidities;
 
+            //Add quids to leaderboard
             for(var quid in usersArray) {
-                leaderboard.innerHTML += '<div class="data-leaderboard '+usersArray[quid].id+'">'+usersArray[quid].name+' <span class="normal">'+usersArray[quid].ouch.degree+'</span></div><br></br>';
+                leaderboard.innerHTML += '<div class="data-leaderboard '+usersArray[quid].id+
+                    '">'+usersArray[quid].name+
+                    ' <span class="normal">'+usersArray[quid].ouch.degree+
+                    '</span></div>';
             }
 
         }
+
         //if chat then add items
         else if (JSONdata.dataType == "CHAT"){
 
             //if message is from current user
-            if(parsedData.authorName == nickname) { //is current user make right
-                document.getElementById('chat').innerHTML += '<p class="chat-msg right">'+parsedData.content+'</p>';
-            } else { //if message is from new user
-                document.getElementById('chat').innerHTML += '<p class="chat-msg"><span style="font-weight: bold;">'+parsedData.authorName+': </span>'+parsedData.content+'</p>';
+            if(parsedData.authorName == nickname) {
+                document.getElementById('chat').innerHTML +=
+                    '<p class="chat-msg right">'+parsedData.content+'</p>';
             }
+            //if message is from new user
+            else {
+                document.getElementById('chat').innerHTML +=
+                    '<p class="chat-msg"><span style="font-weight: bold;">'+parsedData.authorName+': </span>'+parsedData.content+'</p>';
+            }
+
+        //New user has entered
         } else if (JSONdata.dataType == "ENTER") {
-            leaderboard.innerHTML += '<div class="data-leaderboard '+parsedData.id+'">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div><br></br>';
-
-
+            //Add new user to leaderboard
             leaderboard.innerHTML += '<div class="data-leaderboard '+parsedData.id+'">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div>';
+
             document.getElementById('chat').innerHTML +=
                 '<p class="chat-msg enter"><span style="font-weight: bold;">'+
                 parsedData.name+' has joined the Existence. </span> </p>';
 
         } else if (JSONdata.dataType == "EXIT") {
-            document.getElementByClassName(parsedData.id)[0].display = none;
+            var quidleaderbaord = document.getElementByClassName(parsedData.id)[0]
+            quidleaderbaord.parentNode.removeChild(quidleaderbaord);
+
             document.getElementById('chat').innerHTML +=
                 '<p class="chat-msg exit"><span style="font-weight: bold;">'+
-                parsedData.name+' has left the Existence. </span> </p>';
+                parsedData.name+'</span> has left the Existence.</p>';
         }
 
+        //Some unkown dataType
         else {
-            alert("idk wtf is going on");
-            alert(e.data);
+            console.log("Unkown dataType");
+            console.log(e.data);
         }
     };
 
     connection.onclose = (closeEvent) => {
-        switchState();
-        document.getElementById("indicator").classList.toggle("connected");
-        document.getElementById("world-value").innerHTML = "offline";
+        //switch back to login
+        reset();
         if (closeEvent.code == close_code.ER_BAD_ID) {
             document.getElementById('exist-input').placeholder = "Unknown ID";
         } else if (closeEvent.code == close_code.ER_NO_NAME) {
             document.getElementById('user-input').placeholder = "Must provide a name";
         }
+
         connection = null;
-        leaderboard.innerHTML = "";
-        //document.getElementById('user-input').reset();
     }
 
 }
-

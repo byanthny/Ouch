@@ -4,8 +4,8 @@ var action;
 //HTML elemnts
 var exist_input = document.getElementById("exist-input");
 var user_input = document.getElementById("user-input");
-
-var leaderboard =     document.getElementsByClassName("leaderboard")[0];
+var chat = document.getElementById("chat");
+var leaderboard = document.getElementsByClassName("leaderboard")[0];
 
 function switchState() {
     document.getElementById("submit-button").classList.toggle("hidden");
@@ -32,7 +32,6 @@ function switchDark() {
     document.getElementById("header").classList.toggle("dark");
 
     //TODO update all chat to dark
-    //TODO RESET leaderbaord on log out
 }
 
 function togglePopUp() {
@@ -47,7 +46,17 @@ document.getElementsByClassName("close")[0].onclick = function() {
 };
 
 //autoscroll for chat
+//TODO MAKE SCROLL BETER
 window.setInterval(function() {
     var elem = document.getElementById('chat');
     elem.scrollTop = elem.scrollHeight;
 }, 0);
+
+function reset() {
+    switchState();
+    document.getElementById("indicator").classList.toggle("connected");
+    document.getElementById("world-value").innerHTML = "offline";
+    leaderboard.innerHTML = "";
+    chat.innerHTML = "";
+    document.getElementById('user-input').value = "";
+}

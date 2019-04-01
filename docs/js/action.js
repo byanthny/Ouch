@@ -1,7 +1,5 @@
-//Actions listnen  or enter
-
 user_input.addEventListener("keydown", function(event) {
-    // Number 13 is the "Enter" key on the keyboard
+    //not login screen
     if(!login) {
         if (event.key === 13 || event.key === "Enter") {
             event.preventDefault();
@@ -16,5 +14,9 @@ user_input.addEventListener("keydown", function(event) {
             }
             user_input.value = "";
         }
+    }
+    //login screen
+    else  {
+
     }
 });
