@@ -10,7 +10,7 @@
 
     <div class="header" id="header">
 
-        <p id="world">existence: <span id="world-value" class="normal">something</span>
+        <p id="world">existence: <span id="world-value" class="normal">offline</span>
             <div class="indicator" id="indicator"></div>
         <div class="leaderboard">
             <!--
@@ -18,8 +18,8 @@
             <div class="data-leaderboard">Longer something</div>
             <div class="data-leaderboard">short something</div>
             <div class="data-leaderboard">i dont know what this is</div>
-            <div class="data-leaderboard">what is your name so got damn long</div>-->
-            <div class="data-leaderboard">Quiddity <span class="normal">1</span></div>
+            <div class="data-leaderboard">what is your name so got damn long</div>
+            <div class="data-leaderboard">Quiddity <span class="normal">1</span></div>-->
         </div>
         </p>
 
@@ -43,13 +43,16 @@
             </div>
 
                 <div id="chat">
+                    <!--
                     <p class="chat-msg">Chat Item 1</p>
                     <p class="chat-msg">Chat Item 1</p>
                     <p class="chat-msg right">Chat Item 1</p>
                     <p class="chat-msg right">Chat Item 1</p>
                     <p class="chat-msg">Chat Item 1</p>
                     <p class="chat-msg">Chat Item 1</p>
-                    <p class="chat-msg right">Chat Item 1</p>
+                    <p class="chat-msg right">Chat Item 1</p>-->
+
+                    <!--TODO AUTO SCROLL-->
                 </div>
                 </div>
         </div>
@@ -63,18 +66,19 @@
 
     <script src="js/style.js"></script>
     <script src="js/socket.js"></script>
+    <script src="js/action.js"></script>
     <script>
         // Testing
         //switchDark();
-        //switchState();
+        switchState();
         //switchSearch();
-     /*   (function() {
+       /*(function() {
            //switchState();
             //switchSearch();
             //switchDark();
             setTimeout(function(){
                 switchSearch();
-                switchState();
+               // switchState();
                 //switchDark();
             }, 5000);
         })();*/
