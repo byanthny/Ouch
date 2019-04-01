@@ -4,6 +4,7 @@ var id = 'id';
 var usr;
 
 var url = 'wss://sim-ouch.herokuapp.com/ws?name=user';//&exID=id';
+var connection;
 
 //On button click update connected and stuff
 document.getElementById("submit-button").onclick = function() {
@@ -27,7 +28,7 @@ var elements;
 
 function play() {
 
-    var connection = new WebSocket(url);
+    connection = new WebSocket(url);
 
     connection.onopen = () => {
         switchState();
@@ -76,7 +77,7 @@ function play() {
         else if (JSONdata.dataType == "CHAT"){
 
             //if message is from current user
-            if(parsedData.authorName == usr.existence.initialQuidity.name) { //is current user make right
+            if(parsedData.authorName == nickname) { //is current user make right
                 document.getElementById('chat').innerHTML += '<p class="chat-msg right">'+parsedData.content+'</p>';
             } else { //if message is from new user
                 document.getElementById('chat').innerHTML += '<p class="chat-msg">'+parsedData.content+'</p>';
@@ -85,6 +86,7 @@ function play() {
             leaderboard.innerHTML += '<div class="data-leaderboard '+parsedData.id+'">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div>';
 
         } else if (JSONdata.dataType == "EXIT") {
+            alert(parsedData.id + "Left");
             document.getElementByClassName(parsedData.id)[0].display = none;
         }
 
@@ -98,6 +100,7 @@ function play() {
         switchState();
         document.getElementById("indicator").classList.toggle("connected");
         document.getElementById("world-value").innerHTML = "offline";
+        connection = null;
         //document.getElementById('user-input').reset();
     }
 

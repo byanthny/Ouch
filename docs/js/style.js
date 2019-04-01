@@ -3,6 +3,7 @@ var action;
 
 //HTML elemnts
 var exist_input = document.getElementById("exist-input");
+var user_input = document.getElementById("user-input");
 
 var leaderboard =     document.getElementsByClassName("leaderboard")[0];
 
