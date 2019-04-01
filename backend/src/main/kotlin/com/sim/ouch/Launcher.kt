@@ -16,7 +16,7 @@ val javalin: Javalin by lazy { Javalin.create() }
 
 fun main() = javalin.apply {
 
-    ws(EndPoints.SOCKET.point) { Websocket }
+    ws(EndPoints.SOCKET.point, Websocket)
 
     get(EndPoints.STATUS.point) {
         val dex = DAO.dexList
@@ -49,9 +49,7 @@ fun main() = javalin.apply {
     }
     get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
     get(EndPoints.ACTIONS.point) { it.result(Quidity.Action.values().json()) }
-    get(EndPoints.ENDPOINTS.point) {
-        it.render("/map.html")
-    }
+    get(EndPoints.ENDPOINTS.point) { it.render("/map.html") }
 
     secret(this)
 
