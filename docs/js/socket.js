@@ -42,18 +42,18 @@ function play() {
 
         //parse the data
         var JSONdata = JSON.parse(e.data);
+        var parsedData = JSON.parse(JSONdata.data);
 
         //IF begining then save user and update stuff
-        if (JSONdata.dataType == "EXISTENCE") {
-            usr = JSONdata;
-            alert(JSONdata.toString());
-            document.getElementById("level").innerHTML = nickname+'<span id="world-value" style="font-weight: normal;"> '+usr.initialQuidity.ouch.degree+'</span>';
+        if (JSONdata.dataType == "INIT") {
+            usr = parsedData;
+            document.getElementById("level").innerHTML = nickname+'<span id="world-value" style="font-weight: normal;"> '+usr.existence.initialQuidity.ouch.degree+'</span>';
             //load in chat history
             //load in users
-
+/*
             for(int i = 0; i < usr.data.) {
 
-            }
+            }*/
 
             //load in levels
 
@@ -62,13 +62,14 @@ function play() {
         else if (JSONdata.dataType == "CHAT"){
 
             //if message is from current user
-            if(JSONdata.data.authorID == usr.initialQuidity.id) { //is current user make right
-                document.getElementById('chat').innerHTML += '<p class="chat-msg right">'+JSONdata.data.content+'</p>';
+            if(parsedData.authorName == usr.existence.initialQuidity.name) { //is current user make right
+                document.getElementById('chat').innerHTML += '<p class="chat-msg right">'+parsedData.content+'</p>';
             } else { //if message is from new user
-                document.getElementById('chat').innerHTML += '<p class="chat-msg">'+JSONdata.data.content+'</p>';
+                document.getElementById('chat').innerHTML += '<p class="chat-msg">'+parsedData.content+'</p>';
             }
         } else {
             alert("idk wtf is going on");
+            alert(e.data);
         }
     };
 
