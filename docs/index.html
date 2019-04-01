@@ -8,24 +8,23 @@
 </head>
 <body>
 
-    <div class="header" id="header">
+<div class="header" id="header">
 
-        <p id="world">existence: <span id="world-value" class="normal">offline</span>
-            <div class="indicator" id="indicator"></div>
-            <div class="leaderboard"></div>
-        </p>
+    <p id="world">existence: <span id="world-value" class="normal">offline</span>
+    <div class="indicator" id="indicator"></div>
+    <div class="leaderboard"></div>
+    </p>
 
-        <p id="level">100</p>
-        <h1 class="ouch" id="ouch">Ouch</h1>
-        <div id="commands">
-            <form>
-                <input id="user-input" type="text" placeholder="username"> <!--placeholder="What are you feeling?"-->
-                <input id="exist-input" class="opacity disappear" type="text" placeholder="existence">
-                <button type="button" class="submit-button hidden" id="submit-button">enter</button>
-            <form>
-                <div id="box">
+    <p id="level">100</p>
+    <h1 class="ouch" id="ouch">Ouch</h1>
+    <div id="commands">
+        <form>
+            <input id="user-input" type="text" placeholder="username">
+            <input id="exist-input" class="opacity disappear" type="text" placeholder="existence">
+            <button type="button" class="submit-button hidden" id="submit-button">enter</button>
+        </form>
+        <div id="box">
             <div id="search" class="disappear opacity">
-                <!-- <div class="search-item"><button type="button">Search Item 1</button></div> -->
                 <!--TODO create search items to buttons so they can be clicked-->
                 <div class="search-item">Search Item 2</div>
                 <div class="search-item">Search Item 3</div>
@@ -34,45 +33,37 @@
                 <div class="search-item">Search Item 6</div>
             </div>
 
-                <div id="chat">
-                    <!--
-                    <p class="chat-msg">Chat Item 1</p>
-                    <p class="chat-msg">Chat Item 1</p>
-                    <p class="chat-msg right">Chat Item 1</p>
-                    <p class="chat-msg right">Chat Item 1</p>
-                    <p class="chat-msg">Chat Item 1</p>
-                    <p class="chat-msg">Chat Item 1</p>
-                    <p class="chat-msg right">Chat Item 1</p>-->
-
-                    <!--TODO AUTO SCROLL-->
-                </div>
-                </div>
+            <div id="chat"></div>
         </div>
     </div>
+</div>
 
-    <div id="help" class="hidden">
-        <div class="panel">
-            <span class="close">&times;</span>
-        </div>
+<div id="help" class="hidden">
+    <div class="panel">
+        <span class="close">&times;</span>
     </div>
+</div>
 
-    <script src="js/style.js"></script>
-    <script src="js/socket.js"></script>
-    <script src="js/action.js"></script>
-    <script>
-        // Testing
-        //switchDark();
-        switchState();
-        //switchSearch();
-       /*(function() {
-           //switchState();
-            //switchSearch();
-            //switchDark();
-            setTimeout(function(){
-                switchSearch();
-               // switchState();
-                //switchDark();
-            }, 5000);
-        })();*/
-    </script>
+<script src="js/style.js"></script>
+<script src="js/socket.js"></script>
+<script src="js/action.js"></script>
+
+<!--Ignore for testing-->
+<script>
+    // Testing
+    //switchDark();
+    switchState();
+    //switchSearch();
+    /*(function() {
+        //switchState();
+         //switchSearch();
+         //switchDark();
+         setTimeout(function(){
+             switchSearch();
+            // switchState();
+             //switchDark();
+         }, 5000);
+     })();*/
+</script>
+
 </body>
