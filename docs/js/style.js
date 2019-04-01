@@ -1,6 +1,8 @@
 var login = false; //Current state being displayed
 var action;
 
+//TODO load in actions from api
+
 //HTML elements
 var exist_input = document.getElementById("exist-input");
 var user_input = document.getElementById("user-input");
@@ -45,12 +47,9 @@ document.getElementsByClassName("close")[0].onclick = function() {
     togglePopUp();
 };
 
-//TODO MAKE SCROLL BETER
-//TODO Remove scroll bar
-
+//TODO make scroll stay in place if you scroll up
 //When called will scroll chat to bottom
 function scrollBottom() {
-    //make is so yoo don mess uo if scroll up
     chat.scrollTop = chat.scrollHeight;
 }
 
