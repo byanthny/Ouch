@@ -57,5 +57,5 @@ fun Iterable<WsSession>.broadcast(
     dataType: Packet.DataType,
     data: Any,
     vararg excludeIDs: String
-) = filterNot { it.id in excludeIDs }.
-    forEach { it.send(Packet(dataType, data).pack()) }
+) = filterNot { it.id in excludeIDs }
+    .forEach { it.send(Packet(dataType, data).pack()) }
