@@ -2,8 +2,43 @@
 <img src="docs/imgs/logo.png" width="250"/>
 </p>
 
-## Lore
-
+## The Simulation
+  Ah yes...there comes a point in person life were the simulation doesn't treat you so well. Sometimes I wonder what the `simulators` were thinking. 
+  
+  What are `simulators`? 
+  
+  Glad you asked, simulators are the controllers of our simulations, this simulation, every simulation. After all we live in a simulation, prove me wrong. 
+  
+  Now, we're going to define the elements of a **simulation**, in a way we see fit. There are no right or wrong answers here because... well we have no way of breaking the simulation. I mean if you know how to escape and contact the simulator(s), let me know. 
+  
+  Anyway, we have defined `Simulators` as the controllers of the simulation. 
+  
+  We will use `Existences` as the simulation instance. These `Existences` holds everything that is part of the simulation. For sake of simplicity we will have two options human and non-human to describe objects inside the simulation. 
+  
+  We will use `Quiddities` to describe the essence of a human. We will leave the definition of *human* up to you. 
+  
+  Anything that is non-human or not a `Quiddity`  we will call them `Infraquiddities`  or `InfraQuiddity`. 
+  
+  I haven't lost you yet, I hope. 
+  
+  Now why does this matter? Let's go back to feeling... *Ouch*. The feeling of *Ouch* is part of a `Quiddities` life, yes.
+  
+  ---
+  
+  Welcome to Ouch, a web app build like a simulation where you and your friends can exist in an `Existence` together. 
+  
+  In this `Existence` you can chat to each other and perform commands.. that well associate with your feeling of Ouch.
+  
+  You can increase you Ouch level and race up the leaderboard to see who is the most....yeah I know and much more!
+  
+  ---
+  
+  ## Commands
+  
+    "-darmode" Toggles dark mode.
+    "-exit" Exit the simulation
+    "-something"
+    
 
 ## Quiddity 
    * Love state/function
@@ -19,18 +54,17 @@
         * :(
         * Cry
 
+## Future Ideas
+ * Ouch is increased by keywords and songs played
+ 
 ---
-## Thy Future
-    * Make a discord bot
-        * Ouch is increased by keywords and songs played
-        * Ouch plays music and has "leaderboard"   
-    * Make a web app
-        * Multiplayer
+## Technical Stuff
 
----
-## Internal
+#### File Organization
 
+    Working on it
 
+#### Client-Server Communcation
 
 Login: 
     
