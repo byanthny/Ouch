@@ -72,7 +72,7 @@ class Dao {
     fun getSessions() = sessions.map { it.key }
 
     fun statusPacket() = Packet(Packet.DataType.INTERNAL, StatusPacket(
-        getExistences(), sessions.size
+        getExistences() + dormantExistences.map { it.value }, sessions.size
     ))
 
 }
