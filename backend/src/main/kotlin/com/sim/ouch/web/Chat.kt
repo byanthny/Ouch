@@ -1,22 +1,23 @@
 package com.sim.ouch.web
 
 import com.sim.ouch.logic.Existence
+import com.sim.ouch.logic.Quidity
 
 class Chat(@Transient val existence: Existence) {
 
     inner class Message internal constructor(
-            val authorID: String, // Add username TODO
-            // val dateTime: OffsetDateTime?, TODO
-            val content: String
+        @Transient val authorID: String,
+        val authorName: String,
+        val content: String
     )
 
     private var nextID = 0L
     private val history = mutableListOf<Message>()
 
     /** (User ->)? Server -> All Users */
-    fun `update and distrubute`(authorID: String, content: String): Message {
+    fun `update and distrubute`(quidity: Quidity, content: String): Message {
         historySizing()
-        return Message(authorID, content).also {
+        return Message(quidity.id, quidity.name, content).also {
             history.add(it)
             Packet(Packet.DataType.CHAT, it).pack()
                 .also { existence.sessions.forEach { _, wss -> wss.send(it) } }

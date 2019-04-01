@@ -28,10 +28,11 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.9.8")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     implementation("com.google.code.gson:gson:2.8.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.10")
+
 
     //
     implementation("org.slf4j:slf4j-simple:1.7.26")
-
 
     testImplementation("junit:junit:4.12")
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.3.21")

@@ -46,7 +46,7 @@ class DefaultExistence(
         override val name: String  = DefaultNameGenerator.next()
 ) : Existence() {
 
-    override val chat: Chat = Chat(this)
+    @Transient override val chat: Chat = Chat(this)
 
     init {
         quidities[initialQuidity.id] = initialQuidity

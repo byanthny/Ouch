@@ -2,6 +2,8 @@ package com.sim.ouch.web
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.sim.ouch.logic.Existence
+import com.sim.ouch.logic.Quidity
 
 val gson: Gson by lazy { GsonBuilder().create() }
 
@@ -29,7 +31,7 @@ data class Packet(
         @Transient val prebuild: Boolean = false
 ) {
 
-    enum class DataType { QUIDITY, EXISTENCE, ACTION, CHAT, INTERNAL }
+    enum class DataType { INIT, QUIDITY, EXISTENCE, ACTION, CHAT, INTERNAL }
 
     init {
         data = if (prebuild) data else gson.toJson(data)!!
@@ -43,3 +45,7 @@ data class Packet(
 
     override fun toString() = "$dataType:$data"
 }
+
+// Special Packets
+
+data class InitPacket(val existence: Existence, val quidity: Quidity)

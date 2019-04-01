@@ -7,10 +7,6 @@ import io.javalin.*
 import io.javalin.websocket.WsSession
 
 
-enum class EndPoints(val point: String) {
-    ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status")
-}
-
 val ER_NO_NAME = 4004 to "no name"
 val ER_BAD_ID  = 4005 to "unknown ID"
 
@@ -18,10 +14,6 @@ val javalin: Javalin by lazy { Javalin.create() }
 
 
 fun main() = javalin.apply {
-
-    exception(Exception::class.java) { e, _ ->
-        e.printStackTrace()
-    }
 
     get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
 
@@ -31,23 +23,30 @@ fun main() = javalin.apply {
         it.result(Quidity.Action.values().json())
     }
 
+    get(EndPoints.ENDPOINTS.point) {
+        it.html(ENDPONT_MAP)
+    }
+
     ws(EndPoints.SOCKET.point) { ws ->
 
         ws.onConnect { session ->
             // Attempt to parse name
             val name: String? = session.queryParam("name")
             if (name.isNullOrBlank()) return@onConnect session.close(ER_NO_NAME)
+            lateinit var quidity: Quidity
             // Attempt to get an existence
             val exist: Existence = session.queryParam("exID")?.let { id ->
                 // With an invalid ID, close
-                DAO.getEx(id)?.also { DAO.addSession(session, it, name) }
+                DAO.getEx(id)?.also { quidity = DAO.addSession(session, it, name) }
                         ?: return@onConnect session.close(ER_BAD_ID)
             } ?: let {
                 // with no ID, make new Existence
-                DAO.newExistence(session, DefaultExistence(Quidity(name)))
+                DAO.newExistence(session, DefaultExistence(Quidity(name))).also {
+                    quidity = it.initialQuidity
+                }
             }
 
-            session.send(Packet(EXISTENCE, exist).pack())
+            session.send(Packet(INIT, InitPacket(exist, quidity)).pack())
         }
 
         ws.onMessage { session, msg ->
@@ -58,7 +57,7 @@ fun main() = javalin.apply {
                 EXISTENCE -> TODO()
                 ACTION -> TODO()
                 CHAT -> ex?.chat?.`update and distrubute`(
-                    session.quidity!!.id, packet.data as String
+                    session.quidity!!, packet.data as String
                 )
             }
         }
