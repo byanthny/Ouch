@@ -29,14 +29,15 @@
 @login-header: 20vh;
 
 //Data
-@data-padding: 10px 15px;
+@data-padding-vertical: 10px;
+@data-padding: @data-padding-vertical 15px;
 @data-background: @white-color;
 @data-text-color: @dark-color;
 @data-text-weight: bold;
 @data-rounded: 5px;
 @data-height: 18px;
-@data-leaderbaord-margin: 4px;
-@data-size: calc(@default-margin + @data-height + @default-font-size + (@data-padding * 2));
+@data-leaderboard-margin: 4px;
+@data-size: calc(@default-margin + @data-height);
 
 //Indicator
 @indic-size: 10px;
@@ -66,9 +67,9 @@
 @box-margin: -10px;
 @box-padding: 6px;
 @search-itm-padding: 10px;
-@chat-itm-padding: 6px;
+@chat-itm-padding: 8px;
 @search-itm-border: 1px solid lightgrey;
-@chat-size: calc(@chat-itm-padding + @data-height + @default-font-size + (@data-padding * 2));
+@chat-size: calc(@chat-itm-padding + @default-font-size + (@data-padding-vertical * 2) + 4px);
 
 //Pop-up
 @help-width: 90vw;

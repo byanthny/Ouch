@@ -71,7 +71,7 @@ html {
 }
 .data-leaderboard-cont {
   width: 100%;
-  height: calc(20px + 18px + 1em + (10px 15px * 2));
+  height: calc(20px + 18px);
 }
 .data-leaderboard {
   display: table;
@@ -182,18 +182,22 @@ html {
 }
 .chat-msg-cont {
   width: 100%;
-  height: calc(6px + 18px + 1em + (10px 15px * 2));
+  height: calc(8px + 1em + (10px * 2) + 4px);
+  margin: 0;
+  padding: 0;
 }
 .chat-msg {
   margin: 0;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   display: table;
   font-weight: normal;
+  text-align: left;
 }
 .chat-msg.right {
   background: #262626;
   color: #ffffff;
   float: right;
+  text-align: right;
 }
 .chat-msg.system {
   background: #262626;

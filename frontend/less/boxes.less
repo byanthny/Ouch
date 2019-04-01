@@ -29,6 +29,8 @@
 .chat-msg-cont {
   width: 100%;
   height: @chat-size;
+  margin: 0;
+  padding: 0;
 }
 
 .chat-msg {
@@ -37,11 +39,13 @@
   margin-bottom: @chat-itm-padding;
   display: table;
   font-weight: normal;
+  text-align:left;
 
   &.right {
     background: @dark-color;
     color: @white-color;
     float: right;
+    text-align:right;
   }
 
   &.system {
