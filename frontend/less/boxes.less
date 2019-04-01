@@ -27,7 +27,7 @@
 }
 
 .chat-msg {
-  .data;
+  &:extend(.data);
   margin: 0;
   margin-bottom: @chat-itm-padding;
   display: table;
@@ -37,5 +37,10 @@
     background: @dark-color;
     color: @white-color;
     //float: right;
+  }
+
+  &.system {
+    background: @system-color;
+    color: @dark-color;
   }
 }

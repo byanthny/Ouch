@@ -23,10 +23,10 @@ html {
 }
 .box-shadow,
 .data,
-.chat-msg,
 .data-leaderboard,
 #level,
-#world {
+#world,
+.chat-msg {
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
 }
 .normal {
@@ -35,7 +35,8 @@ html {
 .data,
 .data-leaderboard,
 #level,
-#world {
+#world,
+.chat-msg {
   height: 18px;
   padding: 10px 15px;
   margin: 20px;
@@ -128,7 +129,7 @@ html {
   background: #ffffff;
   box-shadow: 0px 0px 24px -7px rgba(0, 0, 0, 0.4);
   width: 100%;
-  max-height: 20vh;
+  max-height: 40vh;
   margin: 0 auto;
   border-radius: 5px;
   margin-top: -10px;
@@ -143,7 +144,7 @@ html {
 }
 #chat {
   width: 100%;
-  max-height: 20vh;
+  max-height: 40vh;
   margin: 0 auto;
   border-radius: 5px;
   margin-top: -10px;
@@ -153,15 +154,6 @@ html {
   display: block;
 }
 .chat-msg {
-  height: 18px;
-  padding: 10px 15px;
-  margin: 20px;
-  background: #ffffff;
-  color: #262626;
-  font-weight: bold;
-  border-radius: 5px;
-  font-family: "Arial";
-  transition: all 1s!important;
   margin: 0;
   margin-bottom: 8px;
   display: table;
@@ -171,13 +163,9 @@ html {
   background: #262626;
   color: #ffffff;
 }
-.chat-msg.enter {
-  background: #3AED93;
-  color: #ffffff;
-}
-.chat-msg.exit {
-  background: #F92020;
-  color: #ffffff;
+.chat-msg.system {
+  background: #b5f8ff;
+  color: #262626;
 }
 #header.dark {
   background: linear-gradient(-130deg, #262626 50%, #0c0c0c 100%);

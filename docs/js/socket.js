@@ -23,7 +23,7 @@ document.getElementById("submit-button").onclick = function() {
     document.getElementById('user-input').value = "";
     document.getElementById('user-input').placeholder = "enter command or message";
 
-    if (id == "") {
+    if (id === "") {
         url = 'wss://sim-ouch.herokuapp.com/ws?name='+nickname;
     } else {
         url = 'wss://sim-ouch.herokuapp.com/ws?name='+nickname+'&exID='+id;
@@ -82,10 +82,10 @@ function play() {
         }
 
         //if chat then add items
-        else if (JSONdata.dataType == "CHAT"){
+        else if (JSONdata.dataType === "CHAT"){
 
             //if message is from current user
-            if(parsedData.authorName == nickname) {
+            if(parsedData.authorName === nickname) {
                 document.getElementById('chat').innerHTML +=
                     '<p class="chat-msg right">'+parsedData.content+'</p>';
             }
@@ -96,20 +96,20 @@ function play() {
             }
 
         //New user has entered
-        } else if (JSONdata.dataType == "ENTER") {
+        } else if (JSONdata.dataType === "ENTER") {
             //Add new user to leaderboard
             leaderboard.innerHTML += '<div class="data-leaderboard '+parsedData.id+'">'+parsedData.name+' <span class="normal">'+parsedData.ouch.degree+'</span></div>';
 
             document.getElementById('chat').innerHTML +=
-                '<p class="chat-msg enter"><span style="font-weight: bold;">'+
-                parsedData.name+' has joined the Existence. </span> </p>';
+                '<p class="chat-msg system"><span style="font-weight: bold;">'+
+                parsedData.name+'</span> has joined the Existence. </p>';
 
-        } else if (JSONdata.dataType == "EXIT") {
+        } else if (JSONdata.dataType === "EXIT") {
             var quidleaderbaord = document.getElementByClassName(parsedData.id)[0]
             quidleaderbaord.parentNode.removeChild(quidleaderbaord);
 
             document.getElementById('chat').innerHTML +=
-                '<p class="chat-msg exit"><span style="font-weight: bold;">'+
+                '<p class="chat-msg system"><span style="font-weight: bold;">'+
                 parsedData.name+'</span> has left the Existence.</p>';
         }
 
@@ -123,9 +123,9 @@ function play() {
     connection.onclose = (closeEvent) => {
         //switch back to login
         reset();
-        if (closeEvent.code == close_code.ER_BAD_ID) {
+        if (closeEvent.code === close_code.ER_BAD_ID) {
             document.getElementById('exist-input').placeholder = "Unknown ID";
-        } else if (closeEvent.code == close_code.ER_NO_NAME) {
+        } else if (closeEvent.code === close_code.ER_NO_NAME) {
             document.getElementById('user-input').placeholder = "Must provide a name";
         }
 
