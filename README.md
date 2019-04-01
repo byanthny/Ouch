@@ -47,37 +47,18 @@
   | ------------- | ------------- |
   | -darkmode  | Toggles dark mode.  |
   | -exit  | Exit the simulation  |
+  
+  or https://sim-ouch.herokuapp.com/actions 
 
 ## Technical Stuff
-
+Current status of Ouch API: https://sim-ouch.herokuapp.com/status  
 #### File Organization
 
     Working on it
 
-#### Client-Server Communcation
+#### Client-Server Communication
 
-Login: 
-    
-        C -> Name, exID? => wss://sim-ouch.herokuapp.com/ws?name=user&exID=id
-        S -> when: {
-                no name     => close(4004, "No Name")
-                invalid ID  => close(4005, "Unknown ID")
-                no ID       => generate new DefaultExistence
-                valid ID    => live existence
-            }
-            InitPacket as JSON 
-            {
-                existence: {...}
-                actions: {...}
-                (other data?...)
-            }
-            send(InitPacket)
-
-Action: 
-    
-        C -> Action Name
-        S -> updated Quidity (if actions affect Existence then send that)
-        
+Refer to: https://sim-ouch.herokuapp.com/map      
     
 ## Future Ideas
  * Ouch is increased by keywords and songs played
