@@ -1,9 +1,10 @@
 package com.sim.ouch.logic
 
 import com.sim.ouch.IDGenerator
+import com.sim.ouch.web.QC
 
 sealed class Entity {
-    open val id: String = DEFAULT_ID_GEN.next()
+    open val id: QC = DEFAULT_ID_GEN.next()
     companion object {
         val DEFAULT_ID_GEN = IDGenerator(10)
     }
