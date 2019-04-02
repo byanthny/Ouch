@@ -124,7 +124,10 @@ function play() {
             case close_code.ER_INTERNAL_GENERIC:
                 alert("Sorry, an internal error occurred. Please try again");
                 break;
-            default: break;
+            default:
+                alert("You disconnected from the Existence.");
+                // TODO nicify this
+                break;
         }
         connection = null;
     }
