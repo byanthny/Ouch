@@ -15,7 +15,7 @@ val Websocket = Consumer<WsHandler> {
     val connect = ConnectHandler { session ->
         launch {
             // Check for reconnection key
-
+            session.upgradeRequest.getHeader()
         }
     }
 

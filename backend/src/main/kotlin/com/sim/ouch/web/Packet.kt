@@ -20,7 +20,6 @@ fun readPacket(json: String) = quickLoad<Packet>(json)
  * A Packet is used to send data in a uniform matter
  * between the Server & clients
  *
- * @property key The session key used for verification and reconnection
  * @property dataType The DataType to parse from the data
  * @property data The Object being sent
  * @property prebuild Whether the data is already in JSON

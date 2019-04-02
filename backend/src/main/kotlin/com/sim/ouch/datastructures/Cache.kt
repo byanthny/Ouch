@@ -1,5 +1,6 @@
-package com.sim.ouch
+package com.sim.ouch.datastructures
 
+import com.sim.ouch.removeLastOrNull
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -37,9 +38,9 @@ abstract class UsagePriorityKache<K, V> : Kache<K, V> {
  * @property trashSize The number of elements to remove during a downsizing.
  */
 class LruKache<K, V>(
-        val maxSize: Int = DEFAULT_MAX,
-        val minSize: Int = DEFAULT_MIN,
-        val trashSize: Int = DEFAULT_TRASH_SIZE
+    val maxSize: Int = DEFAULT_MAX,
+    val minSize: Int = DEFAULT_MIN,
+    val trashSize: Int = DEFAULT_TRASH_SIZE
 ) : UsagePriorityKache<K, V>() {
     private val map = ConcurrentHashMap<K, V>()
     override val size get() = map.size

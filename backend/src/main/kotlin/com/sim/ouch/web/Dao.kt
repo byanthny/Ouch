@@ -1,6 +1,8 @@
 package com.sim.ouch.web
 
 import com.sim.ouch.IDGenerator
+import com.sim.ouch.NOW
+import com.sim.ouch.datastructures.MutableBiMap
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Existence.Status.DORMANT
 import com.sim.ouch.logic.Existence.Status.DRY
@@ -8,6 +10,7 @@ import com.sim.ouch.logic.Quidity
 import io.javalin.websocket.WsSession
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.bson.codecs.pojo.annotations.BsonId
 import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
@@ -28,16 +31,38 @@ suspend fun WsSession.existence() = DAO.getExistence(id)
 suspend fun WsSession.quidity() = DAO.getQuidity(id)
 
 class Dao {
+
+    /**
+     *
+     * @property _id The session key used for verification and reconnection
+     */
     data class SessionData(
-            var key: String,var session: WsSession? = null,
-            var existence: Existence, var quidity: Quidity
+        @BsonId var _id: Key,
+        /** [Existence._id] -> [Quidity.id] */
+        var idPair: MutableMap<String, String> = mutableMapOf()
     )
-    /** [Existence._id] -> [Existence] */
+
+    /** Mongo DB [Existence] collection. */
     private val existences get() = mongo.getCollection<Existence>()
-    /**  */
-    private val kayMap = ConcurrentHashMap<String, SessionData>()
+    /** Mongo DB [SessionData] collection */
+    private val sessionData = mongo.getCollection<SessionData>()
+    /** Key -> [WsSession]? */
+    private val keySessionMap = MutableBiMap<Key, WsSession>()
 
     init {
+        // Dormant
+        launch {
+            while (true) {
+                val ids = mutableListOf<String>()
+                existences.distinct(Existence::_id).consumeEach {
+                    if (exSes[it]?.isEmpty() == true) ids += it
+                }
+                existences.updateMany(Existence::_id `in` ids,
+                    SetTo(Existence::status, DORMANT))
+                delay(1_000 * 60 * 5)
+            }
+        }
+        // Dead Keys
         launch {
             while (true) {
                 val ids = mutableListOf<String>()
@@ -129,3 +154,8 @@ class Dao {
 
 data class StatusPacket(val ex: List<Existence>, val ses: Int)
 
+typealias Key = String
+
+fun keyGen(session: WsSession): String {
+
+}
