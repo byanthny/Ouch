@@ -20,6 +20,7 @@ fun readPacket(json: String) = quickLoad<Packet>(json)
  * A Packet is used to send data in a uniform matter
  * between the Server & clients
  *
+ * @property key The session key used for verification and reconnection
  * @property dataType The DataType to parse from the data
  * @property data The Object being sent
  * @property prebuild Whether the data is already in JSON
@@ -28,7 +29,7 @@ fun readPacket(json: String) = quickLoad<Packet>(json)
  */
 data class Packet(
         val dataType: DataType,
-        var data: Any,
+        var data: Any? = null,
         @Transient val prebuild: Boolean = false
 ) {
 
@@ -44,14 +45,18 @@ data class Packet(
     fun pack() = gson.toJson(this)!!
 
     /** Returns The [data] unpacked from a JSON string. */
-    inline fun <reified T> unpack() = quickLoad<T>(data as String)
+    inline fun <reified T> unpack() = data?.let { quickLoad<T>(data as String) }
 
     override fun toString() = "$dataType:$data"
 }
 
 // Special Packets
 
-data class InitPacket(val existence: Existence, val quidity: Quidity)
+data class InitPacket(
+        val existence: Existence,
+        val quidity: Quidity,
+        val key: String
+)
 
 fun Iterable<WsSession>.broadcast(
     dataType: Packet.DataType,

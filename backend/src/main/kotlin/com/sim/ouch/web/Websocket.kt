@@ -14,28 +14,8 @@ import java.util.function.Consumer
 val Websocket = Consumer<WsHandler> {
     val connect = ConnectHandler { session ->
         launch {
-            // Attempt to parse name
-            val name: String? = session.queryParam("name")
-            if (name.isNullOrBlank()) return@launch session.close(ER_NO_NAME)
-            lateinit var quidity: Quidity
+            // Check for reconnection key
 
-            // Attempt to get an existence
-            val exist = session.queryParam("exID")?.let { id ->
-                // With an invalid ID, close
-                DAO.getEx(id)?.also {
-                    quidity = DAO.addSession(session, it, name)
-                            ?: return@launch session.close(ER_INTERNAL)
-                    // Broadcast the join event to all sessions but this one
-                    it.sessions?.broadcast(ENTER, quidity, session.id)
-                } ?: return@launch session.close(ER_BAD_ID)
-            } ?: let {
-                // with no ID, make new Existence
-                DAO.newExistence(session, DefaultExistence(
-                    Quidity(name)))?.also { quidity = it.initialQuidity }
-                        ?: return@launch session.close(ER_INTERNAL)
-            }
-
-            session.send(Packet(INIT, InitPacket(exist, quidity)).pack())
         }
     }
 

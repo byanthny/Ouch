@@ -1,5 +1,6 @@
 package com.sim.ouch.web
 
+import com.sim.ouch.IDGenerator
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Existence.Status.DORMANT
 import com.sim.ouch.logic.Existence.Status.DRY
@@ -27,12 +28,14 @@ suspend fun WsSession.existence() = DAO.getExistence(id)
 suspend fun WsSession.quidity() = DAO.getQuidity(id)
 
 class Dao {
+    data class SessionData(
+            var key: String,var session: WsSession? = null,
+            var existence: Existence, var quidity: Quidity
+    )
     /** [Existence._id] -> [Existence] */
     private val existences get() = mongo.getCollection<Existence>()
-    /** [WsSession.id] -> <[Existence._id], [Quidity.id]> */
-    private val sessions = ConcurrentHashMap<String, Pair<String, String>>()
-    /** [WsSession.id] <- [Existence._id] */
-    private val exSes = ConcurrentHashMap<String, MutableList<WsSession>>()
+    /**  */
+    private val kayMap = ConcurrentHashMap<String, SessionData>()
 
     init {
         launch {
@@ -88,6 +91,12 @@ class Dao {
         existences.findOne(Existence::_id eq it)
     }
 
+    fun giveKey(session: WsSession): String {
+        val key = sessionKeyGen.next()
+        sessionKeys[key] = session
+        return key
+    }
+
     suspend fun getQuidity(sessionID: String) = getExistence(sessionID)?.let {
         it.quidities[sessions[sessionID]!!.second]
     }
@@ -108,6 +117,7 @@ class Dao {
 
     suspend fun removeSession(session: WsSession) {
         val (exID, qID) = sessions.remove(session.id)!!
+        sessionKeys.forEach { s , _ -> sessionKeys.remove(s) }
         exSes[exID]?.remove(session)
         val ex = existences.findOneById(exID) ?: return
         if (exSes[exID]?.isEmpty() != false) {
