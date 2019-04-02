@@ -209,9 +209,9 @@ html {
 #ouch.dark {
   color: white;
 }
-chat-msg.right.dark {
-  background: #b5f8ff;
-  color: #262626;
+#chat.dark > .chat-msg-cont > .chat-msg.right {
+  background: #b5f8ff !important;
+  color: #262626 !important;
 }
 #user-input.login {
   margin-top: 5vh;
