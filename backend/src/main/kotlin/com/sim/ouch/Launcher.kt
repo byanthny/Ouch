@@ -6,13 +6,20 @@ import com.sim.ouch.web.*
 import io.javalin.Javalin
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
+import java.lang.System.getenv
 
 
 val ER_NO_NAME  = 4004 to "no name"
 val ER_BAD_ID   = 4005 to "unknown ID"
 val ER_INTERNAL = 4010 to "internal err"
 
-val javalin: Javalin by lazy { Javalin.create() }
+val javalin: Javalin by lazy {
+    Javalin.create().prefer405over404().enableMicrometer()
+}
+
+class OuchData(val version: String, vararg val authors: String)
+
+val OUCH_VERSION = OuchData("0.0.0", "Jonathan Augustine", "Anthony Das")
 
 fun main() = javalin.apply {
 
@@ -53,5 +60,5 @@ fun main() = javalin.apply {
 
     secret(this)
 
-    start(System.getenv("PORT")?.toInt() ?: 7000)
+    start(getenv("PORT")?.toInt() ?: 7000.also { javalin.enableDebugLogging() })
 }.unit
