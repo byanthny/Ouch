@@ -58,7 +58,22 @@
 Current status of Ouch API: https://sim-ouch.herokuapp.com/status  
 #### File Organization
 
-    Working on it
+```text
+Athena/
+├── backend/ *source code for backend
+│   ├── src/
+│   └── gradle/wrapper
+│
+├── docs/ *Production files for Github Pages Website (minified, coming soon)
+│   ├── css/
+│   ├── imgs/
+│   └── js/
+│
+└── frontend/   *source code for frontend
+    ├── js/
+    └── less/
+
+```
 
 #### Client-Server Communication
 
