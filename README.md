@@ -22,7 +22,7 @@
   Now, we're going to define the elements of a **simulation**, in a way we see fit. There are no right or wrong answers here because... well we have no way of breaking the simulation. I mean if you know how to escape and contact the simulator(s), let me know. 
   
 <p align="center">
-<img src="docs/imgs/somethingspecial.png" width="250"/>
+<img src="docs/imgs/somethingspecial.jpg" width="250"/>
 </p>
   
   Anyway, we have defined `Simulators` as the controllers of the simulation. 
