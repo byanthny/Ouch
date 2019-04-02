@@ -5,9 +5,10 @@ import com.sim.ouch.logic.Existence.Status.DORMANT
 import com.sim.ouch.logic.Existence.Status.DRY
 import com.sim.ouch.logic.Quidity
 import io.javalin.websocket.WsSession
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.coroutine
-import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.KMongoConfiguration
 import java.util.concurrent.ConcurrentHashMap
@@ -32,6 +33,20 @@ class Dao {
     private val sessions = ConcurrentHashMap<String, Pair<String, String>>()
     /** [WsSession.id] <- [Existence._id] */
     private val exSes = ConcurrentHashMap<String, MutableList<WsSession>>()
+
+    init {
+        launch {
+            while (true) {
+                val ids = mutableListOf<String>()
+                existences.distinct(Existence::_id).consumeEach {
+                    if (exSes[it]?.isEmpty() == true) ids += it
+                }
+                existences.updateMany(Existence::_id `in` ids,
+                    SetTo(Existence::status, DORMANT))
+                delay(1_000 * 60 * 5)
+            }
+        }
+    }
 
     /** contains [Existence._id]. */
     suspend fun contains(exID: String) =
