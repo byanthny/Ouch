@@ -59,7 +59,7 @@ Current status of Ouch API: https://sim-ouch.herokuapp.com/status
 #### File Organization
 
 ```text
-Athena/
+Ouch/
 ├── backend/ *source code for backend
 │   ├── src/
 │   └── gradle/wrapper
