@@ -117,6 +117,7 @@ function play() {
                 //document.getElementById('user-input').placeholder = "Must provide a name";
                 break;
             case close_code.ER_BAD_ID:
+                document.getElementById('exist-input').value = "";
                 document.getElementById('exist-input').placeholder = "Unknown ID";
                 document.getElementById('user-input').value = nickname;
                 shakeExist();
