@@ -120,7 +120,7 @@ function play() {
                 document.getElementById('exist-input').value = "";
                 document.getElementById('exist-input').placeholder = "Unknown ID";
                 document.getElementById('user-input').value = nickname;
-                shakeExist();
+                shake(exist_input);
                 break;
             case close_code.ER_INTERNAL_GENERIC:
                 alert("Sorry, an internal error occurred. Please try again");

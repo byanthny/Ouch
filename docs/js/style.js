@@ -1,46 +1,60 @@
-var login = false; //Current state being displayed
-var action;
+/* Handles all actions regarding styling
+ * ex. changing to dark mode or animations
+ * style.js
+ */
+
+//Is on login page?
+var login = false;
 
 //TODO load in actions from api
+//Array of all possible actions
+var action;
 
 //HTML elements
+var header = document.getElementById("header");
 var exist_input = document.getElementById("exist-input");
 var user_input = document.getElementById("user-input");
 var chat = document.getElementById("chat");
 var leaderboard = document.getElementsByClassName("leaderboard")[0];
+var level = document.getElementById("level");
+var box = document.getElementById("box");
+var search = document.getElementById("search").classList.toggle("opacity");
+var ouch = document.getElementById("ouch");
+var submit_button = document.getElementById("submit-button");
+var help = document.getElementById("help");
+var indicator = document.getElementById("indicator");
+var world_value = document.getElementById("world-value");
 
 function switchState() {
-    document.getElementById("submit-button").classList.toggle("hidden");
-    document.getElementById("box").classList.toggle("opacity");
-    document.getElementById("user-input").classList.toggle("login");
-    document.getElementById("exist-input").classList.toggle("login");
-    document.getElementById("header").classList.toggle("login");
-    document.getElementById("exist-input").classList.toggle("opacity");
-    document.getElementById("exist-input").classList.toggle("disappear");
-    document.getElementById("level").classList.toggle("opacity");
-    document.getElementsByClassName("leaderboard")[0].classList.toggle("opacity");
+    submit_button.classList.toggle("hidden");
+    box.classList.toggle("opacity");
+    user_input.classList.toggle("login");
+    exist_input.classList.toggle("login");
+    header.classList.toggle("login");
+    exist_input.classList.toggle("opacity");
+    exist_input.classList.toggle("disappear");
+    level.classList.toggle("opacity");
+    leaderboard.classList.toggle("opacity");
     login = !login;
 }
 
 function switchSearch() {
-    document.getElementById("search").classList.toggle("opacity");
-    document.getElementById("search").classList.toggle("disappear");
-    document.getElementById("chat").classList.toggle("opacity");
-    document.getElementById("chat").classList.toggle("disappear");
+    search.classList.toggle("opacity");
+    search.toggle("disappear");
+    chat.classList.toggle("opacity");
+    chat.classList.toggle("disappear");
 }
 
 function switchDark() {
-    document.getElementById("ouch").classList.toggle("dark");
-    document.getElementById("header").classList.toggle("dark");
-    document.getElementById("chat").classList.toggle("dark");
-
-    //TODO update all chat to dark
+    ouch.classList.toggle("dark");
+    header.classList.toggle("dark");
+    chat.classList.toggle("dark");
 }
 
 function togglePopUp() {
-    document.getElementById("help").classList.toggle("opacity");
+    help.classList.toggle("opacity");
     setTimeout(function () {
-        document.getElementById("help").classList.toggle("hidden");
+        help.classList.toggle("hidden");
     }, 1000);
 }
 
@@ -54,25 +68,30 @@ function scrollBottom() {
     chat.scrollTop = chat.scrollHeight;
 }
 
+/* Reset Ouch back to the login screen. */
 function reset() {
     switchState();
-    document.getElementById("indicator").classList.toggle("connected");
-    document.getElementById("world-value").innerHTML = "offline";
+    indicator.classList.toggle("connected");
+    world_value.innerHTML = "offline";
     leaderboard.innerHTML = "";
     chat.innerHTML = "";
-    document.getElementById('user-input').value = "";
+    user_input.value = "";
+}
+
+/* Used to create shake animation on given element
+ * @param the HTML element to be "shaken"
+ */
+function shake(toShake) {
+    toShake.classList.add("shake");
+    setTimeout(function () {
+        toShake.classList.remove("shake");
+    }, 1000);
 }
 
 function shakeUsername() {
-    user_input.classList.add("shake");
-    setTimeout(function () {
-        user_input.classList.remove("shake");
-    }, 1000);
+    shake(user_input);
 }
 
 function shakeExist() {
-    exist_input.classList.add("shake");
-    setTimeout(function () {
-        exist_input.classList.remove("shake");
-    }, 1000);
+    shake(exist_input);
 }

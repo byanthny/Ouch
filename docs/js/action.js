@@ -28,7 +28,7 @@ function checkInput(clicked) {
         //login screen
         else {
             if (input === "") {
-                shakeUsername();
+                shake(user_input);
                 return false;
             } else {
                 return true;
@@ -39,14 +39,14 @@ function checkInput(clicked) {
 
 user_input.addEventListener("keydown", function (event) {
     if(checkInput()) {
-        document.getElementById("submit-button").click();
+        submit_button.click();
     }
 });
 
 exist_input.addEventListener("keydown", function (event) {
     if (event.key === 13 || event.key === "Enter") {
         if(checkInput()) {
-            document.getElementById("submit-button").click();
+            submit_button.click();
         }
     }
 });
@@ -54,8 +54,8 @@ exist_input.addEventListener("keydown", function (event) {
 //On button click update connected and stuff
 document.getElementById("submit-button").onclick = function () {
 
-    nickname = document.getElementById('user-input').value;
-    id = document.getElementById('exist-input').value;
+    nickname = user_input.value;
+    id = exist_input.value;
 
     if (checkInput(true)) {
 
