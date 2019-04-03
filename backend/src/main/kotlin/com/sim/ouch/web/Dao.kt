@@ -17,10 +17,8 @@ import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.KMongoConfiguration
-import java.io.File
-import java.io.IOException
 import java.time.OffsetDateTime
-import javax.crypto.SecretKey
+import javax.crypto.KeyGenerator
 import javax.crypto.spec.SecretKeySpec
 import kotlin.collections.set
 import kotlin.reflect.KFunction
@@ -288,14 +286,18 @@ class Dao {
     }
 
     private val tokenParser get() = Jwts.parser().setSigningKey(instanceKey)!!
-    private val instanceKey: SecretKey by lazy {
-        try {
-            val t = File("backend/res", "kkk.kk").readBytes()
-            if (t.isNotEmpty()) SecretKeySpec(t, "HMACSHA256")
-            else throw Exception()
-        } catch (e: Exception) {
-            runBlocking { logger.err("Failed to load key", Dao::readToken) }
-            throw IOException()
+    private val instanceKey by lazy {
+        runBlocking {
+            class Key(val key: ByteArray)
+            mongo.getCollection<Key>().let { c ->
+                c.find().first()?.let { SecretKeySpec(it.key, "HMACSHA256") }
+                    ?: let {
+                        logger.err("Failed to load key. Loading new key",
+                            Dao::readToken)
+                        KeyGenerator.getInstance("HMACSHA256").generateKey()
+                            ?.also { it.encoded.let { c.insertOne(Key(it)) } }
+                    }
+            }
         }
     }
 
