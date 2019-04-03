@@ -1,5 +1,6 @@
 package com.sim.ouch.web
 
+import com.sim.ouch.javalin
 import com.sim.ouch.logic.DefaultExistence
 import com.sim.ouch.logic.Quidity
 import com.sim.ouch.logic.broadcast
@@ -85,19 +86,14 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
         }
     }
 
-    val close = CloseHandler { session, statusCode, reason ->
-        launch {
-            DAO.disconnect(session)
-        }
-    }
+    wsHandler.onClose { session, _, _ -> launch { DAO.disconnect(session) } }
 
     val err = ErrorHandler { session, throwable: Throwable? ->
-        TODO()
+        javalin.wsLogger { TODO() }
     }
 
     wsHandler.onConnect(connect)
     wsHandler.onMessage(message)
-    wsHandler.onClose(close)
     wsHandler.onError(err)
 
 }
