@@ -9,8 +9,8 @@ var keepConnectionOpen =  setTimeout(checkOpen(), 3000); //900000
 function checkOpen() {
     console.log("I'm called");
     if(here) {
-        console.log("I am sending data");
-        //connection.send("");
+        console.log("sending heartbeat");
+        connection.send(ping_packet);
         keepConnectionOpen;
     } else {
         //connection.close();
@@ -23,17 +23,16 @@ function checkOpen() {
 document.onmousemove = function(){here=true;};
 document.onkeydown = function(){here=true;};
 
-function play() {
+function play(endpoint) {
 
-    connection = new WebSocket(url);
+    connection = new WebSocket(endpoint);
 
     //On connection open
     connection.onopen = () => {
         switchState();
-        document.getElementById("indicator").classList.toggle("connected");
-
-        document.getElementById('user-input').value = "";
-        document.getElementById('user-input').placeholder = "enter command or message";
+        indicator.classList.toggle("await");
+        user_input.value = "";
+        user_input.placeholder = "enter command or message";
         keepConnectionOpen;
     };
 
@@ -52,61 +51,38 @@ function play() {
         var parsedData = JSON.parse(JSONdata.data);
 
         //Check if datatype us INIT
-        if (JSONdata.dataType === "INIT") {
-            //Save init data to usr in case needed later
-            usr = parsedData;
+        switch (JSONdata.dataType) {
+            case "INIT":
+                handleInit(parsedData);
+                break;
+            case "CHAT": //if message is from current user
+                if (parsedData.authorName === nickname) {
+                    addChat("", parsedData.content, "user");
+                    scrollBottom();
+                }
+                //if message is from new user
+                else {
+                    addChat(parsedData.authorName, parsedData.content, "other");
+                    scrollBottom();
+                }
+                //New user has entered
+                break;
+            case "ENTER": //Add new user to leaderboard
+                leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></p></div>';
 
-            //Update level with data received
-            document.getElementById("level").innerHTML = nickname + '<span id="world-value" style="font-weight: normal;"> '
-                + parsedData.existence.initialQuidity.ouch.degree + '</span>';
-            //Set existence ID
-            document.getElementById("world-value").innerHTML = parsedData.existence._id;
-
-            //load in quids in leaderboard
-            var usersArray = parsedData.existence.quidities;
-
-            //Add quids to leaderboard
-            for (var quid in usersArray) {
-                leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + usersArray[quid].id +
-                    '">' + usersArray[quid].name +
-                    ' <span class="normal">' + usersArray[quid].ouch.degree +
-                    '</span></p></div>';
-            }
-
-        }
-
-        //if chat then add items
-        else if (JSONdata.dataType === "CHAT") {
-            //if message is from current user
-            if (parsedData.authorName === nickname) {
-                addChat("", parsedData.content, "user");
+                addChat(parsedData.name, "has joined the Existence.", "system");
                 scrollBottom();
-            }
-            //if message is from new user
-            else {
-                addChat(parsedData.authorName, parsedData.content, "other");
+                break;
+            case "EXIT":
+                var quidleaderboard = document.getElementsByClassName(parsedData.id)[0]
+                quidleaderboard.parentNode.removeChild(quidleaderboard);
+                addChat(parsedData.name, "has left the Existence.", "system");
                 scrollBottom();
-            }
-
-            //New user has entered
-        } else if (JSONdata.dataType === "ENTER") {
-            //Add new user to leaderboard
-            leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></p></div>';
-
-            addChat(parsedData.name, "has joined the Existence.", "system");
-            scrollBottom();
-
-        } else if (JSONdata.dataType === "EXIT") {
-            var quidleaderboard = document.getElementsByClassName(parsedData.id)[0]
-            quidleaderboard.parentNode.removeChild(quidleaderboard);
-            addChat(parsedData.name, "has left the Existence.", "system");
-            scrollBottom();
-        }
-
-        //Some unknown dataType
-        else {
-            console.log("Unknown dataType");
-            console.log(e.data);
+                break;
+            default:
+                console.log("Unknown dataType");
+                console.log(e.data);
+                break;
         }
     };
 
@@ -115,20 +91,22 @@ function play() {
         reset();
         switch (closeEvent.code) {
             case close_code.ER_NO_NAME:
-                //document.getElementById('user-input').placeholder = "Must provide a name";
+                shake(user_input);
                 break;
             case close_code.ER_BAD_ID:
-                document.getElementById('exist-input').value = "";
-                document.getElementById('exist-input').placeholder = "Unknown ID";
-                document.getElementById('user-input').value = nickname;
+                exist_input.value = "";
+                exist_input.placeholder = "Unknown ID";
+                user_input.value = nickname;
                 shake(exist_input);
                 break;
             case close_code.ER_INTERNAL_GENERIC:
                 alert("Sorry, an internal error occurred. Please try again");
                 break;
+            case close_code.ER_BAD_TOKEN:
+                reconnect_token = null;
+                break;
             default:
-                alert("You disconnected from the Existence.");
-                // TODO nicify this
+                reconnect_button.onclick();
                 break;
         }
         connection = null;

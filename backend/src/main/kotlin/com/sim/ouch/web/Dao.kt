@@ -17,12 +17,20 @@ import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.KMongoConfiguration
+import java.io.File
+import java.io.IOException
 import java.time.OffsetDateTime
-import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
 import kotlin.collections.set
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.reflect
 
+
+typealias Token = String
+typealias ID = String
+/** [Existence] Code ([Existence._id]) */ typealias EC = ID
+typealias QC = ID
 
 val DAO: Dao by lazy { Dao() }
 private val mongo by lazy {
@@ -84,13 +92,13 @@ class Dao {
             : Triple<Token, Existence, Quiddity>? {
         val ini = existence.initialQuiddity
         // Generate new Token
-        val key = genToken(session, existence, ini)
+        val token = genToken(session, existence, ini)
         // Add key to Existence
-        existence.addSession(key)
+        existence.addSession(token)
         // Add key to sessionTokens
-        sessionTokens[key] = session
+        sessionTokens[token] = session
         // Add SessionData & Existence to database
-        val sd = SessionData(key, existence._id, ini.id)
+        val sd = SessionData(token, existence._id, ini.id)
         return when {
             sessionData.save(sd)?.wasAcknowledged() == false -> {
                 logger.err("Failed to save new SessionData", Dao::addExistence)
@@ -100,7 +108,7 @@ class Dao {
                 logger.err("Failed to save new Existence", Dao::addExistence)
                 null
             }
-            else -> Triple(key, existence, ini)
+            else -> Triple(token, existence, ini)
         }
     }
 
@@ -136,12 +144,17 @@ class Dao {
     suspend fun refreshSession(token: Token, session: WsSession)
             : Pair<Token, SessionData>? {
         // Validate Token
-        val (exID, qID) = readToken(session, token) ?: return null
+        val (exID, qID) = readToken(session, token)
+            ?: let {
+                logger.err("Token validation failed", Dao::refreshSession)
+                return null
+            }
         // Generate new token
         val nToken = genToken(session, exID, qID)
         // Update existence
         existences.findOneById(exID)?.also {
-            it.addSession(token)
+            it.removeSession(token)
+            it.addSession(nToken)
             existences.save(it)
         } ?: let {
             logger.err("Failed to find existence.", Dao::refreshSession)
@@ -191,10 +204,9 @@ class Dao {
     suspend fun status(): StatusPacket {
         val le = getLive()
         val de = getDormant()
-        val sc = sessionTokens.size
         val avgQpe = (le + de).avgBy { it.quidities.size }
         val oldest = (le + de).minBy(Existence::init)?.init
-        return StatusPacket(le.size, de.size, sc, avgQpe, oldest)
+        return StatusPacket(le.size, de.size, liveSessionsCount, avgQpe, oldest)
     }
 
     /** Removes old dormant [Existence] */
@@ -245,43 +257,46 @@ class Dao {
         }
     }
 
-}
+    private fun genToken(session: WsSession, existence: Existence, quiddity: Quiddity) =
+        genToken(session, existence._id, quiddity.id)
 
-typealias Token = String
-typealias ID = String
-/** [Existence] Code ([Existence._id]) */ typealias EC = ID
-typealias QC = ID
+    private fun genToken(session: WsSession, exID: EC, qID: QC) = Jwts.builder().apply {
+        setSubject("quiddity.$qID").claim("exID", exID)
+        //claim("ip", session.remoteAddress.address.address)
+        // setExpiration(Date.from(Instant.now().plusSeconds(60 * 30))) TODO?
+        signWith(instanceKey, SignatureAlgorithm.HS256)
+    }.compact()
 
-private fun genToken(session: WsSession, existence: Existence, quiddity: Quiddity) =
-    genToken(session, existence._id, quiddity.id)
-
-private fun genToken(session: WsSession, exID: EC, qID: QC) = Jwts.builder().apply {
-    setSubject("quiddity.$qID").claim("exID", exID)
-    claim("ip", session.remoteAddress.address.address)
-    // setExpiration(Date.from(Instant.now().plusSeconds(60 * 30))) TODO?
-    signWith(instanceKey, SignatureAlgorithm.HS256)
-}.compact()
-
-/** Returns `null` on invalid token. */
-fun readToken(session: WsSession, token: String) : Pair<EC, QC>? {
-    try {
-        val claims = tokenParser.parseClaimsJws(token).body
-        require(claims["ip"] == session.remoteAddress.address.address)
-        require(claims["exID"] is String)
-        require(claims.subject.matches(Regex("quiddity\\.\\d{10}")))
-        return claims["exID"] as String to
-            claims.subject.removePrefix("quiddity.")
-    } catch (e: SignatureException) {
-        return null
-    } catch (e: ExpiredJwtException) {
-        return null
-    } catch (e: JwtException) {
-        return null
-    } catch (e: IllegalArgumentException) {
-        return null
+    /** Returns `null` on invalid token. */
+    private fun readToken(session: WsSession, token: String) : Pair<EC, QC>? {
+        try {
+            val claims = tokenParser.parseClaimsJws(token).body
+            //require(claims["ip"] == session.remoteAddress.address.address)
+            require(claims["exID"] is String)
+            require(claims.subject.matches(Regex("quiddity\\.([\\dA-Z]){10}")))
+            return claims["exID"] as String to
+                claims.subject.removePrefix("quiddity.")
+        } catch (e: SignatureException) {
+            return null
+        } catch (e: ExpiredJwtException) {
+            return null
+        } catch (e: JwtException) {
+            return null
+        } catch (e: IllegalArgumentException) {
+            return null
+        }
     }
-}
 
-private val tokenParser get() = Jwts.parser().setSigningKey(instanceKey)!!
-private val instanceKey
-    by lazy { KeyGenerator.getInstance("HMACSHA256").generateKey()!! }
+    private val tokenParser get() = Jwts.parser().setSigningKey(instanceKey)!!
+    private val instanceKey: SecretKey by lazy {
+        try {
+            val t = File("backend/res", "kkk.kk").readBytes()
+            if (t.isNotEmpty()) SecretKeySpec(t, "HMACSHA256")
+            else throw Exception()
+        } catch (e: Exception) {
+            runBlocking { logger.err("Failed to load key", Dao::readToken) }
+            throw IOException()
+        }
+    }
+
+}

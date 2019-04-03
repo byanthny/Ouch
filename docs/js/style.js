@@ -5,7 +5,9 @@
 
 /* Toggles between login and main page */
 function switchState() {
-    submit_button.classList.toggle("hidden");
+    if (reconnect_token != null) {
+        reconnect_button.classList.toggle("hidden");
+    } else submit_button.classList.toggle("hidden");
     box.classList.toggle("opacity");
     user_input.classList.toggle("login");
     exist_input.classList.toggle("login");

@@ -130,6 +130,10 @@ html {
   background: red;
   box-shadow: 0 0 3px red;
 }
+#indicator.await {
+  background: darkorange;
+  box-shadow: 0 0 3px darkorange;
+}
 #indicator.connected {
   background: lightgreen;
   box-shadow: 0 0 3px lightgreen;
@@ -234,13 +238,13 @@ html {
   padding-top: 20vh;
   height: calc(100vh - 20vh);
 }
-#submit-button {
+#submit-button, #reconnect-button {
   border-width: 0;
   border-radius: 5px;
   color: #262626;
   background: #ffffff;
   font-size: 1em;
-  display: block;
+  display: inline-block;
   margin: 0 auto;
   margin-top: 20px;
   padding: 10px 20px;
@@ -248,7 +252,7 @@ html {
   transition: all 1s!important;
   opacity: 0.7;
 }
-#submit-button:hover {
+#submit-button:hover, #reconnect-button:hover {
   opacity: 1;
 }
 #exist-input {

@@ -29,7 +29,7 @@ function checkInput(clicked) {
             else {
                 //console.log("chat");
                 if (connection != null) {
-                    connection.send('{"dataType":"CHAT","data":"' + input + '"}');
+                    connection.send(makeChatMessage(input));
                 }
             }
             user_input.value = "";
@@ -62,21 +62,23 @@ exist_input.addEventListener("keydown", function (event) {
 });
 
 //On button click update connected and stuff
-document.getElementById("submit-button").onclick = function () {
+// Reconnect
+submit_button.onclick = function () {
 
     nickname = user_input.value;
     id = exist_input.value;
 
     if (checkInput(true)) {
-
         if (id === "") {
-            url = 'wss://sim-ouch.herokuapp.com/ws?name=' + nickname;
+            play(url_ws + '?name=' + nickname);
         } else {
-            url = 'wss://sim-ouch.herokuapp.com/ws?name=' + nickname + '&exID=' + id;
+            play(url_ws + '?name=' + nickname + '&exID=' + id);
         }
-
-        play();
     }
+};
+
+reconnect_button.onclick = function () {
+    play(url_ws + "?token=" + reconnect_token);
 };
 
 document.onmousemove = function(){
