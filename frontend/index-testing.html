@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!--Production code for docs folder-->
+<!--Use this for testing-->
 <html lang="en">
 
 <head>
     <title>Ouch</title>
-    <link rel="stylesheet" href="css/style.min.css">
+    <link rel="stylesheet" href="../docs/css/style.min.css">
     <link href="https://fonts.googleapis.com/css?family=Mrs+Sheppards" rel="stylesheet">
     <link rel="icon" type="image/png" href="imgs/favicon.png" />
 </head>
@@ -48,7 +48,29 @@
         <span class="close">&times;</span>
     </div>
 </div>
-<script src="js/ouch.min.js">
+
+<script src="js/variables.js"></script>
+<script src="js/style.js"></script>
+<script src="js/socket.js"></script>
+<script src="js/action.js"></script>
+<!--<script src="js/ouch.min.js"></script>-->
+
+<!--Ignore for testing-->
+<script>
+    // Testing
+    //switchDark();
     switchState();
+    //switchSearch();
+    /*(function() {
+        //switchState();
+         //switchSearch();
+         //switchDark();
+         setTimeout(function(){
+             switchSearch();
+            // switchState();
+             //switchDark();
+         }, 5000);
+     })();*/
 </script>
+
 </body>
