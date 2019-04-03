@@ -1,3 +1,5 @@
+var jsfiles = ['frontend/js/variables.js','frontend/js/style.js', 'frontend/js/packets.js', 'frontend/js/socket.js', 'frontend/js/action.js'];
+
 module.exports = function(grunt) {
     require('jit-grunt')(grunt);
 
@@ -21,7 +23,7 @@ module.exports = function(grunt) {
 
             my_target: {
                 files: {
-                    'docs/js/ouch.min.js': ['frontend/js/variables.js','frontend/js/style.js', 'frontend/js/packets.js', 'frontend/js/socket.js', 'frontend/js/action.js'],
+                    'docs/js/ouch.min.js': jsfiles,
                 }
             }
         },
