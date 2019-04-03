@@ -1,7 +1,5 @@
 // Client -> Server packets
 
-const ping_packet = '{"dataType":"PING","data":"PING"}';
-
 function makeChatMessage(text) {
     return '{"dataType":"CHAT","data":"' + text + '"}';
 }
