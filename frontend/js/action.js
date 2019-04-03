@@ -86,3 +86,23 @@ reconnect_button.onclick = function () {
 document.onmousemove = function(){
     here = true;
 };
+
+//Get HTTP and return JSON
+function getHTTP(url) {
+    fetch(url).then(function(resp) { resp.json();}) // Transform the data into json
+        .then(function(data) {
+            console.log(data);
+            return data;
+        });
+}
+
+function loadActions() {
+    var actions_data = getHTTP(url_actions);
+    if (actions_data === "") {
+        console.log("Error");
+    }
+    else  {
+        //actions = JSON.parse(actions_data);
+        console.log(actions);
+    }
+}

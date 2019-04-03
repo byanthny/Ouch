@@ -33,6 +33,9 @@ function play(endpoint) {
         indicator.classList.toggle("await");
         user_input.value = "";
         user_input.placeholder = "enter command or message";
+
+        //loadActions();
+
         keepConnectionOpen =  setTimeout(checkOpen(), 3000);
     };
 

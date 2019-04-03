@@ -41,6 +41,7 @@ var usr;
 var url_base = 'sim-ouch.herokuapp.com';
 //Socket
 var url_ws = 'wss://' + url_base + '/ws';
+var url_actions = 'https://'+url_base+'/actions';
 var connection;
 var reconnect_token = null;
 
