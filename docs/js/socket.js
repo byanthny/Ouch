@@ -3,10 +3,25 @@
  * socket.js
  */
 
-//TODO keep connection open, close after a certain amount of time and when connection is closed
-function keepConnectionOpen() {
+var keepConnectionOpen =  setTimeout(checkOpen(), 3000); //900000
 
-}
+//TODO keep connection open, close after a certain amount of time and when connection is closed
+function checkOpen() {
+    console.log("I'm called");
+    if(here) {
+        console.log("I am sending data");
+        //connection.send("");
+        keepConnectionOpen;
+    } else {
+        //connection.close();
+        console.log("I am not here");
+        clearTimeout(keepConnectionOpen);
+    }
+};
+
+//I am here
+document.onmousemove = function(){here=true;};
+document.onkeydown = function(){here=true;};
 
 function play() {
 
@@ -19,7 +34,7 @@ function play() {
 
         document.getElementById('user-input').value = "";
         document.getElementById('user-input').placeholder = "enter command or message";
-
+        keepConnectionOpen;
     };
 
     //If  there is an  error
@@ -62,10 +77,9 @@ function play() {
 
         //if chat then add items
         else if (JSONdata.dataType === "CHAT") {
-
             //if message is from current user
             if (parsedData.authorName === nickname) {
-                addChat("", parsedData.content,"user");
+                addChat("", parsedData.content, "user");
                 scrollBottom();
             }
             //if message is from new user
@@ -118,10 +132,11 @@ function play() {
                 break;
         }
         connection = null;
+        here = false;
     }
 }
 
 //disconnect from server on page close or refresh
-window.onbeforeunload = function(){
+window.onbeforeunload = function () {
     connection.close();
 }

@@ -1,4 +1,7 @@
 function checkInput(clicked) {
+
+    here = true;
+
     //not login screen
     if (event.key === 13 || event.key === "Enter" || clicked === true) {
         var input = user_input.value;
@@ -68,3 +71,7 @@ document.getElementById("submit-button").onclick = function () {
         play();
     }
 };
+
+document.onmousemove = function(){
+    here = true;
+}
