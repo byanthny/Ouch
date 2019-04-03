@@ -5,8 +5,12 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.sim.ouch.DefaultNameGenerator
 import com.sim.ouch.IDGenerator
-import com.sim.ouch.web.*
+import com.sim.ouch.NOW
+import com.sim.ouch.web.Chat
+import com.sim.ouch.web.EC
+import com.sim.ouch.web.Token
 import org.bson.codecs.pojo.annotations.BsonId
+import java.time.OffsetDateTime
 
 /** The simulation. */
 @JsonTypeInfo(
@@ -20,14 +24,23 @@ import org.bson.codecs.pojo.annotations.BsonId
 sealed class Existence {
 
     @BsonId open val _id: EC = EXISTENCE_ID_GEN.next()
+    open val init = NOW()
+    open var dormantSince: OffsetDateTime? = null
     var status: Status = Status.DRY
+        set(value) {
+            when (value) {
+                Status.DORMANT -> dormantSince = NOW()
+                else -> dormantSince = null
+            }
+            field = value
+        }
 
     abstract val name: String
     abstract val capacity: Long
     abstract val chat: Chat
     /** The first [Quidity] to enter the [Existence]. */
     abstract val initialQuidity: Quidity
-    open val sessionTokens: MutableList<Key> = mutableListOf()
+    open val sessionTokens: MutableList<Token> = mutableListOf()
     open val quidities: MutableMap<String, Quidity> = mutableMapOf()
     open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
 
@@ -43,7 +56,10 @@ sealed class Existence {
 
     operator fun get(id: String) = quidities[id] ?: infraQuidities[id]
 
-    fun addSession(key: Key) = sessionTokens.add(key)
+    /** Add a new [Session token][Token]. */
+    fun addSession(token: Token) = sessionTokens.add(token)
+    /** Remove a [Session token][Token]. */
+    fun removeSession(token: Token) = sessionTokens.remove(token)
 
     enum class Status { DORMANT, WET, DRY }
 

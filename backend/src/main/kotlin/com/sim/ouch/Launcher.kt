@@ -1,7 +1,6 @@
 package com.sim.ouch
 
 import com.sim.ouch.logic.Quidity
-import com.sim.ouch.logic.sessions
 import com.sim.ouch.web.*
 import io.javalin.Javalin
 import kotlinx.html.*
@@ -23,17 +22,17 @@ fun main() = javalin.apply {
 
     ws(EndPoints.SOCKET.point, Websocket)
 
-    get(EndPoints.STATUS.point) {
-        val dex = DAO.dexList
-        val ex = DAO.exList
-        val ss = DAO.numSessions
+    get(EndPoints.STATUS.point) { launch {
+        val dex = DAO.getDormant()
+        val ex = DAO.getLive()
+        val ss = DAO.liveSessionsCount
         val html = createHTML().apply {
             body {
                 table {
                     tr {
                         th { text("Live Existences: ${ex.size}") }
                         th { text("Dormant Existences: ${dex.size}") }
-                        th { text("Total Sessions: ${ss}") }
+                        th { text("Total Sessions: $ss") }
                     }
                     tr {
                         th { text("Existence") }
@@ -44,14 +43,14 @@ fun main() = javalin.apply {
                         tr {
                             td { text(it._id) }
                             td { text(it.quidities.size) }
-                            td { text(it.sessions?.size ?: 0) }
+                            td { text(it.sessionTokens.size) }
                         }
                     }
                 }
             }
         }.finalize()
         it.html(html)
-    }
+    }}
     get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
     get(EndPoints.ACTIONS.point) { it.result(Quidity.Action.values().json()) }
     get(EndPoints.ENDPOINTS.point) { it.render("/map.html") }

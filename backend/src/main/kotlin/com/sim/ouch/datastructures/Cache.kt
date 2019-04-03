@@ -56,7 +56,7 @@ class LruKache<K, V>(
     }
 
     /**
-     * Set a [Key][K]-[Value][V] pair in cache. If the cache is at [maxSize],
+     * Set a [Token][K]-[Value][V] pair in cache. If the cache is at [maxSize],
      * remove [trashSize]-number [entries][evictTarget] then add the new entry.
      * @return the [value][V] previously at [key]
      */
@@ -108,10 +108,14 @@ class LruKache<K, V>(
     }
 }
 
+/**
+ * @property trashAction
+ */
 class ExpiringKache<K, V>(
     val maxSize: Int = DEFAULT_MAX,
     val minSize: Int = DEFAULT_MIN,
-    val trashSize: Int = DEFAULT_TRASH_SIZE
+    val trashSize: Int = DEFAULT_TRASH_SIZE,
+    val trashAction: (Map<K, V?>) -> Unit = {}
 ) : UsagePriorityKache<K, V>() {
     private val map = ConcurrentHashMap<K, V>()
     override val size get() = map.size
@@ -127,7 +131,7 @@ class ExpiringKache<K, V>(
     }
 
     /**
-     * Set a [Key][K]-[Value][V] pair in cache. If the cache is at [maxSize],
+     * Set a [Token][K]-[Value][V] pair in cache. If the cache is at [maxSize],
      * remove [trashSize]-number [entries][evictTarget] then add the new entry.
      * @return the [value][V] previously at [key]
      */
@@ -137,10 +141,12 @@ class ExpiringKache<K, V>(
             usageRanks += key
             // Downsize on max-size
             if (size == maxSize) {
+                val map = mutableMapOf<K, V?>()
                 var i = 0
                 while (size > minSize && i++ < trashSize) evictTarget?.also {
-                    this.remove(it)
+                    map[key] = this.remove(it)
                 } ?: break
+                trashAction(map)
             }
         }
         return map.put(key, value)
