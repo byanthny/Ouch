@@ -69,7 +69,9 @@ function shake(toShake) {
         toShake.classList.remove("shake");
     }, 1000);
 }
-
+/* Creates new chat message based on type
+ * @param
+ */
 function addChat(name, content, type) {
 
     var  html = "";

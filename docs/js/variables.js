@@ -31,6 +31,9 @@ var id = 'id';
 
 
 //Server Communication
+//if user is active
+var here = true;
+
 //Temp init data
 var usr;
 

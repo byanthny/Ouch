@@ -1,4 +1,7 @@
 function checkInput(clicked) {
+
+    here = true;
+
     //not login screen
     if (event.key === 13 || event.key === "Enter" || clicked === true) {
         var input = user_input.value;
@@ -6,7 +9,12 @@ function checkInput(clicked) {
         //not lpgin screen
         if (!login) {
             event.preventDefault();
-            if (input.charAt(0) === "-") {
+            //If no input
+            if(input === "") {
+                shake(user_input);
+            }
+            //If command
+            else if (input.charAt(0) === "-") {
                 switch (input) {
                     case "-theme":
                         switchDark();
@@ -16,7 +24,9 @@ function checkInput(clicked) {
                     default:
                         console.log("action " + input);
                 }
-            } else {
+            }
+            //If chat
+            else {
                 //console.log("chat");
                 if (connection != null) {
                     connection.send('{"dataType":"CHAT","data":"' + input + '"}');
@@ -68,3 +78,7 @@ document.getElementById("submit-button").onclick = function () {
         play();
     }
 };
+
+document.onmousemove = function(){
+    here = true;
+}
