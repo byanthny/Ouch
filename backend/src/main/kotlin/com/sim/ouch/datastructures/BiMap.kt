@@ -38,15 +38,15 @@ class MutableBiMap<K, V>() : MutableMap<K, V> {
         from.forEach { (k: K, v: V) -> inverseMap[v] = k }
     }
 
-    override fun remove(key: K) = directMap.remove(key)
+    override fun remove(key: K) = directMap.remove(key)?.also { inverseMap.remove(it) }
 
-    fun removeValue(value: V) = inverseMap.remove(value)
+    fun removeValue(value: V) = inverseMap.remove(value)?.also { directMap.remove(it) }
 
     override fun containsKey(key: K) = directMap.containsKey(key)
 
     override fun containsValue(value: V) = inverseMap.containsKey(value)
 
-    override fun isEmpty() = directMap.isEmpty()
+    override fun isEmpty() = directMap.isEmpty() && inverseMap.isEmpty()
 
     override fun clear() {
         directMap.clear()

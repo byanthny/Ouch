@@ -1,21 +1,27 @@
 package com.sim.ouch.web
 
-import com.sim.ouch.*
-import com.sim.ouch.logic.*
+import com.sim.ouch.ER_BAD_ID
+import com.sim.ouch.ER_NO_NAME
 import com.sim.ouch.web.Packet.DataType.*
 import io.javalin.UnauthorizedResponse
 import io.javalin.websocket.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.function.Consumer
+
+private const val IDLE_TIMOUT = 1_020_000L
 
 /**
  * Server side [WsHandler] implementation
  */
 val Websocket = Consumer<WsHandler> {
     val connect = ConnectHandler { session ->
+        session.idleTimeout = IDLE_TIMOUT
         launch {
             // Check for reconnection key
-            session.remoteAddress.hashCode()
+            TODO()
         }
     }
 
@@ -27,9 +33,7 @@ val Websocket = Consumer<WsHandler> {
                 QUIDITY -> TODO()
                 EXISTENCE -> TODO()
                 ACTION -> TODO()
-                CHAT -> ex?.chat?.update(
-                    session.quidity()!!, packet.data as String
-                )?.let { m -> ex.sessions?.broadcast(CHAT, m) }
+                CHAT -> TODO()
                 PING -> session.send(Packet(PING, "pong").pack())
                 else -> throw UnauthorizedResponse(
                     "Client cannot make ${packet.dataType} requests.")
@@ -44,10 +48,7 @@ val Websocket = Consumer<WsHandler> {
                 ER_BAD_ID.first -> println("bad _id")
                 else -> println("close on $statusCode=$reason")
             }
-            session.quidity()?.also {
-                session.existence()?.sessions?.broadcast(EXIT, it, session.id)
-            }
-            DAO.removeSession(session)
+            TODO("CLOSE ACTION")
         }
     }
 
