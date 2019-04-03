@@ -31,6 +31,6 @@ fun main() = javalin.apply {
     }
 
     secret(this)
-
+    javalin.enableDebugLogging()
     start(getenv("PORT")?.toInt() ?: 7000.also { javalin.enableDebugLogging() })
 }.unit
