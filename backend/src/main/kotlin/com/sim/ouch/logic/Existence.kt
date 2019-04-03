@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.sim.ouch.DefaultNameGenerator
 import com.sim.ouch.IDGenerator
-import com.sim.ouch.web.Chat
-import com.sim.ouch.web.DAO
+import com.sim.ouch.web.*
 import org.bson.codecs.pojo.annotations.BsonId
 
 /** The simulation. */
@@ -20,7 +19,7 @@ import org.bson.codecs.pojo.annotations.BsonId
 )
 sealed class Existence {
 
-    @BsonId open val _id = EXISTENCE_ID_GEN.next()
+    @BsonId open val _id: EC = EXISTENCE_ID_GEN.next()
     var status: Status = Status.DRY
 
     abstract val name: String
@@ -28,6 +27,7 @@ sealed class Existence {
     abstract val chat: Chat
     /** The first [Quidity] to enter the [Existence]. */
     abstract val initialQuidity: Quidity
+    open val sessionTokens: MutableList<Key> = mutableListOf()
     open val quidities: MutableMap<String, Quidity> = mutableMapOf()
     open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
 
@@ -43,14 +43,14 @@ sealed class Existence {
 
     operator fun get(id: String) = quidities[id] ?: infraQuidities[id]
 
+    fun addSession(key: Key) = sessionTokens.add(key)
+
     enum class Status { DORMANT, WET, DRY }
 
     companion object {
         val EXISTENCE_ID_GEN = IDGenerator(10)
     }
 }
-
-val Existence.sessions get() = DAO.getSessions(_id)
 
 class DefaultExistence(
         override val initialQuidity: Quidity,

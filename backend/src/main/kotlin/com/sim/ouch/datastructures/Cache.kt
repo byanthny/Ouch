@@ -107,3 +107,77 @@ class LruKache<K, V>(
         const val DEFAULT_TRASH_SIZE = 1
     }
 }
+
+class ExpiringKache<K, V>(
+    val maxSize: Int = DEFAULT_MAX,
+    val minSize: Int = DEFAULT_MIN,
+    val trashSize: Int = DEFAULT_TRASH_SIZE
+) : UsagePriorityKache<K, V>() {
+    private val map = ConcurrentHashMap<K, V>()
+    override val size get() = map.size
+    override val entries get() = map.entries
+    override val keys get() = map.keys
+    override val values get() = map.values
+    override val usageRanks = mutableListOf<K>()
+    override val evictTarget get() = usageRanks.removeAt(0)
+
+    init {
+        if (trashSize < 1) throw IllegalArgumentException(
+            "TrashSize must be greater than 0.")
+    }
+
+    /**
+     * Set a [Key][K]-[Value][V] pair in cache. If the cache is at [maxSize],
+     * remove [trashSize]-number [entries][evictTarget] then add the new entry.
+     * @return the [value][V] previously at [key]
+     */
+    override fun put(key: K, value: V): V? {
+        if (key !in this) {
+            // Add key to usage ranks
+            usageRanks += key
+            // Downsize on max-size
+            if (size == maxSize) {
+                var i = 0
+                while (size > minSize && i++ < trashSize) evictTarget?.also {
+                    this.remove(it)
+                } ?: break
+            }
+        }
+        return map.put(key, value)
+    }
+
+    /**
+     * Retrieve a [value][V] and set to MOST recently used
+     *
+     * @return the [value][V] at [key] or null
+     */
+    override fun get(key: K): V? = map[key]?.also {
+        usageRanks -= key
+        usageRanks.add(key)
+    }
+
+    operator fun minusAssign(key: K) = map.minusAssign(
+        key).also { usageRanks.remove(key) }
+
+    override fun containsKey(key: K) = key in map
+
+    override fun containsValue(value: V) = map.containsValue(value)
+
+    override fun isEmpty() = map.isEmpty()
+
+    override fun clear() {
+        map.clear()
+        usageRanks.clear()
+    }
+
+    override fun putAll(from: Map<out K, V>) {
+        map.putAll(from)
+        usageRanks += from.keys
+    }
+
+    override fun remove(key: K): V? = map.remove(key)
+
+    companion object {
+        const val DEFAULT_TRASH_SIZE = 1
+    }
+}

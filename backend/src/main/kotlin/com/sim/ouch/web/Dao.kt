@@ -1,30 +1,28 @@
 package com.sim.ouch.web
 
-import com.sim.ouch.IDGenerator
-import com.sim.ouch.NOW
-import com.sim.ouch.datastructures.MutableBiMap
+import com.sim.ouch.datastructures.*
 import com.sim.ouch.logic.Existence
-import com.sim.ouch.logic.Existence.Status.DORMANT
-import com.sim.ouch.logic.Existence.Status.DRY
 import com.sim.ouch.logic.Quidity
 import io.javalin.websocket.WsSession
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import io.jsonwebtoken.*
+import io.jsonwebtoken.security.SignatureException
 import org.bson.codecs.pojo.annotations.BsonId
-import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.KMongoConfiguration
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.set
+import sun.misc.LRUCache
+import java.lang.IllegalArgumentException
+import java.time.Instant
+import java.util.*
+import javax.crypto.KeyGenerator
 
 
 val DAO: Dao by lazy { Dao() }
 private val mongo by lazy {
     KMongoConfiguration.extendedJsonMapper.enableDefaultTyping()
     KMongo.createClient(
-        "mongodb://jono:G3lassenheit@ds023523.mlab.com:23523/heroku_4f8vnwwf"
-    ).getDatabase("heroku_4f8vnwwf").coroutine
+        "mongodb://jono:G3lassenheit@ds023523.mlab.com:23523/heroku_4f8vnwwf")
+        .getDatabase("heroku_4f8vnwwf").coroutine
 }
 
 suspend fun WsSession.existence() = DAO.getExistence(id)
@@ -35,12 +33,9 @@ class Dao {
     /**
      *
      * @property _id The session key used for verification and reconnection
+     * @property idPair [Existence._id], [Quidity.id]
      */
-    data class SessionData(
-        @BsonId var _id: Key,
-        /** [Existence._id] -> [Quidity.id] */
-        var idPair: MutableMap<String, String> = mutableMapOf()
-    )
+    data class SessionData(@BsonId var _id: Key, var idPair: Pair<EC, QC>)
 
     /** Mongo DB [Existence] collection. */
     private val existences get() = mongo.getCollection<Existence>()
@@ -48,106 +43,24 @@ class Dao {
     private val sessionData = mongo.getCollection<SessionData>()
     /** Key -> [WsSession]? */
     private val keySessionMap = MutableBiMap<Key, WsSession>()
-
-    init {
-        // Dormant
-        launch {
-            while (true) {
-                val ids = mutableListOf<String>()
-                existences.distinct(Existence::_id).consumeEach {
-                    if (exSes[it]?.isEmpty() == true) ids += it
-                }
-                existences.updateMany(Existence::_id `in` ids,
-                    SetTo(Existence::status, DORMANT))
-                delay(1_000 * 60 * 5)
-            }
-        }
-        // Dead Keys
-        launch {
-            while (true) {
-                val ids = mutableListOf<String>()
-                existences.distinct(Existence::_id).consumeEach {
-                    if (exSes[it]?.isEmpty() == true) ids += it
-                }
-                existences.updateMany(Existence::_id `in` ids,
-                    SetTo(Existence::status, DORMANT))
-                delay(1_000 * 60 * 5)
-            }
-        }
-    }
-
-    /** contains [Existence._id]. */
-    suspend fun contains(exID: String) =
-        existences.findOne(Existence::_id eq exID) != null
+    /** Cache of keys waiting for reconnect. */
+    private val disconnectedKeys = ExpiringKache<Key, SessionData?>()
 
     /**
-     * Adds a new [WsSession] to an existing [Existence] and returns a new
-     * [Quidity] associated with this session.
+     * Add an [Existence] to the database, generate a key.
+     * `null` if a DB insert failed.
      */
-    suspend fun addSession(
-            session: WsSession,
-            existence: Existence,
-            name: String
-    ) : Quidity? {
-        return existences.findOne(Existence::_id eq existence._id)?.let {
-            if (existence.status == DORMANT) existence.status = DRY
-            existence.generateQuidity(name).also {
-                existence.enter(it)
-                existences.updateOneById(existence._id, existence)
-                sessions[session.id] = existence._id to it.id
-                exSes.getOrPut(existence._id) { mutableListOf() }.add(session)
-            }
-        }
-    }
-
-    suspend fun newExistence(session: WsSession, existence: Existence)
-            : Existence? {
-        existences.insertOne(existence).also {
-            existence.also {
-                sessions[session.id] = existence._id to it.initialQuidity.id
-                exSes[existence._id] = mutableListOf(session)
-            }
-        }
-        return existence
-    }
-
-    suspend fun getExistence(sessionID: String) =
-            sessions[sessionID]?.first?.let {
-        existences.findOne(Existence::_id eq it)
-    }
-
-    fun giveKey(session: WsSession): String {
-        val key = sessionKeyGen.next()
-        sessionKeys[key] = session
-        return key
-    }
-
-    suspend fun getQuidity(sessionID: String) = getExistence(sessionID)?.let {
-        it.quidities[sessions[sessionID]!!.second]
-    }
-
-    /**
-     * Returns the [Existence] matching the [id]. If the [Existence] is dormant,
-     * it is moved to the active map.
-     */
-    suspend fun getEx(id: String) = existences.findOne(Existence::_id eq id)
-
-    fun getSessions(exID: String) = exSes[exID]
-
-    val numSessions get() = sessions.size
-    val exList: List<Existence> = runBlocking { existences.find().toList() }
-    val dexList: List<Existence> = runBlocking {
-        existences.find(Existence::status eq DORMANT).toList()
-    }
-
-    suspend fun removeSession(session: WsSession) {
-        val (exID, qID) = sessions.remove(session.id)!!
-        sessionKeys.forEach { s , _ -> sessionKeys.remove(s) }
-        exSes[exID]?.remove(session)
-        val ex = existences.findOneById(exID) ?: return
-        if (exSes[exID]?.isEmpty() != false) {
-            existences.updateOneById(exID, ex.apply { status = DORMANT })
-        }
+    suspend fun addExistence(
+        session: WsSession, existence: Existence
+    ) : Triple<Key, Existence, Quidity>? {
+        // Generate new Key
+        val key = keyGen(session, existence, existence.initialQuidity)
+        // Add key to Existence
+        existence.addSession(key)
+        // Add key to keySessionMap
+        
+        // Add SessionData & Existence to database
+        return Triple(key, existence, existence.initialQuidity)
     }
 
 }
@@ -155,7 +68,39 @@ class Dao {
 data class StatusPacket(val ex: List<Existence>, val ses: Int)
 
 typealias Key = String
+typealias ID = String
+typealias EC = ID
+typealias QC = ID
 
-fun keyGen(session: WsSession): String {
+fun keyGen(session: WsSession, existence: Existence, quidity: Quidity): Key =
+    Jwts.builder().apply {
+        setSubject("quidity.${quidity.id}")
+        claim("exID", existence._id)
+        claim("ip", session.remoteAddress.address.address)
+        // setExpiration(Date.from(Instant.now().plusSeconds(60 * 30))) TODO?
+        signWith(instanceKey, SignatureAlgorithm.HS256)
+    }.compact()
 
+/** Returns `null` on invalid token. */
+fun readKey(session: WsSession, token: String) : Pair<EC, QC>? {
+    try {
+        val claims = tokenParser.parseClaimsJws(token).body
+        require(claims["ip"] == session.remoteAddress.address.address)
+        require(claims["exID"] is String)
+        require(claims.subject.matches(Regex("quidity\\.\\d{10}")))
+        return claims["exID"] as String to
+            claims.subject.removePrefix("quidity.")
+    } catch (e: SignatureException) {
+        return null
+    } catch (e: ExpiredJwtException) {
+        return null
+    } catch (e: JwtException) {
+        return null
+    } catch (e: IllegalArgumentException) {
+        return null
+    }
 }
+
+private val tokenParser get() = Jwts.parser().setSigningKey(instanceKey)!!
+private val instanceKey
+    by lazy { KeyGenerator.getInstance("HMAC").generateKey()!! }
