@@ -286,9 +286,9 @@ class Dao {
     }
 
     private val tokenParser get() = Jwts.parser().setSigningKey(instanceKey)!!
+    data class Key(val key: ByteArray)
     private val instanceKey by lazy {
         runBlocking {
-            class Key(val key: ByteArray)
             mongo.getCollection<Key>().let { c ->
                 c.find().first()?.let { SecretKeySpec(it.key, "HMACSHA256") }
                     ?: let {
