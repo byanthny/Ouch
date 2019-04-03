@@ -21,7 +21,7 @@ module.exports = function(grunt) {
 
             my_target: {
                 files: {
-                    'docs/js/ouch.min.js': ['frontend/js/variables.js','frontend/js/style.js','frontend/js/socket.js', 'frontend/js/action.js'],
+                    'docs/js/ouch.min.js': ['frontend/js/variables.js','frontend/js/style.js', 'frontend/js/packets.js', 'frontend/js/socket.js', 'frontend/js/action.js'],
                 }
             }
         },
@@ -32,7 +32,7 @@ module.exports = function(grunt) {
             },
             dist: {
                 files: {
-                    'docs/index.html': 'frontend/**/*.html'
+                    'docs/index.html': 'frontend/index.html'
                 }
             }
         },
