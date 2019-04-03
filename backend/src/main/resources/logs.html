@@ -1,0 +1,40 @@
+<head>
+    <meta charset="utf-8">
+    <title>untitled</title>
+    <style type="text/css" media="screen">
+        .container {
+            width: 100%;
+            overflow: auto;
+            background: #ffffff;
+        }
+        .subContainer {
+            float: left;
+            width: 40%;
+            margin: 0 5%;
+            background: #ffffff;
+        }
+    </style>
+    <script th:inline="javascript">
+        function showLog(id, list, date) {
+            document.getElementById("log_name").textContent = "ID: " + id;
+            document.getElementById("log_date").textContent = "DATE: " + date;
+            document.getElementById("log_body").textContent = list.join(" <br> ")
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="subContainer">
+        <select name="NAME" multiple="multiple" th:each="log: ${logs}"
+                style="width: inherit"
+                th:onchange="'showLog(\'' + ${log._id} +'\',\''+ ${log.loog} +'\',\''+${log.date} + '\');'">
+            <option id="${log._id}" th:text="${log.date}"></option>
+        </select>
+    </div>
+    <div id="right" class="subContainer">
+        <h2 id="log_name"></h2>
+        <h4 id="log_date"></h4>
+        <p id="log_body"></p>
+    </div>
+</div>
+</body>

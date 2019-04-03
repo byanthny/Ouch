@@ -3,10 +3,16 @@ package com.sim.ouch
 import com.sim.ouch.logic.Quidity
 import com.sim.ouch.web.*
 import io.javalin.Javalin
+import kotlinx.coroutines.runBlocking
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
 import java.lang.System.getenv
 
+
+enum class EndPoints(val point: String) {
+    ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status"),
+    ENDPOINTS("/map"), LOGS("/logs")
+}
 
 val ER_NO_NAME  = 4004 to "no name"
 val ER_BAD_ID   = 4005 to "unknown ID"
@@ -22,9 +28,8 @@ fun main() = javalin.apply {
 
     ws(EndPoints.SOCKET.point, Websocket)
 
-    get(EndPoints.STATUS.point) { launch {
-        val dex = DAO.getDormant()
-        val ex = DAO.getLive()
+    get(EndPoints.STATUS.point) {
+        val (dex, ex) = runBlocking { DAO.getDormant() to DAO.getLive() }
         val ss = DAO.liveSessionsCount
         val html = createHTML().apply {
             body {
@@ -50,7 +55,10 @@ fun main() = javalin.apply {
             }
         }.finalize()
         it.html(html)
-    }}
+    }
+    get(EndPoints.LOGS.point) {
+        it.render("/logs.html", mapOf("logs" to runBlocking { DAO.getLogs() }))
+    }
     get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
     get(EndPoints.ACTIONS.point) { it.result(Quidity.Action.values().json()) }
     get(EndPoints.ENDPOINTS.point) { it.render("/map.html") }

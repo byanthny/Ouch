@@ -41,8 +41,13 @@ private val mongo by lazy {
         .getDatabase("heroku_4f8vnwwf").coroutine
 }
 
-//suspend fun WsSession.existence() = TODO()
-//suspend fun WsSession.quidity() = TODO()
+suspend fun WsSession.existence() = DAO.getToken(this)
+    ?.let { token -> DAO.getSessionData(token)
+        ?.let { DAO.getExistence(it.idPair.first) } }
+suspend fun WsSession.quidity() = DAO.getToken(this)
+    ?.let { t -> DAO.getSessionData(t)?.idPair }
+    ?.let { (ec, qc) -> DAO.getExistence(ec)
+        ?.let { e -> e.quidities[qc] } }
 
 class Dao {
 
@@ -184,7 +189,11 @@ class Dao {
     /** Get [DORMANT] Existences */
     suspend fun getDormant() = existences.find(Existence::status eq DORMANT).toList()
     suspend fun getSessionData(token: Token) = sessionData.findOneById(token)
+    suspend fun getSessionData(session: WsSession) =
+        sessionTokens.fromValue(session)?.let { sessionData.findOneById(it) }
+    fun getToken(session: WsSession) = sessionTokens.fromValue(session)
     val liveSessionsCount get() = sessionTokens.size
+    suspend fun getLogs() = logger.logCollection.find().toList()
 
     /** Removes old dormant [Existence] */
     private suspend fun cleanDB(): Boolean {
@@ -196,18 +205,18 @@ class Dao {
         }
     }
 
-    /** A [Slogger] which saves a [Log] to the `logs` database collection. */
-    private class DaoLogger : Slogger("DAO") {
-        private data class Log(
+    /** A [Slogger] which saves a [Log] to the `logs` logCollection collection. */
+    class DaoLogger : Slogger("DAO") {
+        data class Log(
             @BsonId val _id: ID = next(),
-            val log: MutableList<String> = mutableListOf(),
+            val loog: MutableList<String> = mutableListOf(),
             val date: OffsetDateTime = OffsetDateTime.now()
         ) {
             companion object idGen : IDGenerator(10)
-            operator fun invoke(string: String) = string.also { log.add(it) }
-            val size get() = log.size
+            operator fun invoke(string: String) = string.also { loog.add(it) }
+            val size get() = loog.size
         }
-        private val database by lazy { mongo.getCollection<Log>() }
+        val logCollection by lazy { mongo.getCollection<Log>() }
         private val log: Log = Log()
 
         suspend fun <F: KFunction<*>> info(any: Any? = "", function: F? = null) =
@@ -221,7 +230,7 @@ class Dao {
         ) {
             println(log("[${NOW_STR()}] [$threadName] [$name] ${
             f?.let { "[${f.name}]" } ?: ""} [$level] $any"))
-            if (log.size % 100 == 0) database.save(log)
+            if (log.size % 100 == 0) logCollection.save(log)
         }
     }
 
