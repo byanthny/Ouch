@@ -187,6 +187,14 @@ class Dao {
         } ?: logger.err("Failed to remove session from Existence", Dao::disconnect)
     }
 
+    /**
+     * Save the [Existence] to the database. Use this only when a serialized
+     * property is changed.
+     */
+    suspend fun saveExistence(existence: Existence): Boolean {
+        return existences.save(existence)?.wasAcknowledged() ?: false
+    }
+
     suspend fun getExistence(id: EC) = existences.findOneById(id)
     /** Get non-[DORMANT] Existences */
     suspend fun getLive() = existences.find(Existence::status ne DORMANT).toList()
