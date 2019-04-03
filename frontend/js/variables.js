@@ -38,7 +38,7 @@ var here = true;
 var usr;
 
 // Base endpoint
-const url_base = 'sim-ouch.herokuapp.com';
+var url_base = 'sim-ouch.herokuapp.com';
 //Socket
 var url_ws = 'wss://' + url_base + '/ws';
 var connection;
@@ -51,3 +51,5 @@ var close_code = {
     ER_BAD_TOKEN : 4007,
     ER_INTERNAL_GENERIC : 4010
 };
+
+var ping_packet = '{"dataType":"PING","data":"PING"}';

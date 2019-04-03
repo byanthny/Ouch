@@ -1,43 +1,44 @@
-var login = false; //Current state being displayed
-var action;
+/* Handles all actions regarding styling
+ * ex. changing to dark mode or animations
+ * style.js
+ */
 
-//HTML elemnts
-var exist_input = document.getElementById("exist-input");
-var user_input = document.getElementById("user-input");
-var chat = document.getElementById("chat");
-var leaderboard = document.getElementsByClassName("leaderboard")[0];
-
+/* Toggles between login and main page */
 function switchState() {
-    document.getElementById("submit-button").classList.toggle("hidden");
-    document.getElementById("box").classList.toggle("opacity");
-    document.getElementById("user-input").classList.toggle("login");
-    document.getElementById("exist-input").classList.toggle("login");
-    document.getElementById("header").classList.toggle("login");
-    document.getElementById("exist-input").classList.toggle("opacity");
-    document.getElementById("exist-input").classList.toggle("disappear");
-    document.getElementById("level").classList.toggle("opacity");
-    document.getElementsByClassName("leaderboard")[0].classList.toggle("opacity");
+    if (reconnect_token != null) {
+        reconnect_button.classList.toggle("hidden");
+    } else submit_button.classList.toggle("hidden");
+    box.classList.toggle("opacity");
+    user_input.classList.toggle("login");
+    exist_input.classList.toggle("login");
+    header.classList.toggle("login");
+    exist_input.classList.toggle("opacity");
+    exist_input.classList.toggle("disappear");
+    level.classList.toggle("opacity");
+    leaderboard.classList.toggle("opacity");
     login = !login;
 }
 
+
+/* Toggles predictive search panel */
 function switchSearch() {
-    document.getElementById("search").classList.toggle("opacity");
-    document.getElementById("search").classList.toggle("disappear");
-    document.getElementById("chat").classList.toggle("opacity");
-    document.getElementById("chat").classList.toggle("disappear");
+    search.classList.toggle("opacity");
+    search.classList.toggle("disappear");
+    chat.classList.toggle("opacity");
+    chat.classList.toggle("disappear");
 }
 
+/* Toggles Ouch theme between dark and light mode */
 function switchDark() {
-    document.getElementById("ouch").classList.toggle("dark");
-    document.getElementById("header").classList.toggle("dark");
-
-    //TODO update all chat to dark
+    ouch.classList.toggle("dark");
+    header.classList.toggle("dark");
+    chat.classList.toggle("dark");
 }
 
 function togglePopUp() {
-    document.getElementById("help").classList.toggle("opacity");
+    help.classList.toggle("opacity");
     setTimeout(function () {
-        document.getElementById("help").classList.toggle("hidden");
+        help.classList.toggle("hidden");
     }, 1000);
 }
 
@@ -45,32 +46,50 @@ document.getElementsByClassName("close")[0].onclick = function() {
     togglePopUp();
 };
 
-//autoscroll for chat
-//TODO MAKE SCROLL BETER
-window.setInterval(function() {
-    var elem = document.getElementById('chat');
-    elem.scrollTop = elem.scrollHeight;
-}, 0);
+//TODO make scroll stay in place if you scroll up
+/* Will scroll chat window to bottom */
+function scrollBottom() {
+    chat.scrollTop = chat.scrollHeight;
+}
 
+/* Reset Ouch back to the login screen. */
 function reset() {
     switchState();
-    document.getElementById("indicator").classList.toggle("connected");
-    document.getElementById("world-value").innerHTML = "offline";
+    indicator.classList.toggle("connected");
+    world_value.innerHTML = "offline";
     leaderboard.innerHTML = "";
     chat.innerHTML = "";
-    document.getElementById('user-input').value = "";
+    user_input.value = "";
 }
 
-function shakeUsername() {
-    user_input.classList.add("shake");
+/* Used to create shake animation on given element
+ * @param the HTML element to be "shaken"
+ */
+function shake(toShake) {
+    toShake.classList.add("shake");
     setTimeout(function () {
-        user_input.classList.remove("shake");
+        toShake.classList.remove("shake");
     }, 1000);
 }
+/* Creates new chat message based on type
+ * @param
+ */
+function addChat(name, content, type) {
 
-function shakeExist() {
-    exist_input.classList.add("shake");
-    setTimeout(function () {
-        exist_input.classList.remove("shake");
-    }, 1000);
+    var  html = "";
+
+    if(type === "system") {
+        html = '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">'
+            + name + '</span> '+content+'</p></div>';
+    } else if (type === "other") {
+        html =
+            '<div class="chat-msg-cont"><p class="chat-msg '+type+'"><span style="font-weight: bold;">'
+            + name + ': </span>' + content + '</p></div>';
+    } else if (type === "user") {
+        html =
+            '<div class="chat-msg-cont"><p class="chat-msg user">' + content + '</p></div>';
+    }
+
+    chat.innerHTML += html;
+
 }

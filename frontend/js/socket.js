@@ -1,124 +1,120 @@
-var nickname = 'user';
-var id = 'id';
+/* Handles all interactions with the server
+ * through web sockets
+ * socket.js
+ */
 
-var usr;
+var keepConnectionOpen =  setTimeout(checkOpen(), 3000); //900000
 
-var url = 'wss://sim-ouch.herokuapp.com/ws?name=user';//&exID=id';
-var connection;
-
-var close_code = {
-    ER_NO_NAME: 4004,
-    ER_BAD_ID: 4005
+//TODO keep connection open, close after a certain amount of time and when connection is closed
+function checkOpen() {
+    console.log("I'm called");
+    if(here) {
+        console.log("sending heartbeat");
+        //connection.send(ping_packet);
+        keepConnectionOpen;
+    } else {
+        //connection.close();
+        console.log("I am not here");
+        clearTimeout(keepConnectionOpen);
+    }
 };
 
-//TODO  keep connection open
-//TODO enter on  username  or existence
+//I am here
+document.onmousemove = function(){here=true;};
+document.onkeydown = function(){here=true;};
 
-function play() {
+function play(endpoint) {
 
-    connection = new WebSocket(url);
+    connection = new WebSocket(endpoint);
 
-    //On conncetion open
-    connection.onopen = () => {
+    //On connection open
+    connection.onopen = function() {
         switchState();
-        document.getElementById("indicator").classList.toggle("connected");
-
-        document.getElementById('user-input').value = "";
-        document.getElementById('user-input').placeholder = "enter command or message";
-
+        indicator.classList.toggle("await");
+        user_input.value = "";
+        user_input.placeholder = "enter command or message";
+        keepConnectionOpen;
     };
 
     //If  there is an  error
-    connection.onerror = error => {
+    connection.onerror = function(error) {
         //create error message
-        alert(`WebSocket error: ${error}`);
+        alert('WebSocket error:'+error);
     };
 
-    //On message recieved from socket
-    connection.onmessage = e => {
+    //On message received from socket
+    connection.onmessage = function(e) {
 
-        //parse the scoket data
+        //parse the socket data
         var JSONdata = JSON.parse(e.data);
         //parse JSONdata.data
         var parsedData = JSON.parse(JSONdata.data);
 
         //Check if datatype us INIT
-        if (JSONdata.dataType == "INIT") {
-            //Save init data to usr in case needed later
-            usr = parsedData;
+        switch (JSONdata.dataType) {
+            case "INIT":
+                handleInit(parsedData);
+                break;
+            case "CHAT": //if message is from current user
+                if (parsedData.authorName === nickname) {
+                    addChat("", parsedData.content, "user");
+                    scrollBottom();
+                }
+                //if message is from new user
+                else {
+                    addChat(parsedData.authorName, parsedData.content, "other");
+                    scrollBottom();
+                }
+                //New user has entered
+                break;
+            case "ENTER": //Add new user to leaderboard
+                leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></p></div>';
 
-            //Update level with data received
-            document.getElementById("level").innerHTML = nickname + '<span id="world-value" style="font-weight: normal;"> '
-                + parsedData.existence.initialQuidity.ouch.degree + '</span>';
-            //Set existence ID
-            document.getElementById("world-value").innerHTML = parsedData.existence._id;
-
-            //load in quids in leaderboard
-            var usersArray = parsedData.existence.quidities;
-
-            //Add quids to leaderboard
-            for (var quid in usersArray) {
-                leaderboard.innerHTML += '<div class="data-leaderboard ' + usersArray[quid].id +
-                    '">' + usersArray[quid].name +
-                    ' <span class="normal">' + usersArray[quid].ouch.degree +
-                    '</span></div>';
-            }
-
-        }
-
-        //if chat then add items
-        else if (JSONdata.dataType === "CHAT") {
-
-            //if message is from current user
-            if (parsedData.authorName === nickname) {
-                document.getElementById('chat').innerHTML +=
-                    '<p class="chat-msg user">' + parsedData.content + '</p>';
-            }
-            //if message is from new user
-            else {
-                document.getElementById('chat').innerHTML +=
-                    '<p class="chat-msg"><span style="font-weight: bold;">' + parsedData.authorName + ': </span>' + parsedData.content + '</p>';
-            }
-
-            //New user has entered
-        } else if (JSONdata.dataType === "ENTER") {
-            //Add new user to leaderboard
-            leaderboard.innerHTML += '<div class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></div>';
-
-            document.getElementById('chat').innerHTML +=
-                '<p class="chat-msg system"><span style="font-weight: bold;">' +
-                parsedData.name + '</span> has joined the Existence. </p>';
-
-        } else if (JSONdata.dataType === "EXIT") {
-            var quidleaderbaord = document.getElementByClassName(parsedData.id)[0]
-            quidleaderbaord.parentNode.removeChild(quidleaderbaord);
-
-            document.getElementById('chat').innerHTML +=
-                '<p class="chat-msg system"><span style="font-weight: bold;">' +
-                parsedData.name + '</span> has left the Existence.</p>';
-        }
-
-        //Some unkown dataType
-        else {
-            console.log("Unkown dataType");
-            console.log(e.data);
+                addChat(parsedData.name, "has joined the Existence.", "system");
+                scrollBottom();
+                break;
+            case "EXIT":
+                var quidleaderboard = document.getElementsByClassName(parsedData.id)[0]
+                quidleaderboard.parentNode.removeChild(quidleaderboard);
+                addChat(parsedData.name, "has left the Existence.", "system");
+                scrollBottom();
+                break;
+            default:
+                console.log("Unknown dataType");
+                console.log(e.data);
+                break;
         }
     };
 
-    connection.onclose = (closeEvent) => {
+    connection.onclose = function(closeEvent) {
         //switch back to login
         reset();
-        if (closeEvent.code === close_code.ER_BAD_ID) {
-            document.getElementById('exist-input').placeholder = "Unknown ID";
-            document.getElementById('user-input').value = nickname;
-
-            shakeExist();
-
-        } else if (closeEvent.code === close_code.ER_NO_NAME) {
-            //document.getElementById('user-input').placeholder = "Must provide a name";
+        switch (closeEvent.code) {
+            case close_code.ER_NO_NAME:
+                shake(user_input);
+                break;
+            case close_code.ER_BAD_ID:
+                exist_input.value = "";
+                exist_input.placeholder = "Unknown ID";
+                user_input.value = nickname;
+                shake(exist_input);
+                break;
+            case close_code.ER_INTERNAL_GENERIC:
+                alert("Sorry, an internal error occurred. Please try again");
+                break;
+            case close_code.ER_BAD_TOKEN:
+                reconnect_token = null;
+                break;
+            default:
+                reconnect_button.onclick();
+                break;
         }
-
         connection = null;
+        here = false;
     }
+}
 
+//disconnect from server on page close or refresh
+window.onbeforeunload = function () {
+    connection.close();
 }

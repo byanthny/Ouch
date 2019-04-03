@@ -1,4 +1,7 @@
 function checkInput(clicked) {
+
+    here = true;
+
     //not login screen
     if (event.key === 13 || event.key === "Enter" || clicked === true) {
         var input = user_input.value;
@@ -6,9 +9,14 @@ function checkInput(clicked) {
         //not lpgin screen
         if (!login) {
             event.preventDefault();
-            if (input.charAt(0) === "-") {
+            //If no input
+            if(input === "") {
+                shake(user_input);
+            }
+            //If command
+            else if (input.charAt(0) === "-") {
                 switch (input) {
-                    case "-darkmode":
+                    case "-theme":
                         switchDark();
                         break;
                     case "-exit":
@@ -16,10 +24,12 @@ function checkInput(clicked) {
                     default:
                         console.log("action " + input);
                 }
-            } else {
+            }
+            //If chat
+            else {
                 //console.log("chat");
                 if (connection != null) {
-                    connection.send('{"dataType":"CHAT","data":"' + input + '"}');
+                    connection.send(makeChatMessage(input));
                 }
             }
             user_input.value = "";
@@ -28,7 +38,7 @@ function checkInput(clicked) {
         //login screen
         else {
             if (input === "") {
-                shakeUsername();
+                shake(user_input);
                 return false;
             } else {
                 return true;
@@ -39,32 +49,38 @@ function checkInput(clicked) {
 
 user_input.addEventListener("keydown", function (event) {
     if(checkInput()) {
-        document.getElementById("submit-button").click();
+        submit_button.click();
     }
 });
 
 exist_input.addEventListener("keydown", function (event) {
     if (event.key === 13 || event.key === "Enter") {
         if(checkInput()) {
-            document.getElementById("submit-button").click();
+            submit_button.click();
         }
     }
 });
 
 //On button click update connected and stuff
-document.getElementById("submit-button").onclick = function () {
+// Reconnect
+submit_button.onclick = function () {
 
-    nickname = document.getElementById('user-input').value;
-    id = document.getElementById('exist-input').value;
+    nickname = user_input.value;
+    id = exist_input.value;
 
     if (checkInput(true)) {
-
         if (id === "") {
-            url = 'wss://sim-ouch.herokuapp.com/ws?name=' + nickname;
+            play(url_ws + '?name=' + nickname);
         } else {
-            url = 'wss://sim-ouch.herokuapp.com/ws?name=' + nickname + '&exID=' + id;
+            play(url_ws + '?name=' + nickname + '&exID=' + id);
         }
-
-        play();
     }
+};
+
+reconnect_button.onclick = function () {
+    play(url_ws + "?token=" + reconnect_token);
+};
+
+document.onmousemove = function(){
+    here = true;
 };
