@@ -18,6 +18,7 @@ function handleInit(init_packet) {
         + quiddity.ouch.degree + '</span>';
     //Set existence ID
     world_value.innerHTML = init_packet.existence._id;
+    indicator.classList.toggle("await");
     indicator.classList.toggle("connected");
 
     //load in quids in leaderboard
