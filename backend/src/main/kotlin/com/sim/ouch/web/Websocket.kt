@@ -74,6 +74,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
                 CHAT -> {
                     qd?.let { ex?.chat?.update(it, packet.data as String) }
                         ?.let { m -> ex?.broadcast(chatPacket(m)) }
+                    ex?.also { DAO.saveExistence(it) }
                 }
                 PING -> session.send(Packet(PING, "pong").pack())
                 else -> throw UnauthorizedResponse(
