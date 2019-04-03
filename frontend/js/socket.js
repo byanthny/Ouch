@@ -3,14 +3,14 @@
  * socket.js
  */
 
-var keepConnectionOpen =  setTimeout(checkOpen(), 3000); //900000
+var keepConnectionOpen;//900000
 
 //TODO keep connection open, close after a certain amount of time and when connection is closed
 function checkOpen() {
     console.log("I'm called");
     if(here) {
         console.log("sending heartbeat");
-        //connection.send(ping_packet);
+        connection.send(ping_packet);
         keepConnectionOpen;
     } else {
         //connection.close();
@@ -33,7 +33,7 @@ function play(endpoint) {
         indicator.classList.toggle("await");
         user_input.value = "";
         user_input.placeholder = "enter command or message";
-        keepConnectionOpen;
+        keepConnectionOpen =  setTimeout(checkOpen(), 3000);
     };
 
     //If  there is an  error
@@ -50,7 +50,7 @@ function play(endpoint) {
         //parse JSONdata.data
         var parsedData = JSON.parse(JSONdata.data);
 
-        //Check if datatype us INIT
+        //Check if datatype is INIT
         switch (JSONdata.dataType) {
             case "INIT":
                 handleInit(parsedData);
