@@ -8,7 +8,7 @@ function checkInput(clicked) {
             event.preventDefault();
             if (input.charAt(0) === "-") {
                 switch (input) {
-                    case "-darkmode":
+                    case "-theme":
                         switchDark();
                         break;
                     case "-exit":
