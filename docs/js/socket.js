@@ -1,18 +1,12 @@
-var nickname = 'user';
-var id = 'id';
-
-var usr;
-
-var url = 'wss://sim-ouch.herokuapp.com/ws?name=user';//&exID=id';
-var connection;
-
-var close_code = {
-    ER_NO_NAME: 4004,
-    ER_BAD_ID: 4005,
-    ER_INTERNAL_GENERIC: 4010
-};
+/* Handles all interactions with the server
+ * through web sockets
+ * socket.js
+ */
 
 //TODO keep connection open, close after a certain amount of time and when connection is closed
+function keepConnectionOpen() {
+
+}
 
 function play() {
 
@@ -71,15 +65,13 @@ function play() {
 
             //if message is from current user
             if (parsedData.authorName === nickname) {
-                document.getElementById('chat').innerHTML +=
-                    '<div class="chat-msg-cont"><p class="chat-msg right">' + parsedData.content + '</p></div>';
+                addChat("", parsedData.content,"user");
                 scrollBottom();
             }
             //if message is from new user
             else {
-                document.getElementById('chat').innerHTML +=
-                    '<div class="chat-msg-cont"><p class="chat-msg"><span style="font-weight: bold;">' + parsedData.authorName + ': </span>' + parsedData.content + '</p></div>';
-                    scrollBottom();
+                addChat(parsedData.authorName, parsedData.content, "other");
+                scrollBottom();
             }
 
             //New user has entered
@@ -87,18 +79,13 @@ function play() {
             //Add new user to leaderboard
             leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></p></div>';
 
-            document.getElementById('chat').innerHTML +=
-                '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">' +
-                parsedData.name + '</span> has joined the Existence. </p></div>';
-                scrollBottom();
+            addChat(parsedData.name, "has joined the Existence.", "system");
+            scrollBottom();
 
         } else if (JSONdata.dataType === "EXIT") {
             var quidleaderboard = document.getElementsByClassName(parsedData.id)[0]
             quidleaderboard.parentNode.removeChild(quidleaderboard);
-
-            document.getElementById('chat').innerHTML +=
-                '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">' +
-                parsedData.name + '</span> has left the Existence.</p></div>';
+            addChat(parsedData.name, "has left the Existence.", "system");
             scrollBottom();
         }
 
