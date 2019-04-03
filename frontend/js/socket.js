@@ -106,8 +106,11 @@ function play(endpoint) {
                 reconnect_token = null;
                 break;
             default:
-                reconnect_button.onclick();
-                break;
+                if(!usr_disconnected) {
+                    reconnect_button.onclick();
+                    break;
+                }
+                usr_disconnected = false;
         }
         connection = null;
         here = false;

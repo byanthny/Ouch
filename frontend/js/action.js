@@ -20,7 +20,9 @@ function checkInput(clicked) {
                         switchDark();
                         break;
                     case "-exit":
+                        usr_disconnected = true;
                         connection.close();
+                        break;
                     default:
                         console.log("action " + input);
                 }
