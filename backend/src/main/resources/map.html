@@ -65,7 +65,8 @@
         means all <code md-pos="622-629">Packets</code>
         when sent by the backend have a <code md-pos="666-674">dataType</code>
         and a JSON-STRING <code md-pos="697-701">data</code>.</strong></p>
-<h2 _id="connecting" md-pos="711-721"><a href="#connecting" name="connecting">Connecting</a>
+<h2 _id="connecting" md-pos="711-721"><a href="#connecting"
+                                         name="connecting">Connecting</a>
 </h2>
 <ol>
     <li md-pos="723-1176" class="p">
@@ -86,17 +87,16 @@
             no <code md-pos="1153-1162">Existence</code> was found.</p>
     </li>
     <li md-pos="1181-1320" class="p">
-        <p md-pos="1184-1320" class="p">On successful connection, Server sends
-            the <code md-pos="1229-1238">Existence</code> and the <code
-                    md-pos="1251-1258">Quidity</code>
-            associated with the new user:
-            At first it looks like this:</p>
+        <p md-pos="1184-1320" class="p">
+            On successful connection, Server sends
+            the <code md-pos="1229-1238">Existence</code> and the
+            <code md-pos="1251-1258">Quidity</code> associated with the new user:
+            At first it looks like this:
+        </p>
     </li>
 </ol>
-<pre md-pos="1320-1747"><code class="json" md-pos="1328-1743">{
-  &quot;dataType&quot;: &quot;INIT&quot;,
-  &quot;data&quot;: &quot;{\&quot;existence\&quot;:{\&quot;initialQuidity\&quot;:{\&quot;ouch\&quot;:{\&quot;degree\&quot;:0},\&quot;name\&quot;:\&quot;name\&quot;,\&quot;_id\&quot;:\&quot;2V1HQG94VE\&quot;},\&quot;capacity\&quot;:-1,\&quot;name\&quot;:\&quot;gyauxo\&quot;,\&quot;_id\&quot;:\&quot;S9PLVMQCL6\&quot;,\&quot;status\&quot;:\&quot;DRY\&quot;,\&quot;quidities\&quot;:{\&quot;2V1HQG94VE\&quot;:{\&quot;ouch\&quot;:{\&quot;degree\&quot;:0},\&quot;name\&quot;:\&quot;name\&quot;,\&quot;_id\&quot;:\&quot;2V1HQG94VE\&quot;}},\&quot;infraQuidities\&quot;:{}},\&quot;quidity\&quot;:{\&quot;ouch\&quot;:{\&quot;degree\&quot;:0},\&quot;name\&quot;:\&quot;name\&quot;,\&quot;_id\&quot;:\&quot;2V1HQG94VE\&quot;}}&quot;
-}
+<pre md-pos="1320-1747"><code class="json" md-pos="1328-1743">
+ TODO
 </code></pre>
 <p md-pos="1747-1786">Parsing <code md-pos="1757-1761">data</code> again will
     result in:</p>
@@ -163,7 +163,7 @@
 </code></pre>
 <h2 _id="Ping-Pong Heartbeat">Ping-Pong Heartbeat</h2>
 <ol>
-    <li> Client sends PING heartbeat on regular 15 min interval. </li>
+    <li> Client sends PING heartbeat on regular 15 min interval.</li>
 </ol>
 <pre><code clas="json">
     {
@@ -171,9 +171,11 @@
         "data": "PING" // anything can go here doesn't matter
     }
 </code></pre>
-<ol><li> Server responds with another PING heartbeat to confirm.</li></ol>
 <ol>
-    <li> Client sends PING heartbeat on regular (under 5 min) interval. </li>
+    <li> Server responds with another PING heartbeat to confirm.</li>
+</ol>
+<ol>
+    <li> Client sends PING heartbeat on regular (under 5 min) interval.</li>
 </ol>
 <pre><code clas="json">
     {

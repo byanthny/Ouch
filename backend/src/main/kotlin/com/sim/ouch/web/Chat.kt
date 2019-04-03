@@ -2,6 +2,10 @@ package com.sim.ouch.web
 
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quidity
+import com.sim.ouch.web.Packet.DataType.CHAT
+
+/** An easy way to make an outgoing typed [Packet] with a message. */
+fun chatPacket(message: Chat.Message) = Packet(CHAT, message)
 
 class Chat(@Transient val existence: Existence) {
 

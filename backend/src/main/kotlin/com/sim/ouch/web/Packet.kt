@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quidity
+import com.sim.ouch.web.Packet.DataType.INIT
 import io.javalin.websocket.WsSession
 
 val gson: Gson by lazy { GsonBuilder().create() }
@@ -15,7 +16,7 @@ inline fun <reified T> quickLoad(json: String) =
 
 /** Loads a Packet from a JSON */
 fun readPacket(json: String) = quickLoad<Packet>(json)
-//
+
 /**
  * A Packet is used to send data in a uniform matter
  * between the Server & clients
@@ -54,8 +55,11 @@ data class Packet(
 data class InitPacket(
         val existence: Existence,
         val quidity: Quidity,
-        val key: String
+        val token: String
 )
+
+fun WsSession.initWith(existence: Existence, quidity: Quidity, token: String) =
+        send(Packet(INIT, InitPacket(existence, quidity, token)).pack())
 
 fun Iterable<WsSession>.broadcast(
     dataType: Packet.DataType,

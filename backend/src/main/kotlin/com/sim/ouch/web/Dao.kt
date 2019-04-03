@@ -25,9 +25,6 @@ import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.KMongoConfiguration
 import java.time.OffsetDateTime
 import javax.crypto.KeyGenerator
-import kotlin.collections.List
-import kotlin.collections.MutableList
-import kotlin.collections.mutableListOf
 import kotlin.collections.set
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.reflect
@@ -43,19 +40,19 @@ private val mongo by lazy {
 
 suspend fun WsSession.existence() = DAO.getToken(this)
     ?.let { token -> DAO.getSessionData(token)
-        ?.let { DAO.getExistence(it.idPair.first) } }
+        ?.let { DAO.getExistence(it.ec) } }
 suspend fun WsSession.quidity() = DAO.getToken(this)
-    ?.let { t -> DAO.getSessionData(t)?.idPair }
-    ?.let { (ec, qc) -> DAO.getExistence(ec)
-        ?.let { e -> e.quidities[qc] } }
+    ?.let { t -> DAO.getSessionData(t) }
+    ?.let { (ec, qc) -> DAO.getExistence(ec)?.let { e -> e.quidities[qc] } }
 
 class Dao {
 
     /**
      * @property _id The session key used for verification and reconnection
-     * @property idPair [Existence._id], [Quidity.id]
+     * @property ec [Existence._id]
+     * @property qc [Quidity.id]
      */
-    data class SessionData(@BsonId var _id: Token, var idPair: Pair<EC, QC>)
+    data class SessionData(@BsonId var _id: Token, var ec: EC, var qc: QC)
 
     private val logger = DaoLogger()
     /** Mongo DB [Existence] collection. */
@@ -99,7 +96,7 @@ class Dao {
         // Add key to sessionTokens
         sessionTokens[key] = session
         // Add SessionData & Existence to database
-        val sd = SessionData(key, existence._id to ini.id)
+        val sd = SessionData(key, existence._id, ini.id)
         return when {
             sessionData.save(sd)?.wasAcknowledged() == false -> {
                 logger.err("Failed to save new SessionData", Dao::addExistence)
@@ -120,25 +117,27 @@ class Dao {
     suspend fun addSession(session: WsSession, existence: Existence, quidity: Quidity)
             : Token? {
         // Generate new key
-        val key = genToken(session, existence, quidity)
+        val token = genToken(session, existence, quidity)
         // Update Existence
-        existence.addSession(key)
+        existence.addSession(token)
+        existence.quidities[quidity.id] = quidity
         if (existences.save(existence)?.wasAcknowledged() == false) {
             logger.err("Failed to add session to Existence", Dao::addSession)
             return null
         }
         // Update sessionData
-        val sd = SessionData(key, existence._id to quidity.id)
+        val sd = SessionData(token, existence._id, quidity.id)
         if (sessionData.save(sd)?.wasAcknowledged() == false) {
             logger.err("Failed to save new SessionData", Dao::addSession)
             return null
         }
-        return key
+        sessionTokens[token] = session
+        return token
     }
 
     /**
-     * Verifies a client [Token] and on success returns the [SessionData] mapped
-     * to the [Token]. Returns `null` on token validation failure.
+     * Verifies a client [Token] and on success returns the [SessionData] paired
+     * to a NEW [Token]. Returns `null` on token validation failure.
      */
     suspend fun refreshSession(token: Token, session: WsSession)
             : Pair<Token, SessionData>? {
@@ -155,7 +154,7 @@ class Dao {
             return null
         }
         // Update sessionData
-        val sd = SessionData(nToken, exID to qID)
+        val sd = SessionData(nToken, exID,  qID)
         if (!sessionData.replaceOneById(token, sd).wasAcknowledged()) {
             logger.err("Failed to replace SessionData", Dao::refreshSession)
             return null
@@ -176,7 +175,7 @@ class Dao {
         // add token to disconnect
         disconnectedTokens[token] = unit
         // Remove from existence
-        getSessionData(token)?.idPair?.first?.let { getExistence(it) }?.also {
+        getSessionData(token)?.ec?.let { getExistence(it) }?.also {
             it.removeSession(token)
             if (existences.save(it)?.wasAcknowledged() == false)
                 logger.err("Failed to save updated Existence", Dao::disconnect)
@@ -192,6 +191,7 @@ class Dao {
     suspend fun getSessionData(session: WsSession) =
         sessionTokens.fromValue(session)?.let { sessionData.findOneById(it) }
     fun getToken(session: WsSession) = sessionTokens.fromValue(session)
+    fun getSession(token: Token) = sessionTokens[token]
     val liveSessionsCount get() = sessionTokens.size
     suspend fun getLogs() = logger.logCollection.find().toList()
 
@@ -243,10 +243,10 @@ typealias ID = String
 /** [Existence] Code ([Existence._id]) */ typealias EC = ID
 typealias QC = ID
 
-fun genToken(session: WsSession, existence: Existence, quidity: Quidity): Token =
-        genToken(session, existence._id, quidity.id)
+private fun genToken(session: WsSession, existence: Existence, quidity: Quidity) =
+    genToken(session, existence._id, quidity.id)
 
-fun genToken(session: WsSession, exID: EC, qID: QC): Token = Jwts.builder().apply {
+private fun genToken(session: WsSession, exID: EC, qID: QC) = Jwts.builder().apply {
     setSubject("quidity.$qID").claim("exID", exID)
     claim("ip", session.remoteAddress.address.address)
     // setExpiration(Date.from(Instant.now().plusSeconds(60 * 30))) TODO?

@@ -14,10 +14,6 @@ enum class EndPoints(val point: String) {
     ENDPOINTS("/map"), LOGS("/logs")
 }
 
-val ER_NO_NAME  = 4004 to "no name"
-val ER_BAD_ID   = 4005 to "unknown ID"
-val ER_INTERNAL = 4010 to "internal err"
-
 val javalin: Javalin by lazy { Javalin.create().prefer405over404() }
 
 class OuchData(val version: String, vararg val authors: String)
