@@ -1,15 +1,10 @@
 package com.sim.ouch.web
 
-import com.sim.ouch.javalin
-import com.sim.ouch.logic.DefaultExistence
-import com.sim.ouch.logic.Quidity
-import com.sim.ouch.logic.broadcast
+import com.sim.ouch.logic.*
 import com.sim.ouch.web.Packet.DataType.*
 import io.javalin.UnauthorizedResponse
 import io.javalin.websocket.*
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.launch
 import java.util.function.Consumer
 
@@ -28,7 +23,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     val connect = ConnectHandler { session ->
         launch {
             // Check for reconnection token
-            session.upgradeRequest.getHeader("token")?.also { token ->
+            session.queryParam("token")?.also { token ->
                 // Attempt to validate the token
                 DAO.refreshSession(token, session)?.also { (_, sd) ->
                     // Attempt to locate existence
@@ -36,13 +31,14 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
                         ?: return@launch session.close(ER_EX_NOT_FOUND)
                     val q  = ex.quidities[sd.qc]
                         ?: return@launch session.close(ER_Q_NOT_FOUND)
+                    session.idleTimeout = IDLE_TIMOUT
                     return@launch session.initWith(ex, q, token)
                 } ?: return@launch session.close(ER_BAD_TOKEN)
             }
 
             // Standard Start Connection
             lateinit var t: Token
-            lateinit var qd: Quidity
+            lateinit var qd: Quiddity
             val name = session.queryParam("name")
                 ?: return@launch session.close(ER_NO_NAME)
             val ex = session.queryParam("exID")?.let { ec ->
@@ -52,7 +48,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
                         ?: return@launch session.close(ER_INTERNAL)
                 } ?: return@launch session.close(ER_EX_NOT_FOUND)
             } ?: let {
-                DefaultExistence(Quidity(name))
+                DefaultExistence(Quiddity(name))
                     .let { DAO.addExistence(session, it) }
                     ?.let {
                         t = it.first
@@ -60,7 +56,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
                         it.second
                     } ?: return@launch session.close(ER_INTERNAL)
             }
-
+            session.idleTimeout = IDLE_TIMOUT
             session.initWith(ex, qd, t)
         }
     }
@@ -89,7 +85,8 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     wsHandler.onClose { session, _, _ -> launch { DAO.disconnect(session) } }
 
     val err = ErrorHandler { session, throwable: Throwable? ->
-        javalin.wsLogger { TODO() }
+        if (session.isOpen) session.send(Packet(INTERNAL, "err", true).pack())
+        else launch { DAO.disconnect(session) }
     }
 
     wsHandler.onConnect(connect)

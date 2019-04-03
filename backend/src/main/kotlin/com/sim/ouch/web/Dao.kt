@@ -5,7 +5,7 @@ import com.sim.ouch.datastructures.ExpiringKache
 import com.sim.ouch.datastructures.MutableBiMap
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Existence.Status.DORMANT
-import com.sim.ouch.logic.Quidity
+import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.Dao.DaoLogger.Log
 import io.javalin.websocket.WsSession
 import io.jsonwebtoken.*
@@ -44,7 +44,7 @@ class Dao {
     /**
      * @property _id The session key used for verification and reconnection
      * @property ec [Existence._id]
-     * @property qc [Quidity.id]
+     * @property qc [Quiddity.id]
      */
     data class SessionData(@BsonId var _id: Token, var ec: EC, var qc: QC)
 
@@ -81,8 +81,8 @@ class Dao {
      * `null` if a DB insert failed.
      */
     suspend fun addExistence(session: WsSession, existence: Existence)
-            : Triple<Token, Existence, Quidity>? {
-        val ini = existence.initialQuidity
+            : Triple<Token, Existence, Quiddity>? {
+        val ini = existence.initialQuiddity
         // Generate new Token
         val key = genToken(session, existence, ini)
         // Add key to Existence
@@ -108,19 +108,19 @@ class Dao {
      * Add a new [WsSession] and [Token] to the [Dao].
      * Returns the [Token] generated for the session.
      */
-    suspend fun addSession(session: WsSession, existence: Existence, quidity: Quidity)
+    suspend fun addSession(session: WsSession, existence: Existence, quiddity: Quiddity)
             : Token? {
         // Generate new key
-        val token = genToken(session, existence, quidity)
+        val token = genToken(session, existence, quiddity)
         // Update Existence
         existence.addSession(token)
-        existence.quidities[quidity.id] = quidity
+        existence.quidities[quiddity.id] = quiddity
         if (existences.save(existence)?.wasAcknowledged() == false) {
             logger.err("Failed to add session to Existence", Dao::addSession)
             return null
         }
         // Update sessionData
-        val sd = SessionData(token, existence._id, quidity.id)
+        val sd = SessionData(token, existence._id, quiddity.id)
         if (sessionData.save(sd)?.wasAcknowledged() == false) {
             logger.err("Failed to save new SessionData", Dao::addSession)
             return null
@@ -144,7 +144,7 @@ class Dao {
             it.addSession(token)
             existences.save(it)
         } ?: let {
-            logger.err("", Dao::refreshSession)
+            logger.err("Failed to find existence.", Dao::refreshSession)
             return null
         }
         // Update sessionData
@@ -188,6 +188,14 @@ class Dao {
     fun getSession(token: Token) = sessionTokens[token]
     val liveSessionsCount get() = sessionTokens.size
     suspend fun getLogs() = logger.logCollection.find().toList()
+    suspend fun status(): StatusPacket {
+        val le = getLive()
+        val de = getDormant()
+        val sc = sessionTokens.size
+        val avgQpe = (le + de).avgBy { it.quidities.size }
+        val oldest = (le + de).minBy(Existence::init)?.init
+        return StatusPacket(le.size, de.size, sc, avgQpe, oldest)
+    }
 
     /** Removes old dormant [Existence] */
     private suspend fun cleanDB(): Boolean {
@@ -198,6 +206,10 @@ class Dao {
                 )
         }
     }
+
+    data class StatusPacket(val numLiveEx: Int, val numDormEx: Int,
+                        val numLiveSes: Int, val avgQpe: Double,
+                        val oldest: OffsetDateTime?)
 
     /** A [Slogger] which saves a [Log] to the `logs` logCollection collection. */
     class DaoLogger : Slogger("DAO") {
@@ -224,24 +236,27 @@ class Dao {
         ) {
             println(log("[${NOW_STR()}] [$threadName] [$name] ${
             f?.let { "[${f.name}]" } ?: ""} [$level] $any"))
-            if (log.size % 100 == 0) logCollection.save(log)
+            if (log.size % 100 == 0) {
+                println("Updating Log Collection...")
+                if (logCollection.save(log)?.wasAcknowledged() == true) {
+                    println("\tSuccessful")
+                } else System.err.println("\tFailed!")
+            }
         }
     }
 
 }
-
-data class StatusPacket(val ex: List<Existence>, val ses: Int)
 
 typealias Token = String
 typealias ID = String
 /** [Existence] Code ([Existence._id]) */ typealias EC = ID
 typealias QC = ID
 
-private fun genToken(session: WsSession, existence: Existence, quidity: Quidity) =
-    genToken(session, existence._id, quidity.id)
+private fun genToken(session: WsSession, existence: Existence, quiddity: Quiddity) =
+    genToken(session, existence._id, quiddity.id)
 
 private fun genToken(session: WsSession, exID: EC, qID: QC) = Jwts.builder().apply {
-    setSubject("quidity.$qID").claim("exID", exID)
+    setSubject("quiddity.$qID").claim("exID", exID)
     claim("ip", session.remoteAddress.address.address)
     // setExpiration(Date.from(Instant.now().plusSeconds(60 * 30))) TODO?
     signWith(instanceKey, SignatureAlgorithm.HS256)
@@ -253,9 +268,9 @@ fun readToken(session: WsSession, token: String) : Pair<EC, QC>? {
         val claims = tokenParser.parseClaimsJws(token).body
         require(claims["ip"] == session.remoteAddress.address.address)
         require(claims["exID"] is String)
-        require(claims.subject.matches(Regex("quidity\\.\\d{10}")))
+        require(claims.subject.matches(Regex("quiddity\\.\\d{10}")))
         return claims["exID"] as String to
-            claims.subject.removePrefix("quidity.")
+            claims.subject.removePrefix("quiddity.")
     } catch (e: SignatureException) {
         return null
     } catch (e: ExpiredJwtException) {
@@ -269,4 +284,4 @@ fun readToken(session: WsSession, token: String) : Pair<EC, QC>? {
 
 private val tokenParser get() = Jwts.parser().setSigningKey(instanceKey)!!
 private val instanceKey
-    by lazy { KeyGenerator.getInstance("HMAC").generateKey()!! }
+    by lazy { KeyGenerator.getInstance("HMACSHA256").generateKey()!! }

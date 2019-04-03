@@ -33,11 +33,9 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.9.8")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     implementation("com.google.code.gson:gson:2.8.5")
-    api("io.jsonwebtoken:jjwt-api:0.10.5")
+    implementation("io.jsonwebtoken:jjwt-api:0.10.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.10.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-orgjson:0.10.5") {
-        exclude(group = "org.json", module = "json" )
-    }
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.10.5")
 
     implementation("org.litote.kmongo:kmongo-async:3.10.0")
     implementation("org.litote.kmongo:kmongo-coroutine:3.10.0")

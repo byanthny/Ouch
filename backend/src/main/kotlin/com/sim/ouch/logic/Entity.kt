@@ -11,7 +11,7 @@ sealed class Entity {
 }
 
 /** The essence of... */
-open class Quidity(open var name: String) : Entity() {
+open class Quiddity(open var name: String) : Entity() {
     /** The gradial state of Ouchies. */
     open var ouch: Ouch = Ouch()
     open fun love() = ouch--

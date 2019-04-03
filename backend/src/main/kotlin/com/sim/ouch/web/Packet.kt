@@ -3,11 +3,11 @@ package com.sim.ouch.web
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.sim.ouch.logic.Existence
-import com.sim.ouch.logic.Quidity
+import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.Packet.DataType.INIT
 import io.javalin.websocket.WsSession
 
-val gson: Gson by lazy { GsonBuilder().create() }
+val gson: Gson by lazy { GsonBuilder().setPrettyPrinting().create() }
 
 fun Any.json(): String = gson.toJson(this)
 
@@ -53,13 +53,13 @@ data class Packet(
 // Special Packets
 
 data class InitPacket(
-        val existence: Existence,
-        val quidity: Quidity,
-        val token: String
+    val existence: Existence,
+    val quiddity: Quiddity,
+    val token: String
 )
 
-fun WsSession.initWith(existence: Existence, quidity: Quidity, token: String) =
-        send(Packet(INIT, InitPacket(existence, quidity, token)).pack())
+fun WsSession.initWith(existence: Existence, quiddity: Quiddity, token: String) =
+        send(Packet(INIT, InitPacket(existence, quiddity, token)).pack())
 
 fun Iterable<WsSession>.broadcast(
     dataType: Packet.DataType,
