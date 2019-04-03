@@ -3,28 +3,7 @@
  * style.js
  */
 
-//Is on login page?
-var login = false;
-
-//TODO load in actions from api
-//Array of all possible actions
-var action;
-
-//HTML elements
-var header = document.getElementById("header");
-var exist_input = document.getElementById("exist-input");
-var user_input = document.getElementById("user-input");
-var chat = document.getElementById("chat");
-var leaderboard = document.getElementsByClassName("leaderboard")[0];
-var level = document.getElementById("level");
-var box = document.getElementById("box");
-var search = document.getElementById("search").classList.toggle("opacity");
-var ouch = document.getElementById("ouch");
-var submit_button = document.getElementById("submit-button");
-var help = document.getElementById("help");
-var indicator = document.getElementById("indicator");
-var world_value = document.getElementById("world-value");
-
+/* Toggles between login and main page */
 function switchState() {
     submit_button.classList.toggle("hidden");
     box.classList.toggle("opacity");
@@ -38,13 +17,16 @@ function switchState() {
     login = !login;
 }
 
+
+/* Toggles predictive search panel */
 function switchSearch() {
     search.classList.toggle("opacity");
-    search.toggle("disappear");
+    search.classList.toggle("disappear");
     chat.classList.toggle("opacity");
     chat.classList.toggle("disappear");
 }
 
+/* Toggles Ouch theme between dark and light mode */
 function switchDark() {
     ouch.classList.toggle("dark");
     header.classList.toggle("dark");
@@ -63,7 +45,7 @@ document.getElementsByClassName("close")[0].onclick = function() {
 };
 
 //TODO make scroll stay in place if you scroll up
-//When called will scroll chat to bottom
+/* Will scroll chat window to bottom */
 function scrollBottom() {
     chat.scrollTop = chat.scrollHeight;
 }
@@ -88,10 +70,22 @@ function shake(toShake) {
     }, 1000);
 }
 
-function shakeUsername() {
-    shake(user_input);
-}
+function addChat(name, content, type) {
 
-function shakeExist() {
-    shake(exist_input);
+    var  html = "";
+
+    if(type === "system") {
+        html = '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">'
+            + name + '</span> '+content+'</p></div>';
+    } else if (type === "other") {
+        html =
+            '<div class="chat-msg-cont"><p class="chat-msg '+type+'"><span style="font-weight: bold;">'
+            + name + ': </span>' + content + '</p></div>';
+    } else if (type === "user") {
+        html =
+            '<div class="chat-msg-cont"><p class="chat-msg user">' + content + '</p></div>';
+    }
+
+    chat.innerHTML += html;
+
 }

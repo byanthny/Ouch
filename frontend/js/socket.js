@@ -72,7 +72,7 @@ function play() {
             //if message is from current user
             if (parsedData.authorName === nickname) {
                 document.getElementById('chat').innerHTML +=
-                    '<p class="chat-msg right">' + parsedData.content + '</p>';
+                    '<p class="chat-msg user">' + parsedData.content + '</p>';
             }
             //if message is from new user
             else {
