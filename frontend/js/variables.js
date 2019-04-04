@@ -56,3 +56,4 @@ var close_code = {
 var ping_packet = '{"dataType":"PING","data":"PING"}';
 
 var  usr_disconnected = false;
+var reconncting = false;
