@@ -32,7 +32,8 @@ function checkInput(clicked) {
                 //console.log("chat");
                // if (connection != null) {
                 console.log("Chat message");
-                    connection.send(makeChatMessage(input));
+                console.log(connection.readyState);
+                connection.send(makeChatMessage(input));
                // }
             }
             user_input.value = "";
@@ -44,7 +45,9 @@ function checkInput(clicked) {
                 shake(user_input);
                 return false;
             } else {
-                return true;
+                if(!enteredOnce) {
+                    return true;
+                }
             }
         }
     }
@@ -73,8 +76,10 @@ submit_button.onclick = function () {
 
     if (checkInput(true)) {
         if (id === "") {
+            enteredOnce = true;
             play(url_ws + '?name=' + nickname);
         } else {
+            enteredOnce = true;
             play(url_ws + '?name=' + nickname + '&exID=' + id);
         }
     }

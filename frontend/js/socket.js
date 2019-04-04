@@ -31,6 +31,7 @@ function play(endpoint) {
     connection.onopen = function() {
 
         switchState();
+        switchLoading(true);
         indicator.classList.toggle("await");
         user_input.value = "";
         user_input.placeholder = "connecting to the Existence...";
@@ -52,6 +53,7 @@ function play(endpoint) {
         //parse JSONdata.data
         var parsedData = JSON.parse(JSONdata.data);
 
+        console.log(parsedData);
         //Check if datatype is INIT
         switch (JSONdata.dataType) {
             case "INIT":

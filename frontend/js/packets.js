@@ -22,6 +22,9 @@ function handleInit(init_packet) {
     user_input.placeholder = "enter command or message";
     indicator.classList.toggle("await");
     indicator.classList.toggle("connected");
+    setTimeout(function () {
+        switchLoading(false);
+    }, 1000);
 
     //load in quids in leaderboard
     var usersArray = existence.quidities;
