@@ -3,7 +3,7 @@
  * socket.js
  */
 
-var keepConnectionOpen;//900000
+var keepConnectionOpen;//30000
 
 //TODO keep connection open, close after a certain amount of time and when connection is closed
 function checkOpen() {

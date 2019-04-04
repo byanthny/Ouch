@@ -10,7 +10,6 @@ import java.util.function.Consumer
 
 private const val IDLE_TIMOUT = 1_020_000L
 
-// TODO Add err codes to specs
 val ER_NO_NAME  = 4005 to "no name"
 val ER_EX_NOT_FOUND = 4004 to "existence not found"
 val ER_Q_NOT_FOUND = 4040 to "quididty not found"
