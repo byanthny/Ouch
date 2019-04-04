@@ -216,12 +216,17 @@ class Dao {
     }
 
     /** Removes old dormant [Existence] */
-    private suspend fun cleanDB(): Boolean {
-        return existences.deleteMany(
+    private suspend fun cleanDB() {
+        existences.deleteMany(
             Existence::dormantSince lt cutoffDate).wasAcknowledged().also {
             if (!it) logger.err(
                 "Failed to delete old dormant existences", Dao::cleanDB
                 )
+        }
+        existences.find(Existence::sessionTokens size 0,
+            Existence::status ne DORMANT).consumeEach {
+            it.status = DORMANT
+            existences.save(it)
         }
     }
 

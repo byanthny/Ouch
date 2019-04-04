@@ -30,6 +30,10 @@ sealed class Existence {
             }
             field = value
         }
+    get() {
+        if (sessionTokens.isEmpty()) field = Status.DORMANT
+        return field
+    }
 
     abstract val name: String
     abstract val capacity: Long
