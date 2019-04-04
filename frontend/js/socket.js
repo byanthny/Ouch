@@ -35,8 +35,6 @@ function play(endpoint) {
         user_input.value = "";
         user_input.placeholder = "enter command or message";
 
-        //loadActions();
-
         keepConnectionOpen =  setTimeout(checkOpen(), 3000);
     };
 
@@ -116,12 +114,16 @@ function play(endpoint) {
                 }
                 usr_disconnected = false;
         }
-        connection = null;
+       // connection;
         here = false;
     }
 }
 
 //disconnect from server on page close or refresh
-window.onbeforeunload = function () {
+document.onbeforeunload = function () {
     connection.close();
-}
+};
+
+document.onload = function () {
+    loadActions();
+};

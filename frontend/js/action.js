@@ -30,9 +30,10 @@ function checkInput(clicked) {
             //If chat
             else {
                 //console.log("chat");
-                if (connection != null) {
+               // if (connection != null) {
+                console.log("Chat message");
                     connection.send(makeChatMessage(input));
-                }
+               // }
             }
             user_input.value = "";
         }
