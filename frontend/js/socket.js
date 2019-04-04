@@ -29,6 +29,7 @@ function play(endpoint) {
 
     //On connection open
     connection.onopen = function() {
+
         switchState();
         indicator.classList.toggle("await");
         user_input.value = "";

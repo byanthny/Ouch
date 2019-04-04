@@ -80,6 +80,7 @@ submit_button.onclick = function () {
 };
 
 reconnect_button.onclick = function () {
+    reconncting = true;
     play(url_ws + "?token=" + reconnect_token);
 };
 
