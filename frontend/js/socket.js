@@ -3,7 +3,7 @@
  * socket.js
  */
 
-var keepConnectionOpen;//900000
+var keepConnectionOpen;//30000
 
 //TODO keep connection open, close after a certain amount of time and when connection is closed
 function checkOpen() {
@@ -33,7 +33,7 @@ function play(endpoint) {
         switchState();
         indicator.classList.toggle("await");
         user_input.value = "";
-        user_input.placeholder = "enter command or message";
+        user_input.placeholder = "connecting to the Existence...";
 
         keepConnectionOpen =  setTimeout(checkOpen(), 3000);
     };
