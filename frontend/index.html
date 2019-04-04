@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--Production code for docs folder-->
+<html lang="en">
+
+<head>
+    <title>Ouch</title>
+    <link rel="stylesheet" href="css/style.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Mrs+Sheppards" rel="stylesheet">
+    <link rel="icon" type="image/png" href="imgs/favicon.png" />
+</head>
+<body>
+
+<div class="header" id="header">
+
+    <p id="world">existence: <span id="world-value" class="normal">offline</span>
+    <div class="indicator" id="indicator"></div>
+    <div class="leaderboard"></div>
+    </p>
+
+    <p id="level">100</p>
+    <h1 class="ouch" id="ouch">Ouch</h1>
+    <div id="commands">
+        <form>
+            <input id="user-input" type="text" placeholder="username">
+            <input id="exist-input" class="opacity disappear" type="text" placeholder="existence">
+            <div style="text-align: center">
+                <button type="button" class="submit-button hidden" id="submit-button">enter</button>
+                <button type="button" class="submit-button hidden" id="reconnect-button">reconnect</button>
+            </div>
+        </form>
+        <div id="box">
+            <div id="search" class="disappear opacity">
+                <!--TODO create search items to buttons so they can be clicked-->
+                <div class="search-item">Search Item 2</div>
+                <div class="search-item">Search Item 3</div>
+                <div class="search-item">Search Item 4</div>
+                <div class="search-item">Search Item 5</div>
+                <div class="search-item">Search Item 6</div>
+            </div>
+
+            <div id="chat"></div>
+        </div>
+    </div>
+</div>
+
+<div id="help" class="hidden">
+    <div class="panel">
+        <span class="close">&times;</span>
+    </div>
+</div>
+<script src="js/ouch.min.js"></script>
+<script>switchState();</script>
+</body>

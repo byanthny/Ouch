@@ -22,7 +22,7 @@
   height: calc(~"100vh - @{login-header}");
 }
 
-#submit-button {
+.button  {
   border-width: 0;
   border-radius: @default-rounded;
   color: @dark-color;
@@ -30,8 +30,8 @@
   font-size: @button-font-size;
   display: block;
   margin: 0 auto;
-  margin-top: @submit-btn-margin;
-  padding: @submit-btn-padding;
+  margin-top: @btn-margin;
+  padding: @btn-padding;
   .box-shadow;
   .transition();
   opacity: .7;
@@ -39,6 +39,14 @@
   &:hover{
     opacity: 1;
   }
+}
+
+#submit-button {
+  &:extend(.button);
+}
+
+#reconnect-button {
+  &:extend(.button);
 }
 
 #exist-input {

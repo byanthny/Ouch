@@ -1,7 +1,7 @@
 package com.sim.ouch.web
 
 import com.sim.ouch.logic.Existence
-import com.sim.ouch.logic.Quidity
+import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.Packet.DataType.CHAT
 
 /** An easy way to make an outgoing typed [Packet] with a message. */
@@ -19,9 +19,9 @@ class Chat(@Transient val existence: Existence) {
     private val history = mutableListOf<Message>()
 
     /** update from client */
-    fun update(quidity: Quidity, content: String): Message {
+    fun update(quiddity: Quiddity, content: String): Message {
         historySizing()
-        return Message(quidity.id, quidity.name, content).also {
+        return Message(quiddity.id, quiddity.name, content).also {
             history.add(it)
         }
     }

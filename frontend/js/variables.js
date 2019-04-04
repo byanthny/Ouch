@@ -13,6 +13,7 @@ var box = document.getElementById("box");
 var search = document.getElementById("search");
 var ouch = document.getElementById("ouch");
 var submit_button = document.getElementById("submit-button");
+var reconnect_button = document.getElementById("reconnect-button");
 var help = document.getElementById("help");
 var indicator = document.getElementById("indicator");
 var world_value = document.getElementById("world-value");
@@ -29,7 +30,6 @@ var login = false;
 var nickname = 'user';
 var id = 'id';
 
-
 //Server Communication
 //if user is active
 var here = true;
@@ -37,12 +37,23 @@ var here = true;
 //Temp init data
 var usr;
 
+// Base endpoint
+var url_base = 'sim-ouch.herokuapp.com';
 //Socket
-var url = 'wss://sim-ouch.herokuapp.com/ws?name=user';//&exID=id';
+var url_ws = 'wss://' + url_base + '/ws';
+var url_actions = 'https://'+url_base+'/actions';
 var connection;
+var reconnect_token = null;
 
 var close_code = {
-    ER_NO_NAME: 4004,
-    ER_BAD_ID: 4005,
-    ER_INTERNAL_GENERIC: 4010
+    ER_NO_NAME  : 4005,
+    ER_EX_NOT_FOUND : 4004,
+    ER_Q_NOT_FOUND : 4040,
+    ER_BAD_TOKEN : 4007,
+    ER_INTERNAL_GENERIC : 4010
 };
+
+var ping_packet = '{"dataType":"PING","data":"PING"}';
+
+var  usr_disconnected = false;
+var reconncting = false;

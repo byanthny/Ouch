@@ -5,30 +5,30 @@ import com.sim.ouch.datastructures.ExpiringKache
 import com.sim.ouch.datastructures.MutableBiMap
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Existence.Status.DORMANT
-import com.sim.ouch.logic.Quidity
+import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.Dao.DaoLogger.Log
 import io.javalin.websocket.WsSession
-import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.JwtException
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.*
 import io.jsonwebtoken.security.SignatureException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.bson.codecs.pojo.annotations.BsonId
-import org.litote.kmongo.`in`
+import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.coroutine
-import org.litote.kmongo.eq
-import org.litote.kmongo.lt
-import org.litote.kmongo.ne
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.KMongoConfiguration
 import java.time.OffsetDateTime
 import javax.crypto.KeyGenerator
+import javax.crypto.spec.SecretKeySpec
 import kotlin.collections.set
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.reflect
 
+
+typealias Token = String
+typealias ID = String
+/** [Existence] Code ([Existence._id]) */ typealias EC = ID
+typealias QC = ID
 
 val DAO: Dao by lazy { Dao() }
 private val mongo by lazy {
@@ -50,7 +50,7 @@ class Dao {
     /**
      * @property _id The session key used for verification and reconnection
      * @property ec [Existence._id]
-     * @property qc [Quidity.id]
+     * @property qc [Quiddity.id]
      */
     data class SessionData(@BsonId var _id: Token, var ec: EC, var qc: QC)
 
@@ -87,16 +87,16 @@ class Dao {
      * `null` if a DB insert failed.
      */
     suspend fun addExistence(session: WsSession, existence: Existence)
-            : Triple<Token, Existence, Quidity>? {
-        val ini = existence.initialQuidity
+            : Triple<Token, Existence, Quiddity>? {
+        val ini = existence.initialQuiddity
         // Generate new Token
-        val key = genToken(session, existence, ini)
+        val token = genToken(session, existence, ini)
         // Add key to Existence
-        existence.addSession(key)
+        existence.addSession(token)
         // Add key to sessionTokens
-        sessionTokens[key] = session
+        sessionTokens[token] = session
         // Add SessionData & Existence to database
-        val sd = SessionData(key, existence._id, ini.id)
+        val sd = SessionData(token, existence._id, ini.id)
         return when {
             sessionData.save(sd)?.wasAcknowledged() == false -> {
                 logger.err("Failed to save new SessionData", Dao::addExistence)
@@ -106,7 +106,7 @@ class Dao {
                 logger.err("Failed to save new Existence", Dao::addExistence)
                 null
             }
-            else -> Triple(key, existence, ini)
+            else -> Triple(token, existence, ini)
         }
     }
 
@@ -114,19 +114,19 @@ class Dao {
      * Add a new [WsSession] and [Token] to the [Dao].
      * Returns the [Token] generated for the session.
      */
-    suspend fun addSession(session: WsSession, existence: Existence, quidity: Quidity)
+    suspend fun addSession(session: WsSession, existence: Existence, quiddity: Quiddity)
             : Token? {
         // Generate new key
-        val token = genToken(session, existence, quidity)
+        val token = genToken(session, existence, quiddity)
         // Update Existence
         existence.addSession(token)
-        existence.quidities[quidity.id] = quidity
+        existence.quidities[quiddity.id] = quiddity
         if (existences.save(existence)?.wasAcknowledged() == false) {
             logger.err("Failed to add session to Existence", Dao::addSession)
             return null
         }
         // Update sessionData
-        val sd = SessionData(token, existence._id, quidity.id)
+        val sd = SessionData(token, existence._id, quiddity.id)
         if (sessionData.save(sd)?.wasAcknowledged() == false) {
             logger.err("Failed to save new SessionData", Dao::addSession)
             return null
@@ -142,15 +142,20 @@ class Dao {
     suspend fun refreshSession(token: Token, session: WsSession)
             : Pair<Token, SessionData>? {
         // Validate Token
-        val (exID, qID) = readToken(session, token) ?: return null
+        val (exID, qID) = readToken(session, token)
+            ?: let {
+                logger.err("Token validation failed", Dao::refreshSession)
+                return null
+            }
         // Generate new token
         val nToken = genToken(session, exID, qID)
         // Update existence
         existences.findOneById(exID)?.also {
-            it.addSession(token)
+            it.removeSession(token)
+            it.addSession(nToken)
             existences.save(it)
         } ?: let {
-            logger.err("", Dao::refreshSession)
+            logger.err("Failed to find existence.", Dao::refreshSession)
             return null
         }
         // Update sessionData
@@ -182,6 +187,14 @@ class Dao {
         } ?: logger.err("Failed to remove session from Existence", Dao::disconnect)
     }
 
+    /**
+     * Save the [Existence] to the database. Use this only when a serialized
+     * property is changed.
+     */
+    suspend fun saveExistence(existence: Existence): Boolean {
+        return existences.save(existence)?.wasAcknowledged() ?: false
+    }
+
     suspend fun getExistence(id: EC) = existences.findOneById(id)
     /** Get non-[DORMANT] Existences */
     suspend fun getLive() = existences.find(Existence::status ne DORMANT).toList()
@@ -194,16 +207,32 @@ class Dao {
     fun getSession(token: Token) = sessionTokens[token]
     val liveSessionsCount get() = sessionTokens.size
     suspend fun getLogs() = logger.logCollection.find().toList()
+    suspend fun status(): StatusPacket {
+        val le = getLive()
+        val de = getDormant()
+        val avgQpe = (le + de).avgBy { it.quidities.size }
+        val oldest = (le + de).minBy(Existence::init)?.init
+        return StatusPacket(le.size, de.size, liveSessionsCount, avgQpe, oldest)
+    }
 
     /** Removes old dormant [Existence] */
-    private suspend fun cleanDB(): Boolean {
-        return existences.deleteMany(
+    private suspend fun cleanDB() {
+        existences.deleteMany(
             Existence::dormantSince lt cutoffDate).wasAcknowledged().also {
             if (!it) logger.err(
                 "Failed to delete old dormant existences", Dao::cleanDB
                 )
         }
+        existences.find(Existence::sessionTokens size 0,
+            Existence::status ne DORMANT).consumeEach {
+            it.status = DORMANT
+            existences.save(it)
+        }
     }
+
+    data class StatusPacket(val numLiveEx: Int, val numDormEx: Int,
+                        val numLiveSes: Int, val avgQpe: Double,
+                        val oldest: OffsetDateTime?)
 
     /** A [Slogger] which saves a [Log] to the `logs` logCollection collection. */
     class DaoLogger : Slogger("DAO") {
@@ -230,49 +259,59 @@ class Dao {
         ) {
             println(log("[${NOW_STR()}] [$threadName] [$name] ${
             f?.let { "[${f.name}]" } ?: ""} [$level] $any"))
-            if (log.size % 100 == 0) logCollection.save(log)
+            if (log.size % 100 == 0) {
+                println("Updating Log Collection...")
+                if (logCollection.save(log)?.wasAcknowledged() == true) {
+                    println("\tSuccessful")
+                } else System.err.println("\tFailed!")
+            }
+        }
+    }
+
+    private fun genToken(session: WsSession, existence: Existence, quiddity: Quiddity) =
+        genToken(session, existence._id, quiddity.id)
+
+    private fun genToken(session: WsSession, exID: EC, qID: QC) = Jwts.builder().apply {
+        setSubject("quiddity.$qID").claim("exID", exID)
+        //claim("ip", session.remoteAddress.address.address)
+        // setExpiration(Date.from(Instant.now().plusSeconds(60 * 30))) TODO?
+        signWith(instanceKey, SignatureAlgorithm.HS256)
+    }.compact()
+
+    /** Returns `null` on invalid token. */
+    private fun readToken(session: WsSession, token: String) : Pair<EC, QC>? {
+        try {
+            val claims = tokenParser.parseClaimsJws(token).body
+            //require(claims["ip"] == session.remoteAddress.address.address)
+            require(claims["exID"] is String)
+            require(claims.subject.matches(Regex("quiddity\\.([\\dA-Z]){10}")))
+            return claims["exID"] as String to
+                claims.subject.removePrefix("quiddity.")
+        } catch (e: SignatureException) {
+            return null
+        } catch (e: ExpiredJwtException) {
+            return null
+        } catch (e: JwtException) {
+            return null
+        } catch (e: IllegalArgumentException) {
+            return null
+        }
+    }
+
+    private val tokenParser get() = Jwts.parser().setSigningKey(instanceKey)!!
+    data class Key(val key: ByteArray)
+    private val instanceKey by lazy {
+        runBlocking {
+            mongo.getCollection<Key>().let { c ->
+                c.find().first()?.let { SecretKeySpec(it.key, "HMACSHA256") }
+                    ?: let {
+                        logger.err("Failed to load key. Loading new key",
+                            Dao::readToken)
+                        KeyGenerator.getInstance("HMACSHA256").generateKey()
+                            ?.also { it.encoded.let { c.insertOne(Key(it)) } }
+                    }
+            }
         }
     }
 
 }
-
-data class StatusPacket(val ex: List<Existence>, val ses: Int)
-
-typealias Token = String
-typealias ID = String
-/** [Existence] Code ([Existence._id]) */ typealias EC = ID
-typealias QC = ID
-
-private fun genToken(session: WsSession, existence: Existence, quidity: Quidity) =
-    genToken(session, existence._id, quidity.id)
-
-private fun genToken(session: WsSession, exID: EC, qID: QC) = Jwts.builder().apply {
-    setSubject("quidity.$qID").claim("exID", exID)
-    claim("ip", session.remoteAddress.address.address)
-    // setExpiration(Date.from(Instant.now().plusSeconds(60 * 30))) TODO?
-    signWith(instanceKey, SignatureAlgorithm.HS256)
-}.compact()
-
-/** Returns `null` on invalid token. */
-fun readToken(session: WsSession, token: String) : Pair<EC, QC>? {
-    try {
-        val claims = tokenParser.parseClaimsJws(token).body
-        require(claims["ip"] == session.remoteAddress.address.address)
-        require(claims["exID"] is String)
-        require(claims.subject.matches(Regex("quidity\\.\\d{10}")))
-        return claims["exID"] as String to
-            claims.subject.removePrefix("quidity.")
-    } catch (e: SignatureException) {
-        return null
-    } catch (e: ExpiredJwtException) {
-        return null
-    } catch (e: JwtException) {
-        return null
-    } catch (e: IllegalArgumentException) {
-        return null
-    }
-}
-
-private val tokenParser get() = Jwts.parser().setSigningKey(instanceKey)!!
-private val instanceKey
-    by lazy { KeyGenerator.getInstance("HMAC").generateKey()!! }

@@ -49,13 +49,14 @@
   
   | Commands  | Description |
   | ------------- | ------------- |
-  | -darkmode  | Toggles dark mode.  |
+  | -theme  | Toggles between themes.  |
   | -exit  | Exit the simulation  |
   
   or https://sim-ouch.herokuapp.com/actions 
 
 ## Technical Stuff
-Current status of Ouch API: https://sim-ouch.herokuapp.com/status  
+Current status of Ouch API: https://sim-ouch.herokuapp.com/status 
+Map of Ouch API: https://sim-ouch.herokuapp.com/map 
 #### File Organization
 
 ```text
