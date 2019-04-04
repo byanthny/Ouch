@@ -37,12 +37,12 @@ sealed class Existence {
 
     abstract val name: String
     abstract val capacity: Long
-    abstract val chat: Chat
     /** The first [Quiddity] to enter the [Existence]. */
     abstract val initialQuiddity: Quiddity
     open val sessionTokens: MutableList<Token> = mutableListOf()
     open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
     open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
+    val chat: Chat = Chat()
 
     abstract fun generateQuidity(name: String): Quiddity
 
@@ -79,8 +79,6 @@ class DefaultExistence(
     override val capacity: Long = -1,
     override val name: String  = DefaultNameGenerator.next()
 ) : Existence() {
-
-    override val chat: Chat = Chat(this)
 
     init {
         quidities[initialQuiddity.id] = initialQuiddity

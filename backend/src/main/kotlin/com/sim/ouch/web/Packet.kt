@@ -50,8 +50,6 @@ data class Packet(
     override fun toString() = "$dataType:$data"
 }
 
-// Special Packets
-
 data class InitPacket(
     val existence: Existence,
     val quiddity: Quiddity,

@@ -33,7 +33,7 @@ function play(endpoint) {
         switchState();
         indicator.classList.toggle("await");
         user_input.value = "";
-        user_input.placeholder = "enter command or message";
+        user_input.placeholder = "connecting to the Existence...";
 
         //loadActions();
 

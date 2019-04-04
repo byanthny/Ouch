@@ -18,6 +18,8 @@ function handleInit(init_packet) {
         + quiddity.ouch.degree + '</span>';
     //Set existence ID
     world_value.innerHTML = init_packet.existence._id;
+
+    user_input.placeholder = "enter command or message";
     indicator.classList.toggle("await");
     indicator.classList.toggle("connected");
 
