@@ -3,6 +3,9 @@
  * socket.js
  */
 
+
+
+
 function heartbeat() {
     if (!connection) return;
     if (connection.readyState !== 1) return;
