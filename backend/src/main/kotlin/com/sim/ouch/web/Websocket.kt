@@ -1,5 +1,7 @@
 package com.sim.ouch.web
 
+import com.sim.ouch.Slogger
+import com.sim.ouch.javalin
 import com.sim.ouch.logic.*
 import com.sim.ouch.web.Packet.DataType.*
 import io.javalin.UnauthorizedResponse
@@ -19,6 +21,8 @@ val ER_INTERNAL = 4010 to "internal err"
 /** Server side [WsHandler] implementation. */
 val Websocket = Consumer<WsHandler> { wsHandler ->
 
+    val sl = Slogger("Socket Handler")
+
     val connect = ConnectHandler { session ->
         launch {
             // Check for reconnection token
@@ -32,6 +36,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
                         ?: return@launch session.close(ER_Q_NOT_FOUND)
                     session.idleTimeout = IDLE_TIMOUT
                     return@launch session.initWith(ex, q, token)
+                        .also { sl.slog("Init reconnect session. Ex=${ex._id} SID=${session.id}") }
                 } ?: return@launch session.close(ER_BAD_TOKEN)
             }
 
@@ -57,6 +62,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
             }
             session.idleTimeout = IDLE_TIMOUT
             session.initWith(ex, qd, t)
+                .also { sl.slog("Init session. Ex=${ex._id} SID=${session.id}") }
         }
     }
 
@@ -82,7 +88,12 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
         }
     }
 
-    wsHandler.onClose { session, _, _ -> launch { DAO.disconnect(session) } }
+    wsHandler.onClose { session, _, _ ->
+        launch {
+            sl.slog("Close session. Ex=${session.existence()?._id} SID=${session.id}")
+            DAO.disconnect(session)
+        }
+    }
 
     val err = ErrorHandler { session, throwable: Throwable? ->
         if (session.isOpen) session.send(Packet(INTERNAL, "err", true).pack())
