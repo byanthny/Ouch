@@ -20,6 +20,7 @@ function heartbeat() {
  * @param url to connect to
  */
 function createConnection(endpoint) {
+    switchLoading(true);
     inactivityTime();
     connection = new WebSocket(endpoint);
 
@@ -27,7 +28,6 @@ function createConnection(endpoint) {
     connection.onopen = function () {
 
         switchState();
-        switchLoading(true);
         indicator.classList.toggle("await");
         user_input.value = "";
         user_input.placeholder = "connecting to the Existence...";
