@@ -3,6 +3,7 @@
  */
 
 //HTML elements
+//
 var header = document.getElementById("header");
 var exist_input = document.getElementById("exist-input");
 var user_input = document.getElementById("user-input");
@@ -21,41 +22,40 @@ var loading = document.getElementById("loading");
 var commands = document.getElementById("commands");
 var chatindic = document.getElementById("chat-indic");
 
-//Array of all possible actions
-//TODO load in actions from api
-var actions;
 
 //Login In
+//
+
 //Is on login page?
 var login = false;
 var enteredOnce = false;
+
 //Username and id from Login Input
 var nickname = 'user';
 var id = 'id';
 
+//Input allowed for username
+var allowedInput = /^[a-z0-9]+$/i;
 
 
 //Server Communication
-//if user is active
-var here = true;
-
-//Temp init data
-var usr;
+//
 
 // Base endpoint
 var url_base = 'sim-ouch.herokuapp.com';
+
 //Socket
 var url_ws = 'wss://' + url_base + '/ws';
-var url_actions = 'https://'+url_base+'/actions';
+var url_actions = 'https://' + url_base + '/actions';
 var connection;
 var reconnect_token = null;
 
 var close_code = {
-    ER_NO_NAME  : 4005,
-    ER_EX_NOT_FOUND : 4004,
-    ER_Q_NOT_FOUND : 4040,
-    ER_BAD_TOKEN : 4007,
-    ER_INTERNAL_GENERIC : 4010
+    ER_NO_NAME: 4005,
+    ER_EX_NOT_FOUND: 4004,
+    ER_Q_NOT_FOUND: 4040,
+    ER_BAD_TOKEN: 4007,
+    ER_INTERNAL_GENERIC: 4010
 };
 
 var ping_packet = '{"dataType":"PING","data":"PING"}';
@@ -63,6 +63,17 @@ var ping_packet = '{"dataType":"PING","data":"PING"}';
 var usr_disconnected = false;
 var reconnecting = false;
 
-var time;
+//Array of all possible actions
+var actions;
 
-var allowedInput =  /^[a-z0-9]+$/i;
+
+//Events
+//
+
+//if user is active
+var here = true;
+
+//Timeout timer
+var timeout;
+//How long stand-by
+var inactive = 30000;
