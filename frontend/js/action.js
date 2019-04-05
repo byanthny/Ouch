@@ -29,12 +29,10 @@ function checkInput(clicked) {
             }
             //If chat
             else {
-                //console.log("chat");
-               // if (connection != null) {
-                console.log("Chat message");
-                console.log(connection.readyState);
+               if (connection.readyState == 1) {
+                console.log("sent chat message, connection status: "+ connection.readyState);
                 connection.send(makeChatMessage(input));
-               // }
+               }
             }
             user_input.value = "";
         }
@@ -86,12 +84,8 @@ submit_button.onclick = function () {
 };
 
 reconnect_button.onclick = function () {
-    reconncting = true;
+    reconnecting = true;
     play(url_ws + "?token=" + reconnect_token);
-};
-
-document.onmousemove = function(){
-    here = true;
 };
 
 //Get HTTP and return JSON

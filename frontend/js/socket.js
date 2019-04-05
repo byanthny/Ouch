@@ -2,7 +2,7 @@
  * through web sockets
  * socket.js
  */
-
+/*
 var keepConnectionOpen;//30000
 
 //TODO keep connection open, close after a certain amount of time and when connection is closed
@@ -10,21 +10,50 @@ function checkOpen() {
     console.log("I'm called");
     if(here) {
         console.log("sending heartbeat");
-        connection.send(ping_packet);
-        keepConnectionOpen;
+        this.connection.send("");
+        keepConnectionOpen = setTimeout(checkOpen(), 30000);
     } else {
         //connection.close();
         console.log("I am not here");
         clearTimeout(keepConnectionOpen);
     }
 };
+*/
+function heartbeat() {
+    if (!connection) return;
+    if (connection.readyState !== 1) return;
+    if(!here) return;
+    connection.send(ping_packet);
+    setTimeout(heartbeat, 29000);
+}
 
-//I am here
-document.onmousemove = function(){here=true;};
-document.onkeydown = function(){here=true;};
+//TODO detect inactivity
+function inactivityTime() {
+
+    window.onload = resetTimer;
+    // DOM Events
+    document.onmousemove = resetTimer;
+    document.onkeypress = resetTimer;
+
+}
+
+function logout() {
+    console.log("BYE");
+    here = false;
+    usr_disconnected  = true;
+    connection.close();
+    //location.href = 'logout.html'
+}
+
+function resetTimer() {
+    clearTimeout(time);
+    here = true;
+    time = setTimeout(logout, 30000)
+    // 1000 milliseconds = 1 second
+}
 
 function play(endpoint) {
-
+    inactivityTime();
     connection = new WebSocket(endpoint);
 
     //On connection open
@@ -35,8 +64,8 @@ function play(endpoint) {
         indicator.classList.toggle("await");
         user_input.value = "";
         user_input.placeholder = "connecting to the Existence...";
-
-        keepConnectionOpen =  setTimeout(checkOpen(), 3000);
+        heartbeat();
+       // keepConnectionOpen =  setTimeout((here ? isHere() : isNotHere()),30000);
     };
 
     //If  there is an  error
@@ -53,7 +82,6 @@ function play(endpoint) {
         //parse JSONdata.data
         var parsedData = JSON.parse(JSONdata.data);
 
-        console.log(parsedData);
         //Check if datatype is INIT
         switch (JSONdata.dataType) {
             case "INIT":
@@ -82,6 +110,8 @@ function play(endpoint) {
                 quidleaderboard.parentNode.removeChild(quidleaderboard);
                 addChat(parsedData.name, "has left the Existence.", "system");
                 scrollBottom();
+                break;
+            case "PING":
                 break;
             default:
                 console.log("Unknown dataType");
