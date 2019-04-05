@@ -60,6 +60,7 @@ function reset() {
     leaderboard.innerHTML = "";
     chat.innerHTML = "";
     user_input.value = "";
+    enteredOnce = false;
 }
 
 /* Used to create shake animation on given element
