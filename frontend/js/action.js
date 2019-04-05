@@ -78,7 +78,7 @@ submit_button.onclick = function () {
             play(url_ws + '?name=' + nickname);
         } else {
             enteredOnce = true;
-            play(url_ws + '?name=' + nickname + '&exID=' + id);
+            play(url_ws + '?name=' + nickname + '&exID=' + id.toUpperCase());
         }
     }
 };

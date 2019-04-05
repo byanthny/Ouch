@@ -65,7 +65,7 @@ Ouch/
 │   ├── src/
 │   └── gradle/wrapper
 │
-├── docs/ *Production files for Github Pages Website (minified, coming soon)
+├── docs/ *Production files for Github Pages Website (minified)
 │   ├── css/
 │   ├── imgs/
 │   └── js/
@@ -81,6 +81,10 @@ Ouch/
 Refer to: https://sim-ouch.herokuapp.com/map      
     
 ## Updates
-* 
+* Reconnect on disconnect
+* Removed annoying scrollbar
+* Grunt works correctly
+* Added loading screen while connecting
+* Smoother animations
  
 ---

@@ -19,7 +19,6 @@ module.exports = function(grunt) {
         },
         //minify js and combine into one file
         uglify: {
-            //TODO combine js to one file
 
             my_target: {
                 files: {
