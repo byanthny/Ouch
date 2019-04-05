@@ -56,8 +56,16 @@ data class InitPacket(
     val token: String
 )
 
-fun WsSession.initWith(existence: Existence, quiddity: Quiddity, token: String) =
-        send(Packet(INIT, InitPacket(existence, quiddity, token)).pack())
+fun WsSession.initWith(existence: Existence, quiddity: Quiddity, token: String) {
+    send(Packet(INIT, InitPacket(existence, quiddity, token)).pack())
+}
+
+fun Existence.broadcast(
+    dataType: Packet.DataType,
+    data: Any,
+    vararg excludeIDs: String
+) = sessionTokens.mapNotNull { DAO.getSession(it) }
+    .broadcast(dataType, data, *excludeIDs)
 
 fun Iterable<WsSession>.broadcast(
     dataType: Packet.DataType,

@@ -15,7 +15,8 @@ import java.time.OffsetDateTime
     property = "@class"
 )
 @JsonSubTypes(
-    Type(value = DefaultExistence::class, name = "default")
+    Type(value = DefaultExistence::class, name = "default"),
+    Type(value = TestExistence::class, name = "test")
 )
 sealed class Existence {
 
@@ -74,7 +75,7 @@ fun Existence.broadcast(packet: Packet) {
     sessionTokens.forEach { DAO.getSession(it)?.send(s) }
 }
 
-class DefaultExistence(
+open class DefaultExistence(
     override val initialQuiddity: Quiddity,
     override val capacity: Long = -1,
     override val name: String  = DefaultNameGenerator.next()
@@ -86,6 +87,9 @@ class DefaultExistence(
 
     override fun generateQuidity(name: String) = Quiddity(name)
 }
+
+class TestExistence(initialQuiddity: Quiddity = Quiddity("test_quid"))
+    : DefaultExistence(initialQuiddity, name = "-TEST")
 
 /** That which possess the [Existence]. */
 interface Simulator {

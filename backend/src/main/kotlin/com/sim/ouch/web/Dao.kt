@@ -111,7 +111,7 @@ class Dao {
     }
 
     /**
-     * Add a new [WsSession] and [Token] to the [Dao].
+     * Add a new [WsSession] [Token] to the [Dao]. Adds [quiddity] to [existence]
      * Returns the [Token] generated for the session.
      */
     suspend fun addSession(session: WsSession, existence: Existence, quiddity: Quiddity)
@@ -253,13 +253,12 @@ class Dao {
         suspend fun <F: KFunction<*>> err(any: Any? = "", function: F? = null) =
             log(any, function, "err")
 
-
         private suspend fun <F: KFunction<*>> log(
             any: Any? = "", f: F?, level: String
         ) {
             println(log("[${NOW_STR()}] [$threadName] [$name] ${
             f?.let { "[${f.name}]" } ?: ""} [$level] $any"))
-            if (log.size % 100 == 0) {
+            if (log.size % 10 == 0) {
                 println("Updating Log Collection...")
                 if (logCollection.save(log)?.wasAcknowledged() == true) {
                     println("\tSuccessful")

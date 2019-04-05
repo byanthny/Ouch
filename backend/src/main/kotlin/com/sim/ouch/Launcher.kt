@@ -5,8 +5,11 @@ import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.*
 import io.javalin.Javalin
 import kotlinx.coroutines.runBlocking
+import kotlinx.html.*
+import kotlinx.html.stream.createHTML
 import java.lang.System.getenv
 
+val test = true
 
 enum class EndPoints(val point: String) {
     ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status"),
@@ -27,7 +30,7 @@ fun main() = javalin.apply {
     ws(SOCKET.point, Websocket)
     get(STATUS.point) { it.result(runBlocking { DAO.status() }.json()) }
     get(LOGS.point) {
-        it.render("/logs.html", mapOf("logs" to runBlocking { DAO.getLogs() }))
+        it.result(runBlocking { DAO.getLogs() }.json())
     }
 
     secret(this)
