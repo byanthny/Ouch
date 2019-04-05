@@ -29,6 +29,7 @@ function createConnection(endpoint) {
 
         switchState();
         indicator.classList.toggle("await");
+        world_value.innerHTML = "connecting";
         user_input.value = "";
         user_input.placeholder = "connecting to the Existence...";
         heartbeat();
