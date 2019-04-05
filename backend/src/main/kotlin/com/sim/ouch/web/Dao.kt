@@ -5,6 +5,7 @@ import com.sim.ouch.datastructures.ExpiringKache
 import com.sim.ouch.datastructures.MutableBiMap
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Existence.Status.DORMANT
+import com.sim.ouch.logic.PublicExistence
 import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.Dao.DaoLogger.Log
 import io.javalin.websocket.WsSession
@@ -58,7 +59,7 @@ class Dao {
     /** Mongo DB [Existence] collection. */
     private val existences get() = mongo.getCollection<Existence>()
     /** Mongo DB [SessionData] collection */
-    private val sessionData = mongo.getCollection<SessionData>()
+    private val sessionData get() = mongo.getCollection<SessionData>()
     /** Token -> [WsSession]? */
     private val sessionTokens = MutableBiMap<Token, WsSession>()
     /**
@@ -111,7 +112,7 @@ class Dao {
     }
 
     /**
-     * Add a new [WsSession] and [Token] to the [Dao].
+     * Add a new [WsSession] [Token] to the [Dao]. Adds [quiddity] to [existence]
      * Returns the [Token] generated for the session.
      */
     suspend fun addSession(session: WsSession, existence: Existence, quiddity: Quiddity)
@@ -198,6 +199,12 @@ class Dao {
     suspend fun getExistence(id: EC) = existences.findOneById(id)
     /** Get non-[DORMANT] Existences */
     suspend fun getLive() = existences.find(Existence::status ne DORMANT).toList()
+    /** Get [PublicExistence]. */
+    suspend fun getPublicExistences() = existences.find(Existence::public eq true)
+        .toList().also { il ->
+            if (il.isEmpty()) return List(100) { PublicExistence() }
+                .also { existences.insertMany(it) }
+        }
     /** Get [DORMANT] Existences */
     suspend fun getDormant() = existences.find(Existence::status eq DORMANT).toList()
     suspend fun getSessionData(token: Token) = sessionData.findOneById(token)
@@ -253,13 +260,12 @@ class Dao {
         suspend fun <F: KFunction<*>> err(any: Any? = "", function: F? = null) =
             log(any, function, "err")
 
-
         private suspend fun <F: KFunction<*>> log(
             any: Any? = "", f: F?, level: String
         ) {
             println(log("[${NOW_STR()}] [$threadName] [$name] ${
             f?.let { "[${f.name}]" } ?: ""} [$level] $any"))
-            if (log.size % 100 == 0) {
+            if (log.size % 10 == 0) {
                 println("Updating Log Collection...")
                 if (logCollection.save(log)?.wasAcknowledged() == true) {
                     println("\tSuccessful")

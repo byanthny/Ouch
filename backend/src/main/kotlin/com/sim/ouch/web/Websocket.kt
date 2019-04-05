@@ -1,27 +1,31 @@
 package com.sim.ouch.web
 
 import com.sim.ouch.Slogger
-import com.sim.ouch.javalin
-import com.sim.ouch.logic.*
+import com.sim.ouch.logic.DefaultExistence
+import com.sim.ouch.logic.Quiddity
+import com.sim.ouch.logic.broadcast
 import com.sim.ouch.web.Packet.DataType.*
 import io.javalin.UnauthorizedResponse
 import io.javalin.websocket.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.function.Consumer
 
 private const val IDLE_TIMOUT = 1_020_000L
 
-val ER_NO_NAME  = 4005 to "no name"
 val ER_EX_NOT_FOUND = 4004 to "existence not found"
-val ER_Q_NOT_FOUND = 4040 to "quididty not found"
+val ER_NO_NAME  = 4005 to "no name"
+val ER_DUPLICATE_NAME = 4006 to "duplicate name"
 val ER_BAD_TOKEN = 4007 to "invalid token"
 val ER_INTERNAL = 4010 to "internal err"
+val ER_Q_NOT_FOUND = 4040 to "quididty not found"
+
+val sl = Slogger("Socket Handler")
 
 /** Server side [WsHandler] implementation. */
 val Websocket = Consumer<WsHandler> { wsHandler ->
-
-    val sl = Slogger("Socket Handler")
 
     val connect = ConnectHandler { session ->
         launch {
@@ -46,9 +50,12 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
             val name = session.queryParam("name")
                 ?: return@launch session.close(ER_NO_NAME)
             val ex = session.queryParam("exID")?.let { ec ->
-                DAO.getExistence(ec)?.also {
-                    qd = it.generateQuidity(name)
-                    t = DAO.addSession(session, it, qd)
+                DAO.getExistence(ec)?.also { e ->
+                    qd = e.quidities.values
+                        .firstOrNull { it.name.equals(name, true) }
+                        //?.also { TODO("Check for duplicates") }
+                        ?: e.generateQuidity(name)
+                    t = DAO.addSession(session, e, qd)
                         ?: return@launch session.close(ER_INTERNAL)
                 } ?: return@launch session.close(ER_EX_NOT_FOUND)
             } ?: let {

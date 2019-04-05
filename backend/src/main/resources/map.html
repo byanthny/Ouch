@@ -152,6 +152,11 @@
             <td>4010</td>
             <td>"internal err"</td>
         </tr>
+        <tr>
+            <td><code>ER_DUPLICATE_NAME</code></td>
+            <td>4006</td>
+            <td>"duplicate name"</td>
+        </tr>
         </tbody>
     </table>
 </div>
@@ -240,12 +245,12 @@
 </div>
 <button id="chat" class="accordion"> Chat</button>
 <div class="panel">
-    <p> <strong>1.) Client sends a chat message: </strong>
-    <code class="json"> { "dataType": "CHAT", "data": "message_content" }</code>
+    <p><strong>1.) Client sends a chat message: </strong>
+        <code class="json"> { "dataType": "CHAT", "data": "message_content" }</code>
     </p>
-    <p> <strong>2.) Server distributes chat message to all clients (to be
+    <p><strong>2.) Server distributes chat message to all clients (to be
         placed in the chat log)</strong>
-    <pre ><code class="json">
+    <pre><code class="json">
 {
     "dataType": "CHAT",
     "data": "{\"authorName\":\"name\",\"content\":\"message content\"}"
@@ -259,44 +264,39 @@
 }
     </code></pre>
 </div>
-<h2 _id="Ping-Pong Heartbeat">Ping-Pong Heartbeat</h2>
-<ol>
-    <li> Client sends PING heartbeat on regular 15 min interval.</li>
-</ol>
-<pre><code clas="json">
-    {
-        "dataType": "PING",
-        "data": "PING" // anything can go here doesn't matter
-    }
-</code></pre>
-<ol>
-    <li> Server responds with another PING heartbeat to confirm.</li>
-</ol>
-<ol>
-    <li> Client sends PING heartbeat on regular (under 5 min) interval.</li>
-</ol>
-<pre><code clas="json">
-    {
-        "dataType": "PING",
-        "data": "PONG" // (anything can go here doesn't matter)
-    }
-</code></pre>
-<h2 _id="actions-wip" ><a href="#actions-wip"
-                                            name="actions-wip">Actions (WIP)</a>
-</h2>
-<ol>
-    <li >Client requests to perform an action:</li>
-</ol>
-<pre ><code class="json" >{
+<button id="pingpong" class="accordion"> Ping-Pong Heartbeat</button>
+<div class="panel">
+    <h4>1.) Client sends PING heartbeat on a sub-20 second interval. </h4>
+    <code clas="json">
+        { "dataType": "PING", "data": "PING" // anything can go here doesn't matter }
+    </code>
+    Server responds with another PING heartbeat to confirm.
+    <ol>
+        <li> Client sends PING heartbeat on regular (under 5 min) interval.</li>
+    </ol>
+    <pre><code clas="json">
+        {
+            "dataType": "PING",
+            "data": "PONG" // (anything can go here doesn't matter)
+        }
+    </code></pre>
+</div>
+<button id="actionsp" class="accordion"> Actions (WIP)</button>
+<div class="panel">
+    <ol>
+        <li>Client requests to perform an action:</li>
+    </ol>
+    <pre><code class="json">{
   &quot;dataType&quot;: &quot;ACTION&quot;,
   &quot;data&quot;: &quot;action_name&quot; // This might get more complex if actions have params
 }
 </code></pre>
-<ol start="2">
-    <li >Server attempts to perform action and then sends
-        updated quidity or Existence?
-    </li>
-</ol>
+    <ol start="2">
+        <li>Server attempts to perform action and then sends
+            updated quidity or Existence?
+        </li>
+    </ol>
+</div>
 
 <script>
     var acc = document.getElementsByClassName("accordion");
