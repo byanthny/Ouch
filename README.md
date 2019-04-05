@@ -89,5 +89,6 @@ Refer to: https://sim-ouch.herokuapp.com/map
 * Added loading screen while connecting
 * Smoother animations
 * Cleaned Up Code
+* -bean
  
 ---
