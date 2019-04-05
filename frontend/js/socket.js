@@ -101,12 +101,14 @@ function play(endpoint) {
                 //New user has entered
                 break;
             case "ENTER": //Add new user to leaderboard
+                console.log("Enter");
                 leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></p></div>';
 
                 addChat(parsedData.name, "has joined the Existence.", "system");
                 scrollBottom();
                 break;
             case "EXIT":
+                console.log("Exit");
                 var quidleaderboard = document.getElementsByClassName(parsedData.id)[0]
                 quidleaderboard.parentNode.removeChild(quidleaderboard);
                 addChat(parsedData.name, "has left the Existence.", "system");
