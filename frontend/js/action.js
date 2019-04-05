@@ -24,17 +24,7 @@ function processInput(clicked) {
             }
             //If command
             else if (input.charAt(0) === "-") {
-                switch (input) {
-                    case "-theme":
-                        switchDark();
-                        break;
-                    case "-exit":
-                        usr_disconnected = true;
-                        connection.close();
-                        break;
-                    default:
-                        console.log("action " + input);
-                }
+                commands(input);
             }
             //If chat
             else {
@@ -63,5 +53,21 @@ function processInput(clicked) {
                 }
             }
         }
+    }
+}
+
+function commands(command) {
+    switch (command) {
+        case "-theme":
+            switchDark();
+            break;
+        case "-bean":
+            break;
+        case "-exit":
+            usr_disconnected = true;
+            connection.close();
+            break;
+        default:
+            console.log("action " + input);
     }
 }
