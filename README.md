@@ -86,5 +86,6 @@ Refer to: https://sim-ouch.herokuapp.com/map
 * Grunt works correctly
 * Added loading screen while connecting
 * Smoother animations
+* Cleaned Up Code
  
 ---
