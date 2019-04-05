@@ -21,6 +21,10 @@
   border-bottom: @search-itm-border;
 }
 
+#chat-outside {
+  position: relative;
+}
+
 #chat {
   .box();
   display: block;
@@ -53,4 +57,12 @@
     background: @dark-color;
     color: @system-color;
   }
+}
+
+#chat-indic {
+  &:extend(.data);
+  position:absolute; bottom:0;
+  margin: 0 auto;
+  width: @chat-indic;
+  left: calc(@chat-indic/2 - 3%);
 }

@@ -6,7 +6,7 @@
     <title>Ouch</title>
     <link rel="stylesheet" href="../docs/css/style.min.css">
     <link href="https://fonts.googleapis.com/css?family=Mrs+Sheppards" rel="stylesheet">
-    <link rel="icon" type="image/png" href="imgs/favicon.png" />
+    <link rel="icon" type="image/png" href="imgs/favicon.png"/>
 </head>
 <body>
 
@@ -42,8 +42,11 @@
                 <div class="search-item">Search Item 5</div>
                 <div class="search-item">Search Item 6</div>
             </div>
-
-            <div id="chat"></div>
+            <div id="chat-outside">
+                <div id="chat">
+                </div>
+                <div id="chat-indic" class="disappear opacity"><a href="#" onclick="chatIndic();">new messages below</a></div>
+            </div>
         </div>
     </div>
 </div>

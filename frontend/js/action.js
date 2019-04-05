@@ -30,7 +30,7 @@ function checkInput(clicked) {
             //If chat
             else {
                if (connection.readyState == 1) {
-                console.log("sent chat message, connection status: "+ connection.readyState);
+                //console.log("sent chat message, connection status: "+ connection.readyState);
                 connection.send(makeChatMessage(input));
                }
             }
@@ -39,7 +39,7 @@ function checkInput(clicked) {
 
         //login screen
         else {
-            if (input === "") {
+            if (input === "" || !input.match(allowedInput)) {
                 shake(user_input);
                 return false;
             } else {
