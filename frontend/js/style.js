@@ -121,6 +121,7 @@ function reset() {
     chat.innerHTML = "";
     user_input.value = "";
     enteredOnce = false;
+    ouch.innerHTML = "Ouch";
 }
 
 /* Creates new chat message based on type

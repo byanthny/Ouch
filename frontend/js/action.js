@@ -62,6 +62,7 @@ function commands(command) {
             switchDark();
             break;
         case "-bean":
+            ouch.innerHTML = "bean";
             break;
         case "-exit":
             usr_disconnected = true;
