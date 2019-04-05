@@ -69,25 +69,28 @@ function processCommands (command) {
             connection.close();
             break;
         default:
-            console.log("action " + input);
+            console.log("action " + command);
     }
 }
 
 //Search Autocomplete
 
+/* Autocomplete funct */
 function autocompleteSearch(currentInput) {
-    /*if(currentInput ===  "" && searching) {
-        switchSearch();
-        return;
-    }*/
-    searching = true;
+
+    console.log("Im called");
+
     search.innerHTML = "";
-    console.log(testActions);
+    var count =  0;
     for (var i = 0; i < testActions.length; i++) {
-        console.log(testActions[i]);
         if(testActions[i].includes(currentInput)) {
+            count++;
             search.innerHTML += '<div class="search-item">'+testActions[i].toString()+'</div>';
         }
     }
+    if(count === 0) {
+        search.innerHTML += '<div class="search-item">No Matches</div>'
+    }
+    searching = true;
 
 }
