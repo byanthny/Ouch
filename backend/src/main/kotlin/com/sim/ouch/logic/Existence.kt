@@ -16,7 +16,7 @@ import java.time.OffsetDateTime
 )
 @JsonSubTypes(
     Type(value = DefaultExistence::class, name = "default"),
-    Type(value = TestExistence::class, name = "test")
+    Type(value = PublicExistence::class, name = "public")
 )
 sealed class Existence {
 
@@ -40,10 +40,12 @@ sealed class Existence {
     abstract val capacity: Long
     /** The first [Quiddity] to enter the [Existence]. */
     abstract val initialQuiddity: Quiddity
-    open val sessionTokens: MutableList<Token> = mutableListOf()
-    open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
+    open val quidities: MutableMap<String, Quiddity> =
+        mutableMapOf(initialQuiddity.id to initialQuiddity)
     open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
+    open val sessionTokens: MutableList<Token> = mutableListOf()
     val chat: Chat = Chat()
+    var public = false
 
     abstract fun generateQuidity(name: String): Quiddity
 
@@ -80,16 +82,16 @@ open class DefaultExistence(
     override val capacity: Long = -1,
     override val name: String  = DefaultNameGenerator.next()
 ) : Existence() {
-
-    init {
-        quidities[initialQuiddity.id] = initialQuiddity
-    }
-
     override fun generateQuidity(name: String) = Quiddity(name)
 }
 
-class TestExistence(initialQuiddity: Quiddity = Quiddity("test_quid"))
-    : DefaultExistence(initialQuiddity, name = "-TEST")
+/** A public [Existence]. */
+class PublicExistence()
+    : DefaultExistence(Quiddity("null"), name = "-TEST") {
+    init {
+        public = true
+    }
+}
 
 /** That which possess the [Existence]. */
 interface Simulator {
