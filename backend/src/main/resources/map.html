@@ -90,6 +90,12 @@
             </code></td>
         </tr>
         <tr>
+            <td>/public?limit=[1+]</td>
+            <td>GET</td>
+            <td>get a list of public Existence IDs</td>
+            <td><code>["ID", "ID_2",...]</code></td>
+        </tr>
+        <tr>
             <td>/ws</td>
             <td>WebSocket</td>
             <td>connect to websocket</td>
@@ -278,9 +284,9 @@
     <h4>1.) Client requests to perform an action:</h4>
     <pre ><code class="json" >
 {
-    "dataType": "ACTION",
-    "data": "action_name" // This might get more complex if actions have params
-    }
+  "dataType": "ACTION",
+  "data": "action_name" // This might get more complex if actions have params
+}
 </code></pre>
     <h4> 2.) Server attempts to perform action and then sends</h4>
     <em>updated quidity or Existence?</em>

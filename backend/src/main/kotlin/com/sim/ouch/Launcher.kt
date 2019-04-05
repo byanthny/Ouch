@@ -25,8 +25,14 @@ fun main() = javalin.apply {
     get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
     ws(SOCKET.point, Websocket)
     get("/public") {
-        val limit = it.queryParam("limit")?.toIntOrNull() ?: 100
-
+        var limit = it.queryParam("limit")?.toIntOrNull() ?: 100
+        if (limit < 1) limit = 100
+        launch {
+            it.result(
+                DAO.getPublicExistences().subList(0, limit)
+                .map { it._id }.json()
+            )
+        }
     }
     get(ACTIONS.point) { it.result(Quiddity.Action.values().json()) }
     get(ENDPOINTS.point) { it.render("/map.html") }
