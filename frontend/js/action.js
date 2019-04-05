@@ -62,7 +62,7 @@ function commands(command) {
             switchDark();
             break;
         case "-bean":
-            ouch.innerHTML = "bean";
+            ouch.innerHTML = '<object data="imgs/bean.svg" type="image/svg+xml"></object>';
             break;
         case "-exit":
             usr_disconnected = true;

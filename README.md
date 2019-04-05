@@ -50,7 +50,9 @@
   | Commands  | Description |
   | ------------- | ------------- |
   | -theme  | Toggles between themes.  |
+  | -bean  | A surprise.  |
   | -exit  | Exit the simulation  |
+  
   
   or https://sim-ouch.herokuapp.com/actions 
 
