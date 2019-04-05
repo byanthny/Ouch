@@ -48,8 +48,25 @@ document.getElementsByClassName("close")[0].onclick = function() {
 
 //TODO make scroll stay in place if you scroll up
 /* Will scroll chat window to bottom */
-function scrollBottom() {
+
+var bottom = function ()  {
     chat.scrollTop = chat.scrollHeight;
+};
+
+function scrollBottom() {
+
+    //check previous
+    //prevChatSize = chat.scrollHeight;
+    //console.log(document.documentElement.clientWidth*.20 < chat.scrollHeight);
+    console.log(+ " " + prevChatSize + " " + chat.offsetTop); //- prevChatSize ===
+    if ((chat.scrollTop === prevChatSize) && (document.documentElement.clientWidth*.20 < chat.scrollHeight)) {
+    //if(!chatScrolling) {
+        bottom;
+        //console.log(document.documentElement.clientWidth*.20+ " "+ chat.scrollHeight);
+    } else if (!(chat.scrollHeight<0)) {
+       switchChatIndic();
+    }
+    prevChatSize = chat.scrollHeight;
 }
 
 /* Reset Ouch back to the login screen. */
@@ -111,4 +128,14 @@ function switchLoading(enter) {
             commands.classList.toggle("opacity");
         }, 1000);
     }
+}
+
+function switchChatIndic() {
+    chatindic.classList.toggle("disappear");
+    chatindic.classList.toggle("opacity");
+}
+
+function chatIndic() {
+    scrollBottom();
+    bottom();
 }

@@ -19,6 +19,7 @@ var indicator = document.getElementById("indicator");
 var world_value = document.getElementById("world-value");
 var loading = document.getElementById("loading");
 var commands = document.getElementById("commands");
+var chatindic = document.getElementById("chat-indic");
 
 //Array of all possible actions
 //TODO load in actions from api
@@ -63,3 +64,5 @@ var usr_disconnected = false;
 var reconnecting = false;
 
 var time;
+
+var allowedInput =  /^[a-z0-9]+$/i;
