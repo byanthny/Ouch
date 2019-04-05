@@ -29,10 +29,10 @@ function checkInput(clicked) {
             }
             //If chat
             else {
-                //console.log("chat");
-                if (connection != null) {
-                    connection.send(makeChatMessage(input));
-                }
+               if (connection.readyState == 1) {
+                console.log("sent chat message, connection status: "+ connection.readyState);
+                connection.send(makeChatMessage(input));
+               }
             }
             user_input.value = "";
         }
@@ -43,7 +43,9 @@ function checkInput(clicked) {
                 shake(user_input);
                 return false;
             } else {
-                return true;
+                if(!enteredOnce) {
+                    return true;
+                }
             }
         }
     }
@@ -72,20 +74,18 @@ submit_button.onclick = function () {
 
     if (checkInput(true)) {
         if (id === "") {
+            enteredOnce = true;
             play(url_ws + '?name=' + nickname);
         } else {
-            play(url_ws + '?name=' + nickname + '&exID=' + id);
+            enteredOnce = true;
+            play(url_ws + '?name=' + nickname + '&exID=' + id.toUpperCase());
         }
     }
 };
 
 reconnect_button.onclick = function () {
-    reconncting = true;
+    reconnecting = true;
     play(url_ws + "?token=" + reconnect_token);
-};
-
-document.onmousemove = function(){
-    here = true;
 };
 
 //Get HTTP and return JSON

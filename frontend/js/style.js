@@ -60,6 +60,7 @@ function reset() {
     leaderboard.innerHTML = "";
     chat.innerHTML = "";
     user_input.value = "";
+    enteredOnce = false;
 }
 
 /* Used to create shake animation on given element
@@ -92,4 +93,22 @@ function addChat(name, content, type) {
 
     chat.innerHTML += html;
 
+}
+
+function switchLoading(enter) {
+    if (enter) {
+        commands.classList.toggle("opacity");
+
+        setTimeout(function () {
+            loading.classList.toggle("disappear");
+            loading.classList.toggle("opacity");
+        }, 1000);
+    }  else {
+        loading.classList.toggle("opacity");
+        loading.classList.toggle("disappear");
+
+        setTimeout(function () {
+            commands.classList.toggle("opacity");
+        }, 1000);
+    }
 }

@@ -17,6 +17,8 @@ var reconnect_button = document.getElementById("reconnect-button");
 var help = document.getElementById("help");
 var indicator = document.getElementById("indicator");
 var world_value = document.getElementById("world-value");
+var loading = document.getElementById("loading");
+var commands = document.getElementById("commands");
 
 //Array of all possible actions
 //TODO load in actions from api
@@ -25,10 +27,12 @@ var actions;
 //Login In
 //Is on login page?
 var login = false;
-
+var enteredOnce = false;
 //Username and id from Login Input
 var nickname = 'user';
 var id = 'id';
+
+
 
 //Server Communication
 //if user is active
@@ -56,4 +60,6 @@ var close_code = {
 var ping_packet = '{"dataType":"PING","data":"PING"}';
 
 var usr_disconnected = false;
-var reconncting = false;
+var reconnecting = false;
+
+var time;

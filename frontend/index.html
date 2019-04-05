@@ -3,6 +3,19 @@
 <html lang="en">
 
 <head>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-137784354-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-137784354-1');
+    </script>
+
+
+
     <title>Ouch</title>
     <link rel="stylesheet" href="css/style.min.css">
     <link href="https://fonts.googleapis.com/css?family=Mrs+Sheppards" rel="stylesheet">
@@ -19,6 +32,11 @@
 
     <p id="level">100</p>
     <h1 class="ouch" id="ouch">Ouch</h1>
+    <div id="loading" class="opacity disappear">
+        <div id="ball-1" class="circle"></div>
+        <div id="ball-2" class="circle"></div>
+        <div id="ball-3" class="circle"></div>
+    </div>
     <div id="commands">
         <form>
             <input id="user-input" type="text" placeholder="username">
