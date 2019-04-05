@@ -24,7 +24,7 @@ function processInput(clicked) {
             }
             //If command
             else if (input.charAt(0) === "-") {
-                commands(input);
+                processCommands(input);
             }
             //If chat
             else {
@@ -56,13 +56,13 @@ function processInput(clicked) {
     }
 }
 
-function commands(command) {
+function processCommands (command) {
     switch (command) {
         case "-theme":
             switchDark();
             break;
         case "-bean":
-            ouch.innerHTML = '<object data="imgs/bean.svg" type="image/svg+xml"></object>';
+            ouch.innerHTML = '<object data="imgs/bean.svg" type="image/svg+xml" style="width: 200px;"></object>';
             break;
         case "-exit":
             usr_disconnected = true;
