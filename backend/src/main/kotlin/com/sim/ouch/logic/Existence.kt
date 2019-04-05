@@ -3,7 +3,9 @@ package com.sim.ouch.logic
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.sim.ouch.*
+import com.sim.ouch.DefaultNameGenerator
+import com.sim.ouch.IDGenerator
+import com.sim.ouch.NOW
 import com.sim.ouch.web.*
 import org.bson.codecs.pojo.annotations.BsonId
 import java.time.OffsetDateTime
@@ -40,8 +42,7 @@ sealed class Existence {
     abstract val capacity: Long
     /** The first [Quiddity] to enter the [Existence]. */
     abstract val initialQuiddity: Quiddity
-    open val quidities: MutableMap<String, Quiddity> =
-        mutableMapOf(initialQuiddity.id to initialQuiddity)
+    open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
     open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
     open val sessionTokens: MutableList<Token> = mutableListOf()
     val chat: Chat = Chat()
@@ -86,8 +87,7 @@ open class DefaultExistence(
 }
 
 /** A public [Existence]. */
-class PublicExistence()
-    : DefaultExistence(Quiddity("null"), name = "-TEST") {
+class PublicExistence : DefaultExistence(Quiddity("null"), name = "-TEST") {
     init {
         public = true
     }
