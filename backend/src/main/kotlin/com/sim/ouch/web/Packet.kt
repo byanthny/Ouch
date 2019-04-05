@@ -60,6 +60,12 @@ fun WsSession.initWith(existence: Existence, quiddity: Quiddity, token: String) 
     send(Packet(INIT, InitPacket(existence, quiddity, token)).pack())
 }
 
+/** Broadcast the [packet] to all connected sessions. */
+fun Existence.broadcast(packet: Packet) {
+    val s = packet.pack()
+    sessionTokens.forEach { DAO.getSession(it)?.send(s) }
+}
+
 fun Existence.broadcast(
     dataType: Packet.DataType,
     data: Any,

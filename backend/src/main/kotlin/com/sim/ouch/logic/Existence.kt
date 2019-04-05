@@ -33,21 +33,24 @@ sealed class Existence {
             }
             field = value
         }
-    get() {
+        get() {
         if (sessionTokens.isEmpty()) field = Status.DORMANT
         return field
     }
 
     abstract val name: String
     abstract val capacity: Long
+    var public = false
+    val size: Int get() = quidities.size + infraQuidities.size
+    val qSize: Int get() = quidities.size
+    val sessionCount: Int get() = sessionTokens.size
     /** The first [Quiddity] to enter the [Existence]. */
-    abstract val initialQuiddity: Quiddity
-    open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
-    open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
+    protected open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
+    protected open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
     open val sessionTokens: MutableList<Token> = mutableListOf()
     val chat: Chat = Chat()
-    var public = false
 
+    /** Generate a new [Quiddity] and add it to the [Existence]. */
     abstract fun generateQuidity(name: String): Quiddity
 
     /** Add an [entity] to the [Existence]. */
@@ -58,7 +61,11 @@ sealed class Existence {
         }
     }
 
-    operator fun get(id: String) = quidities[id] ?: infraQuidities[id]
+    operator fun get(id: ID) = quidities[id] ?: infraQuidities[id]
+    fun qOf(id: QC) = quidities[id]
+    fun qOfName(name: String) =
+        quidities.values.firstOrNull { it.name.equals(name, true) }
+    fun infraOf(id: ID) = infraQuidities[id]
 
     /** Add a new [Session token][Token]. */
     fun addSession(token: Token) = sessionTokens.add(token)
@@ -72,22 +79,17 @@ sealed class Existence {
     }
 }
 
-/** Broadcast the [packet] to all connected sessions. */
-fun Existence.broadcast(packet: Packet) {
-    val s = packet.pack()
-    sessionTokens.forEach { DAO.getSession(it)?.send(s) }
-}
-
 open class DefaultExistence(
-    override val initialQuiddity: Quiddity,
     override val capacity: Long = -1,
     override val name: String  = DefaultNameGenerator.next()
 ) : Existence() {
     override fun generateQuidity(name: String) = Quiddity(name)
+        .also { enter(it) }
 }
 
 /** A public [Existence]. */
-class PublicExistence : DefaultExistence(Quiddity("null"), name = "-TEST") {
+class PublicExistence : DefaultExistence(name = "-TEST") {
+    override val capacity: Long = 1_000
     init {
         public = true
     }
