@@ -72,3 +72,22 @@ function processCommands (command) {
             console.log("action " + input);
     }
 }
+
+//Search Autocomplete
+
+function autocompleteSearch(currentInput) {
+    /*if(currentInput ===  "" && searching) {
+        switchSearch();
+        return;
+    }*/
+    searching = true;
+    search.innerHTML = "";
+    console.log(testActions);
+    for (var i = 0; i < testActions.length; i++) {
+        console.log(testActions[i]);
+        if(testActions[i].includes(currentInput)) {
+            search.innerHTML += '<div class="search-item">'+testActions[i].toString()+'</div>';
+        }
+    }
+
+}

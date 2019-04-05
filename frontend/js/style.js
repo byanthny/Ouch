@@ -28,6 +28,7 @@ function switchSearch() {
     search.classList.toggle("disappear");
     chat.classList.toggle("opacity");
     chat.classList.toggle("disappear");
+    searching = !searching;
 }
 
 /* Toggles Ouch theme between dark and light mode */

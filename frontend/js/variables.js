@@ -65,6 +65,8 @@ var reconnecting = false;
 
 //Array of all possible actions
 var actions;
+var testActions  = ["-bean", "-exit", "-theme"];
+var  searching = false;
 
 
 //Events

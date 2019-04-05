@@ -20,6 +20,21 @@ user_input.addEventListener("keydown", function (event) {
     }
 });
 
+user_input.addEventListener("keyup", function (event) {
+    if(user_input.value.charAt(0)==="-" && !searching) {
+        switchSearch();
+    } else {
+        if(searching) {
+            switchSearch();
+        }
+        searching = false;
+        console.log(searching);
+    }
+    if(!login) {
+        autocompleteSearch(user_input.value);
+    }
+});
+
 //Buttons
 
 /* When reconnect Button  is clicked */
