@@ -28,6 +28,7 @@ function heartbeat() {
 }
 
 //TODO detect inactivity
+//TODO speed up animations
 function inactivityTime() {
 
     window.onload = resetTimer;
