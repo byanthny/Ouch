@@ -8,7 +8,7 @@ fun chatPacket(message: Chat.Message) = Packet(CHAT, message)
 
 class Chat {
 
-    inner class Message internal constructor(
+    data class Message internal constructor(
         val authorID: String, val authorName: String, val content: String
     )
 
