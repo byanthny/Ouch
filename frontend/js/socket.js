@@ -3,14 +3,6 @@
  * socket.js
  */
 
-function heartbeat() {
-    if (!connection) return;
-    if (connection.readyState !== 1) return;
-    if(!here) return;
-    connection.send(ping_packet);
-    setTimeout(heartbeat, 29000);
-}
-
 //TODO speed up animations
 function inactivityTime() {
 
@@ -35,7 +27,9 @@ function resetTimer() {
     time = setTimeout(logout, 30000)
     // 1000 milliseconds = 1 second
 }
-
+/* Handles communication to and from the server
+ * As well as connection and disconnects
+ */
 function play(endpoint) {
     inactivityTime();
     connection = new WebSocket(endpoint);
@@ -142,6 +136,7 @@ document.onbeforeunload = function () {
     connection.close();
 };
 
+/* One page load retrive all actions from actionsurl*/
 document.onload = function () {
     loadActions();
 };
