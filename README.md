@@ -50,7 +50,7 @@
   | Commands  | Description |
   | ------------- | ------------- |
   | -theme  | Toggles between themes.  |
-  | -bean  | A surprise.  |
+  | -bean  | A surprise. But once you bean you can't go back.  |
   | -exit  | Exit the simulation  |
   
   
