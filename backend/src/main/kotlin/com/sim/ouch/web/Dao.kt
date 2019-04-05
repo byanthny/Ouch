@@ -28,7 +28,7 @@ import kotlin.collections.set
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.reflect
 
-
+typealias Name = String
 typealias Token = String
 typealias ID = String
 /** [Existence] Code ([Existence._id]) */ typealias EC = ID

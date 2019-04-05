@@ -20,10 +20,24 @@ import java.time.OffsetDateTime
     Type(value = DefaultExistence::class, name = "default"),
     Type(value = PublicExistence::class, name = "public")
 )
-sealed class Existence {
+sealed class Existence(
+    val name: Name,
+    var capacity: Long = 1,
+    var public: Boolean = false
+) {
 
     @BsonId open val _id: EC = EXISTENCE_ID_GEN.next()
     open val init = NOW()
+
+    /** The first [Quiddity] to enter the [Existence]. */
+    protected open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
+    protected open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
+
+    val size: Int get() = quidities.size + infraQuidities.size
+    val qSize: Int get() = quidities.size
+    val sessionCount: Int get() = sessionTokens.size
+
+    open val sessionTokens: MutableList<Token> = mutableListOf()
     open var dormantSince: OffsetDateTime? = null
     var status: Status = Status.DRY
         set(value) {
@@ -38,16 +52,6 @@ sealed class Existence {
         return field
     }
 
-    abstract val name: String
-    abstract val capacity: Long
-    var public = false
-    val size: Int get() = quidities.size + infraQuidities.size
-    val qSize: Int get() = quidities.size
-    val sessionCount: Int get() = sessionTokens.size
-    /** The first [Quiddity] to enter the [Existence]. */
-    protected open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
-    protected open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
-    open val sessionTokens: MutableList<Token> = mutableListOf()
     val chat: Chat = Chat()
 
     /** Generate a new [Quiddity] and add it to the [Existence]. */
@@ -80,16 +84,16 @@ sealed class Existence {
 }
 
 open class DefaultExistence(
-    override val capacity: Long = -1,
-    override val name: String  = DefaultNameGenerator.next()
-) : Existence() {
+    name: String  = DefaultNameGenerator.next(),
+    capacity: Long = -1
+) : Existence(name, capacity) {
     override fun generateQuidity(name: String) = Quiddity(name)
         .also { enter(it) }
 }
 
 /** A public [Existence]. */
-class PublicExistence : DefaultExistence(name = "-TEST") {
-    override val capacity: Long = 1_000
+class PublicExistence : DefaultExistence("Public", 1_000) {
+    //override val capacity: Long = 1_000
     init {
         public = true
     }
