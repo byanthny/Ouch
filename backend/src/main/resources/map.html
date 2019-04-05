@@ -259,45 +259,27 @@
 }
     </code></pre>
 </div>
-<h2 _id="Ping-Pong Heartbeat">Ping-Pong Heartbeat</h2>
-<ol>
-    <li> Client sends PING heartbeat on regular 15 min interval.</li>
-</ol>
-<pre><code clas="json">
-    {
-        "dataType": "PING",
-        "data": "PING" // anything can go here doesn't matter
-    }
-</code></pre>
-<ol>
-    <li> Server responds with another PING heartbeat to confirm.</li>
-</ol>
-<ol>
-    <li> Client sends PING heartbeat on regular (under 5 min) interval.</li>
-</ol>
-<pre><code clas="json">
-    {
-        "dataType": "PING",
-        "data": "PONG" // (anything can go here doesn't matter)
-    }
-</code></pre>
-<h2 _id="actions-wip" ><a href="#actions-wip"
-                                            name="actions-wip">Actions (WIP)</a>
-</h2>
-<ol>
-    <li >Client requests to perform an action:</li>
-</ol>
-<pre ><code class="json" >{
-  &quot;dataType&quot;: &quot;ACTION&quot;,
-  &quot;data&quot;: &quot;action_name&quot; // This might get more complex if actions have params
+<button id="Ping-Pong" class="accordion">Ping-Pong Heartbeat</button>
+<div class="panel">
+    <h4>1.) Client sends PING heartbeat on a 15 second interval.</h4>
+    <code clas="json">
+        { "dataType": "PING", "data": "PING" /* anything can go here doesn't matter */ }
+    </code>
+    <h4>2.) Server responds with another PING heartbeat to confirm.</h4>
+</div>
+<button id="actions" class="accordion">Actions (WIP) </button>
+<div>
+    TODO
+    <h4>1.) Client requests to perform an action:</h4>
+    <pre ><code class="json" >
+{
+    "dataType": "ACTION",
+    "data": "action_name" // This might get more complex if actions have params
 }
-</code></pre>
-<ol start="2">
-    <li >Server attempts to perform action and then sends
-        updated quidity or Existence?
-    </li>
-</ol>
-
+    </code></pre>
+    <h4> 2.) Server attempts to perform action and then sends</h4>
+    <em>updated quidity or Existence?</em>
+</div>
 <script>
     var acc = document.getElementsByClassName("accordion");
     var i;
