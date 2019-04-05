@@ -2,23 +2,7 @@
  * through web sockets
  * socket.js
  */
-/*
-var keepConnectionOpen;//30000
 
-//TODO keep connection open, close after a certain amount of time and when connection is closed
-function checkOpen() {
-    console.log("I'm called");
-    if(here) {
-        console.log("sending heartbeat");
-        this.connection.send("");
-        keepConnectionOpen = setTimeout(checkOpen(), 30000);
-    } else {
-        //connection.close();
-        console.log("I am not here");
-        clearTimeout(keepConnectionOpen);
-    }
-};
-*/
 function heartbeat() {
     if (!connection) return;
     if (connection.readyState !== 1) return;
@@ -27,7 +11,6 @@ function heartbeat() {
     setTimeout(heartbeat, 29000);
 }
 
-//TODO detect inactivity
 //TODO speed up animations
 function inactivityTime() {
 
