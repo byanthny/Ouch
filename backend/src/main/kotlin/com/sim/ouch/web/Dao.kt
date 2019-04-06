@@ -3,10 +3,8 @@ package com.sim.ouch.web
 import com.sim.ouch.*
 import com.sim.ouch.datastructures.ExpiringKache
 import com.sim.ouch.datastructures.MutableBiMap
-import com.sim.ouch.logic.Existence
+import com.sim.ouch.logic.*
 import com.sim.ouch.logic.Existence.Status.DORMANT
-import com.sim.ouch.logic.PublicExistence
-import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.Dao.DaoLogger.Log
 import io.javalin.websocket.WsSession
 import io.jsonwebtoken.ExpiredJwtException

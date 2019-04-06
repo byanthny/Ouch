@@ -2,9 +2,7 @@ package com.sim.ouch
 
 import com.sim.ouch.EndPoints.*
 import com.sim.ouch.logic.Quiddity
-import com.sim.ouch.web.DAO
-import com.sim.ouch.web.Websocket
-import com.sim.ouch.web.json
+import com.sim.ouch.web.*
 import io.javalin.Javalin
 import kotlinx.coroutines.runBlocking
 import java.lang.System.getenv
@@ -17,13 +15,17 @@ enum class EndPoints(val point: String) {
 
 val javalin: Javalin by lazy { Javalin.create().prefer405over404() }
 
-class OuchData(val version: String, vararg val authors: String)
+class OuchData(val version: String, val uri: String, vararg val authors: String)
 
-val OUCH_VERSION = OuchData("0.0.0", "Jonathan Augustine", "Anthony Das")
+val OUCH = OuchData("0.0.0", "https://anthnyd.github.io/Ouch/",
+    "Jonathan Augustine", "Anthony Das")
 
 fun main() = javalin.apply {
+    enableRouteOverview("/route")
+    enableCorsForAllOrigins()
+    //defaultContentType("application/json")
 
-    get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
+    get("/") { it.redirect(OUCH.uri) }
     ws(SOCKET.point, Websocket)
     get("/public") {
         val limit = it.queryParam("limit")?.toIntOrNull()
@@ -38,7 +40,6 @@ fun main() = javalin.apply {
     get(STATUS.point) { it.result(runBlocking { DAO.status() }.json()) }
     get(LOGS.point) { it.result(runBlocking { DAO.getLogs() }.json()) }
 
-    enableDebugLogging()
     secret(this)
     start(getenv("PORT")?.toInt() ?: 7000.also { javalin.enableDebugLogging() })
 }.unit

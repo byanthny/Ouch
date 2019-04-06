@@ -16,7 +16,7 @@ open class Quiddity(open var name: String) : Entity() {
     open var ouch: Ouch = Ouch()
     open fun love() = ouch--
 
-    enum class Action(val prettyName: String, val description: String) {
+    enum class  Action(val prettyName: String, val description: String) {
         TEST("Test Action", "Description"),
         TEST_2("Test Action 2", "Description 2"),
         TEST_3("Test Action 3", "Description 3")
