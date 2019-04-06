@@ -77,7 +77,6 @@ function processCommands (command) {
 
 /* Autocomplete funct */
 function autocompleteSearch(currentInput) {
-
     search.innerHTML = "";
     var count =  0;
     for (var i = 0; i < testActions.length; i++) {
