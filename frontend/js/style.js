@@ -3,6 +3,8 @@
  * style.js
  */
 
+//TODO fix loading glitch when first connecting
+
 //Switch States
 
 /* Toggles between login and main page */
