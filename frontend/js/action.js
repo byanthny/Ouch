@@ -103,7 +103,6 @@ function autocompleteSearch(currentInput) {
 }
 
 function autofill(input) {
-    //searching = false;
     user_input.value = "";
     processCommands(input);
     switchSearch();
