@@ -22,14 +22,14 @@ user_input.addEventListener("keydown", function (event) {
 
 /* Listens for keyup on user input and perform autocomplete */
 user_input.addEventListener("keyup", function (event) {
-    if(user_input.value.charAt(0)==="-") {
-        if(!searching) {
+    if (user_input.value.charAt(0) === "-") {
+        if (!searching) {
             switchSearch();
         }
-        if(!login) {
+        if (!login) {
             autocompleteSearch(user_input.value);
         }
-    }  else if (searching)  {
+    } else if (searching) {
         switchSearch();
         searching = false;
     }

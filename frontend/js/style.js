@@ -123,6 +123,9 @@ function reset() {
     user_input.value = "";
     enteredOnce = false;
     ouch.innerHTML = "Ouch";
+    if(searching){
+        switchSearch();
+    }
 }
 
 /* Creates new chat message based on type
