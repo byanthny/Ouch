@@ -77,7 +77,6 @@ function processCommands (command) {
 
 /* Autocomplete funct */
 function autocompleteSearch(currentInput) {
-    currentInput = currentInput.toUpperCase();
     search.innerHTML = "";
     var count =  0;
     for (var i = 0; i < actions.length; i++) {
