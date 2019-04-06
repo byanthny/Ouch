@@ -1,4 +1,4 @@
-#loading{
+#loading {
   margin-top: @loading-margin;
   .transition();
 }
@@ -11,36 +11,23 @@
   background-color: @circle-color;
 }
 
-#ball-1{
+.animatedball()  {
   -webkit-animation-name: bounce;
-  -webkit-animation-delay: 1s;
-  -webkit-animation-duration: 1.2s;
-  -webkit-animation-iteration-count: infinite;
-}
-#ball-2{
-  -webkit-animation-name: bounce;
-  -webkit-animation-delay: 1.1s;
-  -webkit-animation-duration: 1.2s;
-  -webkit-animation-iteration-count: infinite;
-}
-#ball-3{
-  -webkit-animation-name: bounce;
-  -webkit-animation-delay: 1.2s;
-  -webkit-animation-duration: 1.2s;
+  -webkit-animation-duration: 1s;
   -webkit-animation-iteration-count: infinite;
 }
 
-@-webkit-keyframes bounce {
-  0% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(23px);
-  }
-  60% {
-    transform: translateY(-25px);
-  }
-  80%{
-    transform: translateY(0);
-  }
+#ball-1 {
+  -webkit-animation-delay: 1s;
+  .animatedball()
+}
+
+#ball-2 {
+  -webkit-animation-delay: 1.1s;
+  .animatedball()
+}
+
+#ball-3 {
+  -webkit-animation-delay: 1.2s;
+  .animatedball()
 }

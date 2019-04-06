@@ -1,15 +1,25 @@
+/*  Creates packets to be sent to web socket
+ *  Handles packets sent from socket
+ */
+
 // Client -> Server packets
 
-function makeChatMessage(text) {
-    return '{"dataType":"CHAT","data":"' + text + '"}';
+/* Creates chat package to send to server
+ * @param content of message
+ */
+function makeChatMessage(content) {
+    return '{"dataType":"CHAT","data":"' + content + '"}';
 }
 
 // Server -> Client packets
 
+/* Handles processing from initial packet from web socket
+ * @param initial packet parsed
+ */
 function handleInit(init_packet) {
     //Save init data to usr in case needed later
     var existence = init_packet.existence;
-    var quiddity  = init_packet.quiddity;
+    var quiddity = init_packet.quiddity;
     reconnect_token = init_packet.token;
 
     //Update level with data received
@@ -22,9 +32,6 @@ function handleInit(init_packet) {
     user_input.placeholder = "enter command or message";
     indicator.classList.toggle("await");
     indicator.classList.toggle("connected");
-    setTimeout(function () {
-        switchLoading(false);
-    }, 1000);
 
     //load in quids in leaderboard
     var usersArray = existence.quidities;
@@ -34,16 +41,20 @@ function handleInit(init_packet) {
         leaderboard.innerHTML +=
             '<div class="data-leaderboard-cont">' +
             '<p class="data-leaderboard ' + usersArray[quid].id + '">'
-                + usersArray[quid].name +
+            + usersArray[quid].name +
             ' <span class="normal">'
-                + usersArray[quid].ouch.degree +
+            + usersArray[quid].ouch.degree +
             '</span></p></div>';
     }
 
     // Load the chat history
-    var char_log = existence.chat.history;
-
-    for (var message in chat_log) {
-        addChat(message.authorName, message.content, "user")
+    var chat_log = existence.chat.history;
+    for  (var i = 0; i < chat_log.length; i++) {
+        var message = chat_log[i];
+        addChat(message.authorName, message.content, "client");
     }
+
+    setTimeout(function () {
+        switchLoading(false);
+    }, 1000);
 }

@@ -1,5 +1,5 @@
 .shake {
-  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.82s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 @keyframes shake {
@@ -17,5 +17,20 @@
 
   40%, 60% {
     transform: translate3d(4px, 0, 0);
+  }
+}
+
+@-webkit-keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(8px);
+  }
+  60% {
+    transform: translateY(-25px);
+  }
+  80% {
+    transform: translateY(0);
   }
 }

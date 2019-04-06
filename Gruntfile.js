@@ -1,4 +1,5 @@
-var jsfiles = ['frontend/js/variables.js','frontend/js/style.js', 'frontend/js/packets.js', 'frontend/js/socket.js', 'frontend/js/action.js'];
+var jsdir = 'frontend/js/';
+var jsfiles = [jsdir+'variables.js',jsdir+'style.js', jsdir+'packets.js', jsdir+'socket.js', jsdir+'events.js', jsdir+'action.js'];
 
 module.exports = function(grunt) {
     require('jit-grunt')(grunt);

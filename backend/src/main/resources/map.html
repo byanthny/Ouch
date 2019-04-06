@@ -90,12 +90,6 @@
             </code></td>
         </tr>
         <tr>
-            <td>/public?limit=[1+]</td>
-            <td>GET</td>
-            <td>get a list of public Existence IDs</td>
-            <td><code>["ID", "ID_2",...]</code></td>
-        </tr>
-        <tr>
             <td>/ws</td>
             <td>WebSocket</td>
             <td>connect to websocket</td>
@@ -251,12 +245,12 @@
 </div>
 <button id="chat" class="accordion"> Chat</button>
 <div class="panel">
-    <p> <strong>1.) Client sends a chat message: </strong>
-    <code class="json"> { "dataType": "CHAT", "data": "message_content" }</code>
+    <p><strong>1.) Client sends a chat message: </strong>
+        <code class="json"> { "dataType": "CHAT", "data": "message_content" }</code>
     </p>
-    <p> <strong>2.) Server distributes chat message to all clients (to be
+    <p><strong>2.) Server distributes chat message to all clients (to be
         placed in the chat log)</strong>
-    <pre ><code class="json">
+    <pre><code class="json">
 {
     "dataType": "CHAT",
     "data": "{\"authorName\":\"name\",\"content\":\"message content\"}"
@@ -270,27 +264,41 @@
 }
     </code></pre>
 </div>
-<button id="Ping-Pong" class="accordion">Ping-Pong Heartbeat</button>
+<button id="pingpong" class="accordion"> Ping-Pong Heartbeat</button>
 <div class="panel">
-    <h4>1.) Client sends PING heartbeat on a 15 second interval.</h4>
+    <h4>1.) Client sends PING heartbeat on a sub-20 second interval. </h4>
     <code clas="json">
-        { "dataType": "PING", "data": "PING" /* anything can go here doesn't matter */ }
+        { "dataType": "PING", "data": "PING" // anything can go here doesn't matter }
     </code>
-    <h4>2.) Server responds with another PING heartbeat to confirm.</h4>
+    Server responds with another PING heartbeat to confirm.
+    <ol>
+        <li> Client sends PING heartbeat on regular (under 5 min) interval.</li>
+    </ol>
+    <pre><code clas="json">
+        {
+            "dataType": "PING",
+            "data": "PONG" // (anything can go here doesn't matter)
+        }
+    </code></pre>
 </div>
-<button id="actions" class="accordion">Actions (WIP) </button>
-<div>
-    TODO
-    <h4>1.) Client requests to perform an action:</h4>
-    <pre ><code class="json" >
-{
-  "dataType": "ACTION",
-  "data": "action_name" // This might get more complex if actions have params
-}
+<button id="actionsp" class="accordion"> Actions (WIP)</button>
+<div class="panel">
+    <ol>
+        <li>Client requests to perform an action:</li>
+    </ol>
+    <pre><code class="json">
+    {
+        "dataType": "ACTION",
+        "data": "action_name" // This might get more complex if actions have params
+    }
 </code></pre>
-    <h4> 2.) Server attempts to perform action and then sends</h4>
-    <em>updated quidity or Existence?</em>
+    <ol start="2">
+        <li>Server attempts to perform action and then sends
+            updated quidity or Existence?
+        </li>
+    </ol>
 </div>
+
 <script>
     var acc = document.getElementsByClassName("accordion");
     var i;

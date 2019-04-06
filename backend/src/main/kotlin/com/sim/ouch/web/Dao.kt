@@ -7,7 +7,10 @@ import com.sim.ouch.logic.*
 import com.sim.ouch.logic.Existence.Status.DORMANT
 import com.sim.ouch.web.Dao.DaoLogger.Log
 import io.javalin.websocket.WsSession
-import io.jsonwebtoken.*
+import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.JwtException
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.SignatureException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -23,7 +26,7 @@ import kotlin.collections.set
 import kotlin.reflect.KFunction
 import kotlin.reflect.jvm.reflect
 
-
+typealias Name = String
 typealias Token = String
 typealias ID = String
 /** [Existence] Code ([Existence._id]) */ typealias EC = ID
@@ -37,13 +40,16 @@ private val mongo by lazy {
         .getDatabase("heroku_4f8vnwwf").coroutine
 }
 
-suspend fun WsSession.existence() = DAO.getToken(this)
+suspend fun WsSession.existence(): Existence? = DAO.getToken(this)
     ?.let { token -> DAO.getSessionData(token)
         ?.let { DAO.getExistence(it.ec) } }
-suspend fun WsSession.quidity() = DAO.getToken(this)
+suspend fun WsSession.quidity(): Quiddity? = DAO.getToken(this)
     ?.let { t -> DAO.getSessionData(t) }
-    ?.let { (ec, qc) -> DAO.getExistence(ec)?.let { e -> e.quidities[qc] } }
+    ?.let { (ec, qc) -> DAO.getExistence(ec)?.qOf(qc) }
 
+/**
+ *
+ */
 class Dao {
 
     /**
@@ -85,9 +91,9 @@ class Dao {
      * Add an [Existence] to the database, generate a token.
      * `null` if a DB insert failed.
      */
-    suspend fun addExistence(session: WsSession, existence: Existence)
+    suspend fun addExistence(session: WsSession, existence: Existence, qName: String)
             : Triple<Token, Existence, Quiddity>? {
-        val ini = existence.initialQuiddity
+        val ini = existence.generateQuidity(qName)
         // Generate new Token
         val token = genToken(session, existence, ini)
         // Add key to Existence
@@ -119,7 +125,7 @@ class Dao {
         val token = genToken(session, existence, quiddity)
         // Update Existence
         existence.addSession(token)
-        existence.quidities[quiddity.id] = quiddity
+        existence.enter(quiddity)
         if (existences.save(existence)?.wasAcknowledged() == false) {
             logger.err("Failed to add session to Existence", Dao::addSession)
             return null
@@ -215,7 +221,7 @@ class Dao {
     suspend fun status(): StatusPacket {
         val le = getLive()
         val de = getDormant()
-        val avgQpe = (le + de).avgBy { it.quidities.size }
+        val avgQpe = (le + de).avgBy(Existence::qSize)
         val oldest = (le + de).minBy(Existence::init)?.init
         return StatusPacket(le.size, de.size, liveSessionsCount, avgQpe, oldest)
     }
@@ -228,7 +234,7 @@ class Dao {
                 "Failed to delete old dormant existences", Dao::cleanDB
                 )
         }
-        existences.find(Existence::sessionTokens size 0,
+        existences.find(Existence::sessionCount size 0,
             Existence::status ne DORMANT).consumeEach {
             it.status = DORMANT
             existences.save(it)

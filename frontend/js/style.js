@@ -3,6 +3,10 @@
  * style.js
  */
 
+//TODO fix loading glitch when first connecting
+
+//Switch States
+
 /* Toggles between login and main page */
 function switchState() {
     if (reconnect_token != null) {
@@ -26,6 +30,7 @@ function switchSearch() {
     search.classList.toggle("disappear");
     chat.classList.toggle("opacity");
     chat.classList.toggle("disappear");
+    searching = !searching;
 }
 
 /* Toggles Ouch theme between dark and light mode */
@@ -37,48 +42,63 @@ function switchDark() {
 
 function togglePopUp() {
     help.classList.toggle("opacity");
-    setTimeout(function () {
-        help.classList.toggle("hidden");
-    }, 1000);
 }
 
-document.getElementsByClassName("close")[0].onclick = function() {
-    togglePopUp();
-};
+/* Switches between loading screen */
+function switchLoading(enter) {
+    //TODO speed up animations
+    if (enter) {
+        commands.classList.toggle("opacity");
 
-//TODO make scroll stay in place if you scroll up
-/* Will scroll chat window to bottom */
+        setTimeout(function () {
+            loading.classList.toggle("disappear");
+            loading.classList.toggle("opacity");
+        }, 1000);
+    } else {
+        loading.classList.toggle("opacity");
+        loading.classList.toggle("disappear");
 
-var bottom = function ()  {
+        setTimeout(function () {
+            commands.classList.toggle("opacity");
+        }, 1000);
+    }
+}
+
+/* Switches on and off chat "more messages" indicator */
+function switchChatIndic() {
+    chatindic.classList.toggle("disappear");
+    chatindic.classList.toggle("opacity");
+}
+
+//Chat
+
+/* Brings chat to bottom */
+var bottom = function () {
     chat.scrollTop = chat.scrollHeight;
 };
 
+
+/* Scroll chat to bottom
+ * Or shows new message indicator if user is scrolling
+ */
 function scrollBottom() {
 
+    //TODO make scroll stay in place if you scroll up
     //check previous
     //prevChatSize = chat.scrollHeight;
     //console.log(document.documentElement.clientWidth*.20 < chat.scrollHeight);
-    console.log(+ " " + prevChatSize + " " + chat.offsetTop); //- prevChatSize ===
-    if ((chat.scrollTop === prevChatSize) && (document.documentElement.clientWidth*.20 < chat.scrollHeight)) {
-    //if(!chatScrolling) {
+    console.log(+" " + prevChatSize + " " + chat.offsetTop); //- prevChatSize ===
+    if ((chat.scrollTop === prevChatSize) && (document.documentElement.clientWidth * .20 < chat.scrollHeight)) {
+        //if(!chatScrolling) {
         bottom;
         //console.log(document.documentElement.clientWidth*.20+ " "+ chat.scrollHeight);
-    } else if (!(chat.scrollHeight<0)) {
-       switchChatIndic();
+    } else if (!(chat.scrollHeight < 0)) {
+        switchChatIndic();
     }
     prevChatSize = chat.scrollHeight;
 }
 
-/* Reset Ouch back to the login screen. */
-function reset() {
-    switchState();
-    indicator.classList.toggle("connected");
-    world_value.innerHTML = "offline";
-    leaderboard.innerHTML = "";
-    chat.innerHTML = "";
-    user_input.value = "";
-    enteredOnce = false;
-}
+//Animations
 
 /* Used to create shake animation on given element
  * @param the HTML element to be "shaken"
@@ -89,21 +109,42 @@ function shake(toShake) {
         toShake.classList.remove("shake");
     }, 1000);
 }
+
+//Web socket
+
+/* Reset Ouch back to the login screen. */
+function reset() {
+    switchState();
+    indicator.classList.toggle("connected");
+    world_value.innerHTML = "offline";
+    leaderboard.innerHTML = "";
+    chat.innerHTML = "";
+    user_input.value = "";
+    user_input.placeholder = "username";
+    enteredOnce = false;
+    ouch.innerHTML = "Ouch";
+    if(searching){
+        switchSearch();
+    }
+}
+
 /* Creates new chat message based on type
- * @param
+ * @param username
+ * @param message content
+ * @param type of message (system, user, or other)
  */
 function addChat(name, content, type) {
 
-    var  html = "";
+    var html = "";
 
-    if(type === "system") {
+    if (type === "system") {
         html = '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">'
-            + name + '</span> '+content+'</p></div>';
-    } else if (type === "other") {
+            + name + '</span> ' + content + '</p></div>';
+    } else if (name !== nickname && type === "client") {
         html =
-            '<div class="chat-msg-cont"><p class="chat-msg '+type+'"><span style="font-weight: bold;">'
+            '<div class="chat-msg-cont"><p class="chat-msg ' + type + '"><span style="font-weight: bold;">'
             + name + ': </span>' + content + '</p></div>';
-    } else if (type === "user") {
+    } else if (name === nickname && type === "client") {
         html =
             '<div class="chat-msg-cont"><p class="chat-msg user">' + content + '</p></div>';
     }
@@ -112,29 +153,9 @@ function addChat(name, content, type) {
 
 }
 
-function switchLoading(enter) {
-    if (enter) {
-        commands.classList.toggle("opacity");
+//Other
 
-        setTimeout(function () {
-            loading.classList.toggle("disappear");
-            loading.classList.toggle("opacity");
-        }, 1000);
-    }  else {
-        loading.classList.toggle("opacity");
-        loading.classList.toggle("disappear");
-
-        setTimeout(function () {
-            commands.classList.toggle("opacity");
-        }, 1000);
-    }
-}
-
-function switchChatIndic() {
-    chatindic.classList.toggle("disappear");
-    chatindic.classList.toggle("opacity");
-}
-
+/* When chat indicator is clicked scroll to bottom */
 function chatIndic() {
     scrollBottom();
     bottom();

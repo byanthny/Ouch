@@ -23,13 +23,13 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
+# Custom Project  Files
 .idea/
 /backend/build/
 /backend/.gradle/
-
 /.gradle/
 /build/
 .DS_Store
-
 package-lock.json
 /node_modules/
+frontend/notes

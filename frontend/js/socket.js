@@ -1,65 +1,48 @@
 /* Handles all interactions with the server
  * through web sockets
+ * As well as and other interactions with websites/servers
  * socket.js
  */
 
+//Web socket
+
+/* Ping-Pong with server */
 function heartbeat() {
     if (!connection) return;
     if (connection.readyState !== 1) return;
-    if(!here) return;
+    if (!here) return;
     connection.send(ping_packet);
     setTimeout(heartbeat, 29000);
 }
 
-//TODO speed up animations
-function inactivityTime() {
-
-    window.onload = resetTimer;
-    // DOM Events
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-
-}
-
-function logout() {
-    console.log("BYE");
-    here = false;
-    usr_disconnected  = true;
-    connection.close();
-    //location.href = 'logout.html'
-}
-
-function resetTimer() {
-    clearTimeout(time);
-    here = true;
-    time = setTimeout(logout, 30000)
-    // 1000 milliseconds = 1 second
-}
-
-function play(endpoint) {
+/* Handles communication to and from the server
+ * As well as connection and disconnects
+ * @param url to connect to
+ */
+function createConnection(endpoint) {
+    switchLoading(true);
     inactivityTime();
     connection = new WebSocket(endpoint);
 
     //On connection open
-    connection.onopen = function() {
-
+    connection.onopen = function () {
         switchState();
-        switchLoading(true);
         indicator.classList.toggle("await");
+        world_value.innerHTML = "connecting";
         user_input.value = "";
         user_input.placeholder = "connecting to the Existence...";
         heartbeat();
-       // keepConnectionOpen =  setTimeout((here ? isHere() : isNotHere()),30000);
+        // keepConnectionOpen =  setTimeout((here ? isHere() : isNotHere()),30000);
     };
 
     //If  there is an  error
-    connection.onerror = function(error) {
+    connection.onerror = function (error) {
         //create error message
-        alert('WebSocket error:'+error);
+        alert('WebSocket error:' + error);
     };
 
     //On message received from socket
-    connection.onmessage = function(e) {
+    connection.onmessage = function (e) {
 
         //parse the socket data
         var JSONdata = JSON.parse(e.data);
@@ -68,45 +51,41 @@ function play(endpoint) {
 
         //Check if datatype is INIT
         switch (JSONdata.dataType) {
-            case "INIT":
+            case "INIT": //Init
                 handleInit(parsedData);
                 break;
-            case "CHAT": //if message is from current user
-                if (parsedData.authorName === nickname) {
-                    addChat("", parsedData.content, "user");
+            case "CHAT": //Chat message
+                    addChat(parsedData.authorName, parsedData.content, "client");
                     scrollBottom();
-                }
-                //if message is from new user
-                else {
-                    addChat(parsedData.authorName, parsedData.content, "other");
-                    scrollBottom();
-                }
-                //New user has entered
                 break;
-            case "ENTER": //Add new user to leaderboard
-                console.log("Enter");
-                leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard ' + parsedData.id + '">' + parsedData.name + ' <span class="normal">' + parsedData.ouch.degree + '</span></p></div>';
-
+            case "ENTER": //New user has entered
+                //Add new user to leaderboard
+                leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard '
+                    + parsedData.id + '">' + parsedData.name + ' <span class="normal">'
+                    + parsedData.ouch.degree + '</span></p></div>';
+                //Announce user joined
                 addChat(parsedData.name, "has joined the Existence.", "system");
                 scrollBottom();
                 break;
-            case "EXIT":
-                console.log("Exit");
-                var quidleaderboard = document.getElementsByClassName(parsedData.id)[0]
+            case "EXIT": //New user has left
+                //Remove user leaderboard item
+                var quidleaderboard = document.getElementsByClassName(parsedData.id)[0];
                 quidleaderboard.parentNode.removeChild(quidleaderboard);
+                //Announce user left
                 addChat(parsedData.name, "has left the Existence.", "system");
                 scrollBottom();
                 break;
-            case "PING":
+            case "PING": //Ping
                 break;
-            default:
+            default: //Other
                 console.log("Unknown dataType");
                 console.log(e.data);
                 break;
         }
     };
 
-    connection.onclose = function(closeEvent) {
+    //On connection close
+    connection.onclose = function (closeEvent) {
         //switch back to login
         reset();
         switch (closeEvent.code) {
@@ -126,22 +105,34 @@ function play(endpoint) {
                 reconnect_token = null;
                 break;
             default:
-                if(!usr_disconnected) {
+                if (!usr_disconnected) {
                     reconnect_button.onclick();
                     break;
                 }
                 usr_disconnected = false;
         }
-       // connection;
         here = false;
     }
 }
 
-//disconnect from server on page close or refresh
-document.onbeforeunload = function () {
-    connection.close();
-};
+/* Retrieve JSON data from website
+* @param url to retrieve JSON from
+*/
+function getHTTP(url) {
+    fetch(url).then(function (resp) {
+        resp.json(); // Transform the data into json
+    }).then(function (data) {
+        return data; //return JSON data
+    });
+}
 
-document.onload = function () {
-    loadActions();
-};
+/* Load in actions from actions_url */
+function loadActions() {
+    var actions_data = getHTTP(url_actions);
+    if (actions_data === "") {
+        console.log("Error");
+    } else {
+        actions = JSON.parse(actions_data);
+        console.log(actions);
+    }
+}

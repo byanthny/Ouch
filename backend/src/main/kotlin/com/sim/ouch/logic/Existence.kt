@@ -3,7 +3,9 @@ package com.sim.ouch.logic
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.sim.ouch.*
+import com.sim.ouch.DefaultNameGenerator
+import com.sim.ouch.IDGenerator
+import com.sim.ouch.NOW
 import com.sim.ouch.web.*
 import org.bson.codecs.pojo.annotations.BsonId
 import java.time.OffsetDateTime
@@ -18,10 +20,24 @@ import java.time.OffsetDateTime
     Type(value = DefaultExistence::class, name = "default"),
     Type(value = PublicExistence::class, name = "public")
 )
-sealed class Existence {
+sealed class Existence(
+    val name: Name,
+    var capacity: Long = 1,
+    var public: Boolean = false
+) {
 
     @BsonId open val _id: EC = EXISTENCE_ID_GEN.next()
     open val init = NOW()
+
+    /** The first [Quiddity] to enter the [Existence]. */
+    open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
+    open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
+
+    val size: Int get() = quidities.size + infraQuidities.size
+    val qSize: Int get() = quidities.size
+    val sessionCount: Int get() = sessionTokens.size
+
+    open val sessionTokens: MutableList<Token> = mutableListOf()
     open var dormantSince: OffsetDateTime? = null
     var status: Status = Status.DRY
         set(value) {
@@ -31,22 +47,14 @@ sealed class Existence {
             }
             field = value
         }
-    get() {
+        get() {
         if (sessionTokens.isEmpty()) field = Status.DORMANT
         return field
     }
 
-    abstract val name: String
-    abstract val capacity: Long
-    /** The first [Quiddity] to enter the [Existence]. */
-    abstract val initialQuiddity: Quiddity
-    open val quidities: MutableMap<String, Quiddity> =
-        mutableMapOf(initialQuiddity.id to initialQuiddity)
-    open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
-    open val sessionTokens: MutableList<Token> = mutableListOf()
     val chat: Chat = Chat()
-    var public = false
 
+    /** Generate a new [Quiddity] and add it to the [Existence]. */
     abstract fun generateQuidity(name: String): Quiddity
 
     /** Add an [entity] to the [Existence]. */
@@ -57,7 +65,11 @@ sealed class Existence {
         }
     }
 
-    operator fun get(id: String) = quidities[id] ?: infraQuidities[id]
+    operator fun get(id: ID) = quidities[id] ?: infraQuidities[id]
+    fun qOf(id: QC) = quidities[id]
+    fun qOfName(name: String) =
+        quidities.values.firstOrNull { it.name.equals(name, true) }
+    fun infraOf(id: ID) = infraQuidities[id]
 
     /** Add a new [Session token][Token]. */
     fun addSession(token: Token) = sessionTokens.add(token)
@@ -71,23 +83,17 @@ sealed class Existence {
     }
 }
 
-/** Broadcast the [packet] to all connected sessions. */
-fun Existence.broadcast(packet: Packet) {
-    val s = packet.pack()
-    sessionTokens.forEach { DAO.getSession(it)?.send(s) }
-}
-
 open class DefaultExistence(
-    override val initialQuiddity: Quiddity,
-    override val capacity: Long = -1,
-    override val name: String  = DefaultNameGenerator.next()
-) : Existence() {
+    name: String  = DefaultNameGenerator.next(),
+    capacity: Long = -1
+) : Existence(name, capacity) {
     override fun generateQuidity(name: String) = Quiddity(name)
+        .also { enter(it) }
 }
 
 /** A public [Existence]. */
-class PublicExistence()
-    : DefaultExistence(Quiddity("null"), name = "-TEST") {
+class PublicExistence : DefaultExistence("Public", 1_000) {
+    //override val capacity: Long = 1_000
     init {
         public = true
     }

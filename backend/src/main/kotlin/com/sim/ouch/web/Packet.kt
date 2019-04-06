@@ -60,16 +60,25 @@ fun WsSession.initWith(existence: Existence, quiddity: Quiddity, token: String) 
     send(Packet(INIT, InitPacket(existence, quiddity, token)).pack())
 }
 
+/** Broadcast the [packet] to all connected sessions. */
+fun Existence.broadcast(packet: Packet) {
+    val s = packet.pack()
+    sessionTokens.forEach { DAO.getSession(it)?.send(s) }
+}
+
 fun Existence.broadcast(
     dataType: Packet.DataType,
     data: Any,
+    isString: Boolean = false,
     vararg excludeIDs: String
 ) = sessionTokens.mapNotNull { DAO.getSession(it) }
-    .broadcast(dataType, data, *excludeIDs)
+    .broadcast(dataType, data, isString, *excludeIDs)
 
 fun Iterable<WsSession>.broadcast(
     dataType: Packet.DataType,
     data: Any,
+    isString: Boolean = false,
     vararg excludeIDs: String
 ) = filterNot { it.id in excludeIDs }
-    .forEach { it.send(Packet(dataType, data).pack()) }
+    .forEach { it.send(Packet(dataType, data, isString).pack()) }
+

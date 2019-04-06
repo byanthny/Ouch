@@ -50,7 +50,9 @@
   | Commands  | Description |
   | ------------- | ------------- |
   | -theme  | Toggles between themes.  |
+  | -bean  | A surprise. But once you bean you can't go back.  |
   | -exit  | Exit the simulation  |
+  
   
   or https://sim-ouch.herokuapp.com/actions 
 
@@ -86,5 +88,7 @@ Refer to: https://sim-ouch.herokuapp.com/map
 * Grunt works correctly
 * Added loading screen while connecting
 * Smoother animations
+* Cleaned Up Code
+* -bean
  
 ---
