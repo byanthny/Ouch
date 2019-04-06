@@ -2,14 +2,13 @@ package com.sim.ouch
 
 import com.sim.ouch.EndPoints.*
 import com.sim.ouch.logic.Quiddity
-import com.sim.ouch.web.*
+import com.sim.ouch.web.DAO
+import com.sim.ouch.web.Websocket
+import com.sim.ouch.web.json
 import io.javalin.Javalin
 import kotlinx.coroutines.runBlocking
-import kotlinx.html.*
-import kotlinx.html.stream.createHTML
 import java.lang.System.getenv
 
-val test = true
 
 enum class EndPoints(val point: String) {
     ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status"),
@@ -27,8 +26,11 @@ fun main() = javalin.apply {
     get("/") { it.redirect("https://anthnyd.github.io/Ouch/") }
     ws(SOCKET.point, Websocket)
     get("/public") {
-        val limit = it.queryParam("limit")?.toIntOrNull() ?: 100
-
+        val limit = it.queryParam("limit")?.toIntOrNull()
+        val json = runBlocking { DAO.getPublicExistences() }
+            .let { el -> limit?.let { el.subList(0, limit) } ?: el }
+            .json()
+        it.result(json)
     }
     get(ACTIONS.point) { it.result(Quiddity.Action.values().json()) }
     get(ENDPOINTS.point) { it.render("/map.html") }

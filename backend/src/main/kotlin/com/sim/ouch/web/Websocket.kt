@@ -3,7 +3,6 @@ package com.sim.ouch.web
 import com.sim.ouch.Slogger
 import com.sim.ouch.logic.DefaultExistence
 import com.sim.ouch.logic.Quiddity
-import com.sim.ouch.logic.broadcast
 import com.sim.ouch.web.Packet.DataType.*
 import io.javalin.UnauthorizedResponse
 import io.javalin.websocket.*
@@ -36,7 +35,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
                     // Attempt to locate existence
                     val ex = DAO.getExistence(sd.ec)
                         ?: return@launch session.close(ER_EX_NOT_FOUND)
-                    val q  = ex.quidities[sd.qc]
+                    val q  = ex.qOf(sd.qc)
                         ?: return@launch session.close(ER_Q_NOT_FOUND)
                     session.idleTimeout = IDLE_TIMOUT
                     return@launch session.initWith(ex, q, token)
@@ -51,16 +50,14 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
                 ?: return@launch session.close(ER_NO_NAME)
             val ex = session.queryParam("exID")?.let { ec ->
                 DAO.getExistence(ec)?.also { e ->
-                    qd = e.quidities.values
-                        .firstOrNull { it.name.equals(name, true) }
-                        //?.also { TODO("Check for duplicates") }
+                    qd = e.qOfName(name)//?.also { TODO("Check for duplicates") }
                         ?: e.generateQuidity(name)
                     t = DAO.addSession(session, e, qd)
                         ?: return@launch session.close(ER_INTERNAL)
                 } ?: return@launch session.close(ER_EX_NOT_FOUND)
             } ?: let {
-                DefaultExistence(Quiddity(name))
-                    .let { DAO.addExistence(session, it) }
+                DefaultExistence()
+                    .let { DAO.addExistence(session, it, name) }
                     ?.let {
                         t = it.first
                         qd = it.third
@@ -78,7 +75,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
             val sd = DAO.getSessionData(session)
             val packet = readPacket(msg)
             val ex = sd?.let { DAO.getExistence(it.ec) }
-            val qd = sd?.let { ex?.quidities?.get(it.qc) }
+            val qd = sd?.let { ex?.qOf(it.qc) }
             when (packet.dataType) {
                 QUIDITY -> TODO()
                 EXISTENCE -> TODO()
