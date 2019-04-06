@@ -40,9 +40,6 @@ function switchDark() {
 
 function togglePopUp() {
     help.classList.toggle("opacity");
-    setTimeout(function () {
-        help.classList.toggle("hidden");
-    }, 1000);
 }
 
 /* Switches between loading screen */

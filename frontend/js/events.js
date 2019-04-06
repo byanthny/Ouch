@@ -68,6 +68,16 @@ submit_button.onclick = function () {
 /* On popup close button clicked */
 document.getElementsByClassName("close")[0].onclick = function () {
     togglePopUp();
+    setTimeout(function () {
+        help.classList.add("zindex");
+    }, 1000);
+
+};
+
+/* On help icon button clicked */
+helpicon.onclick = function () {
+    help.classList.remove("zindex");
+    togglePopUp();
 };
 
 //Page load-in and load-out

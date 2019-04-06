@@ -21,6 +21,7 @@ var world_value = document.getElementById("world-value");
 var loading = document.getElementById("loading");
 var commands = document.getElementById("commands");
 var chatindic = document.getElementById("chat-indic");
+var helpicon = document.getElementById("help-icon");
 
 var search_items = document.getElementsByClassName("search-item")
 
