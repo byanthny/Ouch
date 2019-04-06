@@ -93,7 +93,7 @@ window.onload = function () {
     //get actions from url and then load them
     getHTTP(url_actions,setActions);
     //get public status and load them
-    //getHTTP(url_public,setPublicExist);
+    getHTTP(url_status,setPublicExist);
 };
 
 //Timeout after inactivity

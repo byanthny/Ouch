@@ -24,7 +24,7 @@ function handleInit(init_packet) {
 
     //Update level with data received
     level.innerHTML = quiddity.name
-        + '<span id="world-value" style="font-weight: normal;"> '
+        + '<span id="world-value" class="normal"> '
         + quiddity.ouch.degree + '</span>';
     //Set existence ID
     world_value.innerHTML = init_packet.existence._id;
