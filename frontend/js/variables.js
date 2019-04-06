@@ -71,7 +71,6 @@ var reconnecting = false;
 var actions;
 //all public existences
 var public_exist;
-var testActions  = ["-bean", "-exit", "-theme"];
 var  searching = false;
 
 
