@@ -31,3 +31,19 @@
     color: @dark-color;
   }
 }
+
+#help-icon {
+  &:extend(.button);
+  .circle();
+  background-color: @help-icon-color;
+  height: @help-icon-size;
+  width: @help-icon-size;
+  position: absolute;
+  bottom: @help-icon-spacing;
+  right: @help-icon-spacing;
+  padding: 0;
+
+  &:hover {
+    .button-hover()
+  }
+}
