@@ -69,6 +69,41 @@ function processCommands (command) {
             connection.close();
             break;
         default:
-            console.log("action " + input);
+            console.log("action " + command);
     }
+}
+
+//Search Autocomplete
+
+/* Autocomplete funct */
+function autocompleteSearch(currentInput) {
+
+    console.log("Im called");
+
+    search.innerHTML = "";
+    var count =  0;
+    for (var i = 0; i < testActions.length; i++) {
+        if(testActions[i].includes(currentInput)) {
+            count++;
+            search.innerHTML += '<div class="search-item">'+testActions[i]+'</div>';
+        }
+    }
+    if(count === 0) {
+        search.innerHTML += '<div class="search-item">No Matches</div>'
+    }
+
+    for (var i = 0; i < search_items.length; i++) {
+        search_items[i].onclick = function (event) {
+            autofill(event.target.innerHTML);
+        }
+    }
+
+    searching = true;
+
+}
+
+function autofill(input) {
+    user_input.value = "";
+    processCommands(input);
+    switchSearch();
 }

@@ -29,6 +29,7 @@ function createConnection(endpoint) {
 
         switchState();
         indicator.classList.toggle("await");
+        world_value.innerHTML = "connecting";
         user_input.value = "";
         user_input.placeholder = "connecting to the Existence...";
         heartbeat();
@@ -55,16 +56,8 @@ function createConnection(endpoint) {
                 handleInit(parsedData);
                 break;
             case "CHAT": //Chat message
-                //if message is from current user
-                if (parsedData.authorName === nickname) {
-                    addChat("", parsedData.content, "user");
+                    addChat(parsedData.authorName, parsedData.content, "client");
                     scrollBottom();
-                }
-                //if message is from other user
-                else {
-                    addChat(parsedData.authorName, parsedData.content, "other");
-                    scrollBottom();
-                }
                 break;
             case "ENTER": //New user has entered
                 //Add new user to leaderboard

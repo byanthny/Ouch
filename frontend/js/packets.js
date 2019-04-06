@@ -51,9 +51,10 @@ function handleInit(init_packet) {
     }
 
     // Load the chat history
-    var char_log = existence.chat.history;
-
-    for (var message in chat_log) {
-        addChat(message.authorName, message.content, "user")
+    var chat_log = existence.chat.history;
+    console.log(chat_log);
+    for  (var i = 0; i < chat_log.length; i++) {
+        var message = chat_log[i];
+        addChat(message.authorName, message.content, "client");
     }
 }

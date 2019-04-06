@@ -22,6 +22,7 @@ var loading = document.getElementById("loading");
 var commands = document.getElementById("commands");
 var chatindic = document.getElementById("chat-indic");
 
+var search_items = document.getElementsByClassName("search-item")
 
 //Login In
 //
@@ -65,6 +66,8 @@ var reconnecting = false;
 
 //Array of all possible actions
 var actions;
+var testActions  = ["-bean", "-exit", "-theme"];
+var  searching = false;
 
 
 //Events

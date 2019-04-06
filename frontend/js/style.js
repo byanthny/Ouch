@@ -28,6 +28,7 @@ function switchSearch() {
     search.classList.toggle("disappear");
     chat.classList.toggle("opacity");
     chat.classList.toggle("disappear");
+    searching = !searching;
 }
 
 /* Toggles Ouch theme between dark and light mode */
@@ -120,8 +121,12 @@ function reset() {
     leaderboard.innerHTML = "";
     chat.innerHTML = "";
     user_input.value = "";
+    user_input.placeholder = "username";
     enteredOnce = false;
     ouch.innerHTML = "Ouch";
+    if(searching){
+        switchSearch();
+    }
 }
 
 /* Creates new chat message based on type
@@ -136,11 +141,11 @@ function addChat(name, content, type) {
     if (type === "system") {
         html = '<div class="chat-msg-cont"><p class="chat-msg system"><span style="font-weight: bold;">'
             + name + '</span> ' + content + '</p></div>';
-    } else if (type === "other") {
+    } else if (name !== nickname && type === "client") {
         html =
             '<div class="chat-msg-cont"><p class="chat-msg ' + type + '"><span style="font-weight: bold;">'
             + name + ': </span>' + content + '</p></div>';
-    } else if (type === "user") {
+    } else if (name === nickname && type === "client") {
         html =
             '<div class="chat-msg-cont"><p class="chat-msg user">' + content + '</p></div>';
     }
