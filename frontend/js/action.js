@@ -78,8 +78,6 @@ function processCommands (command) {
 /* Autocomplete funct */
 function autocompleteSearch(currentInput) {
 
-    console.log("Im called");
-
     search.innerHTML = "";
     var count =  0;
     for (var i = 0; i < testActions.length; i++) {
@@ -93,6 +91,8 @@ function autocompleteSearch(currentInput) {
     }
 
     for (var i = 0; i < search_items.length; i++) {
+        if(i !== search_items.length-1)
+            search_items[i].classList.add("search-bottom-border");
         search_items[i].onclick = function (event) {
             autofill(event.target.innerHTML);
         }

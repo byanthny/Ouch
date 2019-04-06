@@ -32,9 +32,6 @@ function handleInit(init_packet) {
     user_input.placeholder = "enter command or message";
     indicator.classList.toggle("await");
     indicator.classList.toggle("connected");
-    setTimeout(function () {
-        switchLoading(false);
-    }, 1000);
 
     //load in quids in leaderboard
     var usersArray = existence.quidities;
@@ -52,9 +49,12 @@ function handleInit(init_packet) {
 
     // Load the chat history
     var chat_log = existence.chat.history;
-    console.log(chat_log);
     for  (var i = 0; i < chat_log.length; i++) {
         var message = chat_log[i];
         addChat(message.authorName, message.content, "client");
     }
+
+    setTimeout(function () {
+        switchLoading(false);
+    }, 1000);
 }

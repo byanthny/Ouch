@@ -4,8 +4,17 @@
   .box();
 }
 
+.search-bottom-border {
+  border-bottom: @search-itm-border;
+}
+
 .search-item {
   padding: @search-itm-padding;
   font-family: @secondary-font;
-  border-bottom: @search-itm-border;
+  border-radius: @default-rounded;
+  .transition();
+
+  &:hover  {
+    background-color: darken(@white-color, 5%);
+  }
 }

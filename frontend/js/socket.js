@@ -26,7 +26,6 @@ function createConnection(endpoint) {
 
     //On connection open
     connection.onopen = function () {
-
         switchState();
         indicator.classList.toggle("await");
         world_value.innerHTML = "connecting";
