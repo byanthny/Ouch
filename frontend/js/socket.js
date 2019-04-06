@@ -119,10 +119,21 @@ function createConnection(endpoint) {
 * @param url to retrieve JSON from
 */
 function getHTTP(url) {
-    fetch(url).then(function (resp) {
+
+    fetch(url, {method: 'GET',  mode: 'cors'}).then(function (resp) {
+       /* console.log(resp);
         resp.json(); // Transform the data into json
+        console.log(resp.json());
     }).then(function (data) {
-        return data; //return JSON data
+        return data; //return JSON data*/
+    var jsonData = resp.json(); // there's always a body
+    if (resp.status >= 200 && resp.status < 300) {
+        console.log(resp);
+        return jsonData;
+    } else {
+        console.log(jsonData.then(Promise.reject.bind(Promise)));
+        return jsonData.then(Promise.reject.bind(Promise));
+    }
     });
 }
 
@@ -132,6 +143,7 @@ function loadActions() {
     if (actions_data === "") {
         console.log("Error");
     } else {
+        console.log(actions_data);
         actions = JSON.parse(actions_data);
         console.log(actions);
     }
