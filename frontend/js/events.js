@@ -90,7 +90,10 @@ document.onbeforeunload = function () {
 
 /* One page load retrieve all actions from actions_url*/
 window.onload = function () {
-    loadActions();
+    //get actions from url and then load them
+    getHTTP(url_actions,setActions);
+    //get public status and load them
+    //getHTTP(url_public,setPublicExist);
 };
 
 //Timeout after inactivity

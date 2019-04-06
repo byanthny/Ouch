@@ -49,6 +49,7 @@ var url_base = 'sim-ouch.herokuapp.com';
 //Socket
 var url_ws = 'wss://' + url_base + '/ws';
 var url_actions = 'https://' + url_base + '/actions';
+var url_public = 'https://' + url_base + '/public';
 var connection;
 var reconnect_token = null;
 
@@ -67,6 +68,8 @@ var reconnecting = false;
 
 //Array of all possible actions
 var actions;
+//all public existences
+var public_exist;
 var testActions  = ["-bean", "-exit", "-theme"];
 var  searching = false;
 

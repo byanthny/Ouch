@@ -55,8 +55,8 @@ function createConnection(endpoint) {
                 handleInit(parsedData);
                 break;
             case "CHAT": //Chat message
-                    addChat(parsedData.authorName, parsedData.content, "client");
-                    scrollBottom();
+                addChat(parsedData.authorName, parsedData.content, "client");
+                scrollBottom();
                 break;
             case "ENTER": //New user has entered
                 //Add new user to leaderboard
@@ -117,30 +117,37 @@ function createConnection(endpoint) {
 
 /* Retrieve JSON data from website
 * @param url to retrieve JSON from
+* @param the function to send the data to
 */
-function getHTTP(url) {
+function getHTTP(url, func) {
+    var callback = func;
 
-    fetch(url, {method: 'GET',  mode: 'cors'}).then(function (resp) {
-       /* console.log(resp);
-        resp.json(); // Transform the data into json
-        console.log(resp.json());
-    }).then(function (data) {
-        return data; //return JSON data*/
-    var jsonData = resp.json(); // there's always a body
-    if (resp.status >= 200 && resp.status < 300) {
-        return Promise.resolve(jsonData).then(function(value){console.log(value);return value;});
-    } else {
-        return jsonData.then(Promise.reject.bind(Promise));
-    }
+    fetch(url, {method: 'GET', mode: 'cors'}).then(function (resp) {
+        var jsonData = resp.json();
+        if (resp.status >= 200 && resp.status < 300) {
+            Promise.resolve(jsonData).then(function (value) {
+                callback(value);
+                return value;
+            });
+        } else {
+            callback(jsonData.then(Promise.reject.bind(Promise)));
+        }
     });
 }
 
-/* Load in actions from actions_url */
-function loadActions() {
-    var actions = getHTTP(url_actions);
-
+/* Load in actions from given data*/
+var setActions = function (data) {
+    actions = data;
     //Actions went wrong
     if (actions === "") {
         console.log("Error");
     }
-}
+};
+
+var setPublicExist = function (data) {
+    public_exist = data;
+    //Actions went wrong
+    if (public_exist === "") {
+        console.log("Error");
+    }
+};
