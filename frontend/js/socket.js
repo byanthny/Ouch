@@ -128,10 +128,8 @@ function getHTTP(url) {
         return data; //return JSON data*/
     var jsonData = resp.json(); // there's always a body
     if (resp.status >= 200 && resp.status < 300) {
-        console.log(resp);
-        return jsonData;
+        return Promise.resolve(jsonData).then(function(value){console.log(value);return value;});
     } else {
-        console.log(jsonData.then(Promise.reject.bind(Promise)));
         return jsonData.then(Promise.reject.bind(Promise));
     }
     });
@@ -139,12 +137,10 @@ function getHTTP(url) {
 
 /* Load in actions from actions_url */
 function loadActions() {
-    var actions_data = getHTTP(url_actions);
-    if (actions_data === "") {
+    var actions = getHTTP(url_actions);
+
+    //Actions went wrong
+    if (actions === "") {
         console.log("Error");
-    } else {
-        console.log(actions_data);
-        actions = JSON.parse(actions_data);
-        console.log(actions);
     }
 }
