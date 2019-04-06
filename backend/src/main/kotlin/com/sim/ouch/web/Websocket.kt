@@ -6,10 +6,7 @@ import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.Packet.DataType.*
 import io.javalin.UnauthorizedResponse
 import io.javalin.websocket.*
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.function.Consumer
 
 private const val IDLE_TIMOUT = 1_020_000L
@@ -26,82 +23,86 @@ val sl = Slogger("Socket Handler")
 /** Server side [WsHandler] implementation. */
 val Websocket = Consumer<WsHandler> { wsHandler ->
 
-    val connect = ConnectHandler { session ->
-        launch {
-            // Check for reconnection token
-            session.queryParam("token")?.also { token ->
-                // Attempt to validate the token
-                DAO.refreshSession(token, session)?.also { (_, sd) ->
-                    // Attempt to locate existence
-                    val ex = DAO.getExistence(sd.ec)
-                        ?: return@launch session.close(ER_EX_NOT_FOUND)
-                    val q  = ex.qOf(sd.qc)
-                        ?: return@launch session.close(ER_Q_NOT_FOUND)
-                    session.idleTimeout = IDLE_TIMOUT
-                    return@launch session.initWith(ex, q, token)
-                        .also { sl.slog("Init reconnect session. Ex=${ex._id} SID=${session.id}") }
-                } ?: return@launch session.close(ER_BAD_TOKEN)
-            }
-
-            // Standard Start Connection
-            lateinit var t: Token
-            lateinit var qd: Quiddity
-            val name = session.queryParam("name")
-                ?: return@launch session.close(ER_NO_NAME)
-            val ex = session.queryParam("exID")?.let { ec ->
-                DAO.getExistence(ec)?.also { e ->
-                    qd = e.qOfName(name)//?.also { TODO("Check for duplicates") }
-                        ?: e.generateQuidity(name)
-                    t = DAO.addSession(session, e, qd)
-                        ?: return@launch session.close(ER_INTERNAL)
-                } ?: return@launch session.close(ER_EX_NOT_FOUND)
-            } ?: let {
-                DefaultExistence()
-                    .let { DAO.addExistence(session, it, name) }
-                    ?.let {
-                        t = it.first
-                        qd = it.third
-                        it.second
-                    } ?: return@launch session.close(ER_INTERNAL)
-            }
-            session.idleTimeout = IDLE_TIMOUT
-            session.initWith(ex, qd, t)
-                .also { sl.slog("Init session. Ex=${ex._id} SID=${session.id}") }
+    val connect = ConnectHandler ch@{ session ->
+        // Check for reconnection token
+        session.queryParam("token")?.also { token ->
+            // Attempt to validate the token
+            runBlocking { DAO.refreshSession(token, session) }?.also { (_, sd) ->
+                // Attempt to locate existence
+                val ex = runBlocking { DAO.getExistence(sd.ec) }
+                    ?: return@ch session.close(ER_EX_NOT_FOUND)
+                val q = ex.qOf(sd.qc)
+                    ?: return@ch session.close(ER_Q_NOT_FOUND)
+                session.idleTimeout = IDLE_TIMOUT
+                return@ch session.initWith(ex, q, token)
+                    .also { ex.broadcast(ENTER, q, false, session.id) }
+                    .also { sl.slog("Init reconnect session. Ex=${ex._id} SID=${session.id}") }
+            } ?: return@ch session.close(ER_BAD_TOKEN)
         }
+
+        // Standard Start Connection
+        lateinit var t: Token
+        lateinit var qd: Quiddity
+        val name = session.queryParam("name")
+            ?: return@ch session.close(ER_NO_NAME)
+        val ex = session.queryParam("exID")?.let { ec ->
+            runBlocking { DAO.getExistence(ec) }?.also { e ->
+                qd = e.qOfName(name) //?.also { TODO("Check for duplicates") }
+                    ?: e.generateQuidity(name)
+                t = runBlocking { DAO.addSession(session, e, qd) }
+                    ?: return@ch session.close(ER_INTERNAL)
+            } ?: return@ch session.close(ER_EX_NOT_FOUND)
+        } ?: run {
+            runBlocking { DAO.addExistence(session, DefaultExistence(), name) }
+                ?.let {
+                    t = it.first
+                    qd = it.third
+                    it.second
+                } ?: return@ch session.close(ER_INTERNAL)
+        }
+        session.idleTimeout = IDLE_TIMOUT
+        session.initWith(ex, qd, t)
+            .also { sl.slog("Init session. Ex=${ex._id} SID=${session.id}") }
+            .also { ex.broadcast(ENTER, qd, false, session.id) }
     }
 
     val message = MessageHandler { session, msg ->
-        launch {
-            val sd = DAO.getSessionData(session)
-            val packet = readPacket(msg)
-            val ex = sd?.let { DAO.getExistence(it.ec) }
-            val qd = sd?.let { ex?.qOf(it.qc) }
-            when (packet.dataType) {
-                QUIDITY -> TODO()
-                EXISTENCE -> TODO()
-                ACTION -> TODO()
-                CHAT -> {
-                    qd?.let { ex?.chat?.update(it, packet.data as String) }
-                        ?.let { m -> ex?.broadcast(chatPacket(m)) }
-                    ex?.also { DAO.saveExistence(it) }
-                }
-                PING -> session.send(Packet(PING, "pong").pack())
-                else -> throw UnauthorizedResponse(
-                    "Client cannot make ${packet.dataType} requests.")
+        val sd = runBlocking { DAO.getSessionData(session) }
+        val packet = readPacket(msg)
+        val ex = sd?.let { runBlocking { DAO.getExistence(it.ec) } }
+        val qd = sd?.let { ex?.qOf(it.qc) }
+        when (packet.dataType) {
+            QUIDITY   -> TODO()
+            EXISTENCE -> TODO()
+            ACTION    -> TODO()
+            CHAT      -> {
+                qd?.let { ex?.chat?.update(it, packet.data as String) }
+                    ?.let { m -> ex?.broadcast(chatPacket(m)) }
+                    ?: sl.elog("Failed to broadcast chat")
+                ex?.also { runBlocking { DAO.saveExistence(it) } }
+                    ?: sl.elog("Failed to update Existence after chat")
             }
+            PING      -> session.send(Packet(PING, "pong").pack())
+            else      -> throw UnauthorizedResponse(
+                "Client cannot make ${packet.dataType} requests."
+            )
         }
     }
 
-    wsHandler.onClose { session, _, _ ->
-        launch {
-            sl.slog("Close session. Ex=${session.existence()?._id} SID=${session.id}")
-            DAO.disconnect(session)
-        }
+    suspend fun close(session: WsSession) = session.let {
+        val qc = DAO.getSessionData(session)?.qc
+        it.existence()?.broadcast(EXIT, qc ?: "", true)
+        DAO.disconnect(it)
+    }
+
+    wsHandler.onClose { session, code, reason ->
+        sl.slog("Close session. $code \"$reason\"")
+        launch { close(session) }
     }
 
     val err = ErrorHandler { session, throwable: Throwable? ->
         if (session.isOpen) session.send(Packet(INTERNAL, "err", true).pack())
-        else launch { DAO.disconnect(session) }
+        else launch { close(session) }
     }
 
     wsHandler.onConnect(connect)

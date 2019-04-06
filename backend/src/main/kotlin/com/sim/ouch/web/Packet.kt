@@ -69,13 +69,16 @@ fun Existence.broadcast(packet: Packet) {
 fun Existence.broadcast(
     dataType: Packet.DataType,
     data: Any,
+    isString: Boolean = false,
     vararg excludeIDs: String
 ) = sessionTokens.mapNotNull { DAO.getSession(it) }
-    .broadcast(dataType, data, *excludeIDs)
+    .broadcast(dataType, data, isString, *excludeIDs)
 
 fun Iterable<WsSession>.broadcast(
     dataType: Packet.DataType,
     data: Any,
+    isString: Boolean = false,
     vararg excludeIDs: String
 ) = filterNot { it.id in excludeIDs }
-    .forEach { it.send(Packet(dataType, data).pack()) }
+    .forEach { it.send(Packet(dataType, data, isString).pack()) }
+
