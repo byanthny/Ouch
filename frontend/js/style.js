@@ -121,6 +121,7 @@ function reset() {
     leaderboard.innerHTML = "";
     chat.innerHTML = "";
     user_input.value = "";
+    user_input.placeholder = "username";
     enteredOnce = false;
     ouch.innerHTML = "Ouch";
     if(searching){
