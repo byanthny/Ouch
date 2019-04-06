@@ -30,8 +30,8 @@ sealed class Existence(
     open val init = NOW()
 
     /** The first [Quiddity] to enter the [Existence]. */
-    protected open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
-    protected open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
+    open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
+    open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
 
     val size: Int get() = quidities.size + infraQuidities.size
     val qSize: Int get() = quidities.size

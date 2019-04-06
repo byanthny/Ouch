@@ -29,6 +29,7 @@ fun main() = javalin.apply {
         val limit = it.queryParam("limit")?.toIntOrNull()
         val json = runBlocking { DAO.getPublicExistences() }
             .let { el -> limit?.let { el.subList(0, limit) } ?: el }
+            .map { it._id }
             .json()
         it.result(json)
     }
@@ -37,6 +38,7 @@ fun main() = javalin.apply {
     get(STATUS.point) { it.result(runBlocking { DAO.status() }.json()) }
     get(LOGS.point) { it.result(runBlocking { DAO.getLogs() }.json()) }
 
+    enableDebugLogging()
     secret(this)
     start(getenv("PORT")?.toInt() ?: 7000.also { javalin.enableDebugLogging() })
 }.unit
