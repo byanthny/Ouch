@@ -128,11 +128,37 @@ function getHTTP(url) {
 
 /* Load in actions from actions_url */
 function loadActions() {
-    var actions_data = getHTTP(url_actions);
+   /* var actions_data = getHTTP(url_actions);
     if (actions_data === "") {
         console.log("Error");
     } else {
-        //actions = JSON.parse(actions_data);
+        actions = JSON.parse(actions_data);
         console.log(actions);
-    }
+    }*/
+    var request = makeHttpObject();
+    request.open("GET", url_actions, true);
+    request.send(null);
+    request.onreadystatechange = function() {
+        if (request.readyState == 4)
+            alert(request.responseText);
+    };
+
 }
+
+function makeHttpObject() {
+    try {
+        return new XMLHttpRequest();
+    } catch (error) {
+    }
+    try {
+        return new ActiveXObject("Msxml2.XMLHTTP");
+    } catch (error) {
+    }
+    try {
+        return new ActiveXObject("Microsoft.XMLHTTP");
+    } catch (error) {
+    }
+
+    throw new Error("Could not create HTTP request object.");
+}
+

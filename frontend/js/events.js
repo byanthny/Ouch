@@ -89,7 +89,7 @@ document.onbeforeunload = function () {
 };
 
 /* One page load retrieve all actions from actions_url*/
-document.onload = function () {
+window.onload = function () {
     loadActions();
 };
 
