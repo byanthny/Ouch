@@ -77,12 +77,13 @@ function processCommands (command) {
 
 /* Autocomplete funct */
 function autocompleteSearch(currentInput) {
+    currentInput = currentInput.toUpperCase();
     search.innerHTML = "";
     var count =  0;
-    for (var i = 0; i < testActions.length; i++) {
-        if(testActions[i].includes(currentInput)) {
+    for (var i = 0; i < actions.length; i++) {
+        if(actions[i].includes(currentInput)) {
             count++;
-            search.innerHTML += '<div class="search-item">'+testActions[i]+'</div>';
+            search.innerHTML += '<div class="search-item">'+actions[i]+'</div>';
         }
     }
     if(count === 0) {
