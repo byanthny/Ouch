@@ -22,5 +22,9 @@ abstract class InfraQuidity : Entity()
 enum class Action(val callform: String, val description: String) {
     BEAN("-bean", "get beaned"),
     THEME("-theme", "darkmode best mode"),
-    EXIT("-exit", "disconnect from the Existence")
+    EXIT("-exit", "disconnect from the Existence");
+
+    companion object {
+        val callForms get() = values().map(Action::callform)
+    }
 }

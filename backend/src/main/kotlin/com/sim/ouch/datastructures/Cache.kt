@@ -85,7 +85,7 @@ class LruKache<K, V>(
 
     operator fun minusAssign(key: K) = map.minusAssign(key).also { usageRanks.remove(key) }
 
-    override fun containsKey(key: K) = key in map
+    override fun containsKey(key: K) = map.containsKey(key)
 
     override fun containsValue(value: V) = map.containsValue(value)
 
@@ -165,7 +165,7 @@ class ExpiringKache<K, V>(
     operator fun minusAssign(key: K) = map.minusAssign(
         key).also { usageRanks.remove(key) }
 
-    override fun containsKey(key: K) = key in map
+    override fun containsKey(key: K) = map.containsKey(key)
 
     override fun containsValue(value: V) = map.containsValue(value)
 

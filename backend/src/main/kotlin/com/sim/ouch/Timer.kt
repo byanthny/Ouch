@@ -23,14 +23,13 @@ fun NOW_STR(): String = NOW().format(DD_MM_YYYY_HH_MM_SS)
 /** @return The current local date and time. dd-MM-yyyy HH-mm-ss */
 val NOW_STR_FILE: String get() = NOW_STR().replace(":", "-")
 
-
 /**
  * Takes in a time length in SECONDS
  * @return W days, X hrs, Y min, Z sec
  */
-fun Long.formatTime() : String {
+fun Long.formatTime(): String {
     val d = this / 60 / 60 / 24
-    val h = (this / 60 / 60 ) - 24 * d
+    val h = (this / 60 / 60) - 24 * d
     val m = this / 60 - (h * 60) - (d * 60 * 24)
     val s = this - (m * 60) - (h * 60 * 60) - (d * 60 * 60 * 24)
     val list = listOf(d to "day", h to "hr", m to "min", s to "sec")
@@ -62,7 +61,7 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
     private var elapsedTime: Long = -1
 
     /** @return The time since the com.sim.ouch.Timer started or was stopped */
-    fun getElapsedTime() : Long {
+    fun getElapsedTime(): Long {
         return if (running) {
             System.currentTimeMillis() - startTime
         } else {
@@ -71,8 +70,8 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
     }
 
     companion object {
-        fun format(millis: Long) : String {
-            var seconds = (millis / 1_000).toDouble()//Math.pow(10.0, 9.0)
+        fun format(millis: Long): String {
+            var seconds = (millis / 1_000).toDouble() // Math.pow(10.0, 9.0)
             var hours = 0
             var min = 0
             if (seconds > 60) {
@@ -100,7 +99,7 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
     /** Start the com.sim.ouch.Timer if it is not running */
     fun start() {
         this.running = true
-        this.elapsedTime -1L
+        this.elapsedTime - 1L
     }
 
     /**
@@ -108,7 +107,7 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
      *
      * @return The formatted duration
      */
-    fun stop() : String {
+    fun stop(): String {
         this.elapsedTime = System.currentTimeMillis()
         this.running = false
         return this.toString()
@@ -119,12 +118,11 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
      *
      * @return the last duration formatted
      */
-    fun reset() : String {
+    fun reset(): String {
         val lastTime = this.toString()
         this.startTime = System.currentTimeMillis()
         return lastTime
     }
-
 }
 
 /**

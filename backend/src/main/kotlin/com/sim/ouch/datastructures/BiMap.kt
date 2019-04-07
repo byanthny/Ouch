@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class MutableBiMap<K, V>() : MutableMap<K, V> {
 
-    constructor(vararg entries: Pair<K, V>)
-            : this() { entries.forEach { (k, v) -> put(k, v) } }
+    constructor(vararg entries: Pair<K, V>) :
+            this() { entries.forEach { (k, v) -> put(k, v) } }
 
     private val directMap = ConcurrentHashMap<K, V>()
     private val inverseMap = ConcurrentHashMap<V, K>()
@@ -52,5 +52,4 @@ class MutableBiMap<K, V>() : MutableMap<K, V> {
         directMap.clear()
         inverseMap.clear()
     }
-
 }

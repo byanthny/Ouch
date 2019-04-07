@@ -5,14 +5,22 @@ import com.sim.ouch.logic.DefaultExistence
 import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.Packet.DataType.*
 import io.javalin.UnauthorizedResponse
-import io.javalin.websocket.*
-import kotlinx.coroutines.*
+import io.javalin.websocket.ConnectHandler
+import io.javalin.websocket.ErrorHandler
+import io.javalin.websocket.MessageHandler
+import io.javalin.websocket.WsHandler
+import io.javalin.websocket.WsSession
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.function.Consumer
 
 private const val IDLE_TIMOUT = 1_020_000L
 
 val ER_EX_NOT_FOUND = 4004 to "existence not found"
-val ER_NO_NAME  = 4005 to "no name"
+val ER_NO_NAME = 4005 to "no name"
 val ER_DUPLICATE_NAME = 4006 to "duplicate name"
 val ER_BAD_TOKEN = 4007 to "invalid token"
 val ER_INTERNAL = 4010 to "internal err"
@@ -47,7 +55,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
             ?: return@ch session.close(ER_NO_NAME)
         val ex = session.queryParam("exID")?.let { ec ->
             runBlocking { DAO.getExistence(ec) }?.also { e ->
-                qd = e.qOfName(name) //?.also { TODO("Check for duplicates") }
+                qd = e.qOfName(name) // ?.also { TODO("Check for duplicates") }
                     ?: e.generateQuidity(name)
                 t = runBlocking { DAO.addSession(session, e, qd) }
                     ?: return@ch session.close(ER_INTERNAL)
@@ -72,18 +80,18 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
         val ex = sd?.let { runBlocking { DAO.getExistence(it.ec) } }
         val qd = sd?.let { ex?.qOf(it.qc) }
         when (packet.dataType) {
-            QUIDITY   -> TODO()
+            QUIDITY -> TODO()
             EXISTENCE -> TODO()
-            ACTION    -> TODO()
-            CHAT      -> {
+            ACTION -> TODO()
+            CHAT -> {
                 qd?.let { ex?.chat?.update(it, packet.data as String) }
                     ?.let { m -> ex?.broadcast(chatPacket(m)) }
                     ?: sl.elog("Failed to broadcast chat")
                 ex?.also { runBlocking { DAO.saveExistence(it) } }
                     ?: sl.elog("Failed to update Existence after chat")
             }
-            PING      -> session.send(Packet(PING, "pong").pack())
-            else      -> throw UnauthorizedResponse(
+            PING -> session.send(Packet(PING, "pong").pack())
+            else -> throw UnauthorizedResponse(
                 "Client cannot make ${packet.dataType} requests."
             )
         }
@@ -100,7 +108,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
         launch { close(session) }
     }
 
-    val err = ErrorHandler { session, throwable: Throwable? ->
+    val err = ErrorHandler { session, _: Throwable? ->
         if (session.isOpen) session.send(Packet(INTERNAL, "err", true).pack())
         else launch { close(session) }
     }
@@ -108,7 +116,6 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     wsHandler.onConnect(connect)
     wsHandler.onMessage(message)
     wsHandler.onError(err)
-
 }
 
 fun WsSession.close(pair: Pair<Int, String>) = close(pair.first, pair.second)

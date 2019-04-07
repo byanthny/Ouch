@@ -9,7 +9,9 @@ fun chatPacket(message: Chat.Message) = Packet(CHAT, message)
 class Chat {
 
     data class Message internal constructor(
-        val authorID: String, val authorName: String, val content: String
+        val authorID: String,
+        val authorName: String,
+        val content: String
     )
 
     private var nextID = 0L
@@ -30,5 +32,4 @@ class Chat {
     companion object {
         private const val MAX_SIZE = 1_000
     }
-
 }

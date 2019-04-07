@@ -1,10 +1,18 @@
 package com.sim.ouch.web
 
-import com.sim.ouch.*
+import com.sim.ouch.IDGenerator
+import com.sim.ouch.NOW
+import com.sim.ouch.NOW_STR
+import com.sim.ouch.Slogger
+import com.sim.ouch.avgBy
 import com.sim.ouch.datastructures.ExpiringKache
 import com.sim.ouch.datastructures.MutableBiMap
-import com.sim.ouch.logic.*
+import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Existence.Status.DORMANT
+import com.sim.ouch.logic.PublicExistence
+import com.sim.ouch.logic.Quiddity
+import com.sim.ouch.threadName
+import com.sim.ouch.unit
 import com.sim.ouch.web.Dao.DaoLogger.Log
 import io.javalin.websocket.WsSession
 import io.jsonwebtoken.ExpiredJwtException
@@ -15,9 +23,13 @@ import io.jsonwebtoken.security.SignatureException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.bson.codecs.pojo.annotations.BsonId
-import org.litote.kmongo.*
+import org.litote.kmongo.`in`
 import org.litote.kmongo.coroutine.coroutine
+import org.litote.kmongo.eq
+import org.litote.kmongo.lt
+import org.litote.kmongo.ne
 import org.litote.kmongo.reactivestreams.KMongo
+import org.litote.kmongo.size
 import org.litote.kmongo.util.KMongoConfiguration
 import java.time.OffsetDateTime
 import javax.crypto.KeyGenerator
@@ -91,8 +103,8 @@ class Dao {
      * Add an [Existence] to the database, generate a token.
      * `null` if a DB insert failed.
      */
-    suspend fun addExistence(session: WsSession, existence: Existence, qName: String)
-            : Triple<Token, Existence, Quiddity>? {
+    suspend fun addExistence(session: WsSession, existence: Existence, qName: String):
+            Triple<Token, Existence, Quiddity>? {
         val ini = existence.generateQuidity(qName)
         // Generate new Token
         val token = genToken(session, existence, ini)
@@ -119,8 +131,8 @@ class Dao {
      * Add a new [WsSession] [Token] to the [Dao]. Adds [quiddity] to [existence]
      * Returns the [Token] generated for the session.
      */
-    suspend fun addSession(session: WsSession, existence: Existence, quiddity: Quiddity)
-            : Token? {
+    suspend fun addSession(session: WsSession, existence: Existence, quiddity: Quiddity):
+            Token? {
         // Generate new key
         val token = genToken(session, existence, quiddity)
         // Update Existence
@@ -144,8 +156,8 @@ class Dao {
      * Verifies a client [Token] and on success returns the [SessionData] paired
      * to a NEW [Token]. Returns `null` on token validation failure.
      */
-    suspend fun refreshSession(token: Token, session: WsSession)
-            : Pair<Token, SessionData>? {
+    suspend fun refreshSession(token: Token, session: WsSession):
+            Pair<Token, SessionData>? {
         // Validate Token
         val (exID, qID) = readToken(session, token)
             ?: let {
@@ -164,7 +176,7 @@ class Dao {
             return null
         }
         // Update sessionData
-        val sd = SessionData(nToken, exID,  qID)
+        val sd = SessionData(nToken, exID, qID)
         if (!sessionData.replaceOneById(token, sd).wasAcknowledged()) {
             logger.err("Failed to replace SessionData", Dao::refreshSession)
             return null
@@ -241,9 +253,13 @@ class Dao {
         }
     }
 
-    data class StatusPacket(val numLiveEx: Int, val numDormEx: Int,
-                        val numLiveSes: Int, val avgQpe: Double,
-                        val oldest: OffsetDateTime?)
+    data class StatusPacket(
+        val numLiveEx: Int,
+        val numDormEx: Int,
+        val numLiveSes: Int,
+        val avgQpe: Double,
+        val oldest: OffsetDateTime?
+    )
 
     /** A [Slogger] which saves a [Log] to the `logs` logCollection collection. */
     class DaoLogger : Slogger("DAO") {
@@ -259,13 +275,15 @@ class Dao {
         val logCollection by lazy { mongo.getCollection<Log>() }
         private val log: Log = Log()
 
-        suspend fun <F: KFunction<*>> info(any: Any? = "", function: F? = null) =
+        suspend fun <F : KFunction<*>> info(any: Any? = "", function: F? = null) =
             log(any, function, "info")
-        suspend fun <F: KFunction<*>> err(any: Any? = "", function: F? = null) =
+        suspend fun <F : KFunction<*>> err(any: Any? = "", function: F? = null) =
             log(any, function, "err")
 
-        private suspend fun <F: KFunction<*>> log(
-            any: Any? = "", f: F?, level: String
+        private suspend fun <F : KFunction<*>> log(
+            any: Any? = "",
+            f: F?,
+            level: String
         ) {
             println(log("[${NOW_STR()}] [$threadName] [$name] ${
             f?.let { "[${f.name}]" } ?: ""} [$level] $any"))
@@ -283,16 +301,16 @@ class Dao {
 
     private fun genToken(session: WsSession, exID: EC, qID: QC) = Jwts.builder().apply {
         setSubject("quiddity.$qID").claim("exID", exID)
-        //claim("ip", session.remoteAddress.address.address)
+        // claim("ip", session.remoteAddress.address.address)
         // setExpiration(Date.from(Instant.now().plusSeconds(60 * 30))) TODO?
         signWith(instanceKey, SignatureAlgorithm.HS256)
     }.compact()
 
     /** Returns `null` on invalid token. */
-    private fun readToken(session: WsSession, token: String) : Pair<EC, QC>? {
+    private fun readToken(session: WsSession, token: String): Pair<EC, QC>? {
         try {
             val claims = tokenParser.parseClaimsJws(token).body
-            //require(claims["ip"] == session.remoteAddress.address.address)
+            // require(claims["ip"] == session.remoteAddress.address.address)
             require(claims["exID"] is String)
             require(claims.subject.matches(Regex("quiddity\\.([\\dA-Z]){10}")))
             return claims["exID"] as String to
@@ -323,5 +341,4 @@ class Dao {
             }
         }
     }
-
 }

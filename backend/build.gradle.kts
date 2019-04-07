@@ -6,10 +6,11 @@ plugins {
     kotlin("jvm") version "1.3.21"
     id("kotlinx-serialization") version "1.3.21"
     id("com.github.johnrengelman.shadow") version "4.0.3"
+    id("org.jmailen.kotlinter") version "1.23.0"
 }
 
 group = "com.sim"
-version = "0.0.1"
+version = "0.0.2"
 
 val ktor_version = "1.1.3"
 

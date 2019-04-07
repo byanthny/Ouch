@@ -6,7 +6,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.sim.ouch.DefaultNameGenerator
 import com.sim.ouch.IDGenerator
 import com.sim.ouch.NOW
-import com.sim.ouch.web.*
+import com.sim.ouch.web.Chat
+import com.sim.ouch.web.EC
+import com.sim.ouch.web.ID
+import com.sim.ouch.web.Name
+import com.sim.ouch.web.QC
+import com.sim.ouch.web.Token
 import org.bson.codecs.pojo.annotations.BsonId
 import java.time.OffsetDateTime
 
@@ -85,7 +90,7 @@ sealed class Existence(
 }
 
 open class DefaultExistence(
-    name: String  = DefaultNameGenerator.next(),
+    name: String = DefaultNameGenerator.next(),
     capacity: Int = -1
 ) : Existence(name, capacity) {
     override fun generateQuidity(name: String) = Quiddity(name)
@@ -94,7 +99,7 @@ open class DefaultExistence(
 
 /** A public [Existence]. */
 class PublicExistence : DefaultExistence("Public", 69) {
-    //override val capacity: Long = 1_000
+    // override val capacity: Long = 1_000
     init {
         public = true
     }
