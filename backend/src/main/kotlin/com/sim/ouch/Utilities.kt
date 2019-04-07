@@ -64,7 +64,7 @@ fun List<Any>.toFile(name: String = "file"): File {
     return file
 }
 
-fun <T> Collection<T>.avgBy(f: (T) -> Int) = sumBy(f) / size.toDouble()
+fun <T> Collection<T>.avgBy(f: (T) -> Int) = if (isEmpty()) 0.0 else sumBy(f) / size.toDouble()
 
 /** Remove and return the last entry of the [list][MutableList]. `null` if empty. */
 internal fun <E> MutableList<E>.removeLastOrNull() = if (isEmpty()) null else removeAt(this.size - 1)

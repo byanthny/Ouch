@@ -6,12 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.sim.ouch.DefaultNameGenerator
 import com.sim.ouch.IDGenerator
 import com.sim.ouch.NOW
-import com.sim.ouch.web.Chat
-import com.sim.ouch.web.EC
-import com.sim.ouch.web.ID
-import com.sim.ouch.web.Name
-import com.sim.ouch.web.QC
-import com.sim.ouch.web.Token
+import com.sim.ouch.web.*
 import org.bson.codecs.pojo.annotations.BsonId
 import java.time.OffsetDateTime
 
@@ -54,9 +49,9 @@ sealed class Existence(
             field = value
         }
         get() {
-        if (sessionTokens.isEmpty()) field = Status.DORMANT
-        return field
-    }
+            if (sessionTokens.isEmpty()) field = Status.DORMANT
+            return field
+        }
 
     val chat: Chat = Chat()
 

@@ -1,18 +1,12 @@
 package com.sim.ouch.web
 
-import com.sim.ouch.IDGenerator
-import com.sim.ouch.NOW
-import com.sim.ouch.NOW_STR
-import com.sim.ouch.Slogger
-import com.sim.ouch.avgBy
+import com.sim.ouch.*
 import com.sim.ouch.datastructures.ExpiringKache
 import com.sim.ouch.datastructures.MutableBiMap
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Existence.Status.DORMANT
 import com.sim.ouch.logic.PublicExistence
 import com.sim.ouch.logic.Quiddity
-import com.sim.ouch.threadName
-import com.sim.ouch.unit
 import com.sim.ouch.web.Dao.DaoLogger.Log
 import io.javalin.websocket.WsSession
 import io.jsonwebtoken.ExpiredJwtException
@@ -23,13 +17,9 @@ import io.jsonwebtoken.security.SignatureException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.bson.codecs.pojo.annotations.BsonId
-import org.litote.kmongo.`in`
+import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.coroutine
-import org.litote.kmongo.eq
-import org.litote.kmongo.lt
-import org.litote.kmongo.ne
 import org.litote.kmongo.reactivestreams.KMongo
-import org.litote.kmongo.size
 import org.litote.kmongo.util.KMongoConfiguration
 import java.time.OffsetDateTime
 import javax.crypto.KeyGenerator
@@ -96,7 +86,7 @@ class Dao {
     private val cutoffDate get() = NOW().minusDays(MAX_DORMANT_DAYS)
 
     init {
-        launch { while (true) { delay(1_000 * 60 * 30); cleanDB() } }
+        launch { do { cleanDB(); delay(1_000 * 60) } while (true) }
     }
 
     /**
@@ -170,7 +160,8 @@ class Dao {
         existences.findOneById(exID)?.also {
             it.removeSession(token)
             it.addSession(nToken)
-            existences.save(it)
+            if (!saveExistence(it))
+                logger.err("Failed to save Existence", Dao::refreshSession)
         } ?: let {
             logger.err("Failed to find existence.", Dao::refreshSession)
             return null
@@ -199,7 +190,7 @@ class Dao {
         // Remove from existence
         getSessionData(token)?.ec?.let { getExistence(it) }?.also {
             it.removeSession(token)
-            if (existences.save(it)?.wasAcknowledged() == false)
+            if (!saveExistence(it))
                 logger.err("Failed to save updated Existence", Dao::disconnect)
         } ?: logger.err("Failed to remove session from Existence", Dao::disconnect)
     }
@@ -242,14 +233,17 @@ class Dao {
     private suspend fun cleanDB() {
         existences.deleteMany(
             Existence::dormantSince lt cutoffDate).wasAcknowledged().also {
-            if (!it) logger.err(
-                "Failed to delete old dormant existences", Dao::cleanDB
-                )
+            if (!it)
+                logger.err("Failed to delete old dormant existences", Dao::cleanDB)
         }
-        existences.find(Existence::sessionCount size 0,
-            Existence::status ne DORMANT).consumeEach {
+        existences.find(
+            Existence::sessionTokens size 0,
+            Existence::status ne DORMANT
+        ).toList().forEach {
             it.status = DORMANT
-            existences.save(it)
+            if (existences.save(it)?.wasAcknowledged() == false) {
+                logger.err("", Dao::cleanDB)
+            }
         }
     }
 
