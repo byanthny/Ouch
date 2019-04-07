@@ -21,6 +21,7 @@ abstract class InfraQuidity : Entity()
 
 enum class Action(val callform: String, val description: String) {
     BEAN("-bean", "get beaned"),
+    MUSIC("-music", "feel the ouchie vibes"),
     THEME("-theme", "darkmode best mode"),
     EXIT("-exit", "disconnect from the Existence");
 

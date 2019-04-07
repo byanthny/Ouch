@@ -1,6 +1,7 @@
 package com.sim.ouch
 
 import com.sim.ouch.EndPoints.*
+import com.sim.ouch.logic.Achievements
 import com.sim.ouch.logic.Action
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.web.DAO
@@ -12,7 +13,7 @@ import java.lang.System.getenv
 
 enum class EndPoints(val point: String) {
     ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status"),
-    ENDPOINTS("/map"), LOGS("/logs")
+    ENDPOINTS("/map"), LOGS("/logs"), ACHIVEMENTS("/achivements")
 }
 
 class OuchData(val version: String, val uri: String, vararg val authors: String)
@@ -42,6 +43,7 @@ val static_endpoints: Javalin by lazy {
             it.result(json)
         }
         get(ACTIONS.point) { it.result(Action.callForms.json()) }
+        get(ACHIVEMENTS.point) { it.result(Achievements.values.json()) }
         enableRouteOverview("/route")
         get(ENDPOINTS.point) { it.render("/map.html") }
         get(STATUS.point) { it.result(runBlocking { DAO.status() }.json()) }
