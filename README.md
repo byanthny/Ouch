@@ -90,5 +90,6 @@ Refer to: https://sim-ouch.herokuapp.com/map
 * Smoother animations
 * Cleaned Up Code
 * -bean
+* Added status bar for Ouch Status
  
 ---

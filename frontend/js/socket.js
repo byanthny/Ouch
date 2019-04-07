@@ -146,8 +146,13 @@ var setActions = function (data) {
 
 var setPublicExist = function (data) {
     public_exist = data;
+    console.log(public_exist.numLiveSes);
     //Actions went wrong
     if (public_exist === "") {
         console.log("Error");
+    } else {
+        login_status.innerHTML = 'Live Sessions: <span class="normal">'+public_exist.numLiveSes +' | </span> Live Existences: '+
+            '<span class="normal">' + public_exist.numLiveEx + ' | </span> Dormant Existences: ' +
+            '<span class="normal">' + public_exist.numDormEx + '</span> ';
     }
 };

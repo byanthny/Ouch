@@ -22,6 +22,7 @@ var loading = document.getElementById("loading");
 var commands = document.getElementById("commands");
 var chatindic = document.getElementById("chat-indic");
 var helpicon = document.getElementById("help-icon");
+var login_status = document.getElementById("login-status");
 
 var search_items = document.getElementsByClassName("search-item")
 
@@ -49,7 +50,7 @@ var url_base = 'sim-ouch.herokuapp.com';
 //Socket
 var url_ws = 'wss://' + url_base + '/ws';
 var url_actions = 'https://' + url_base + '/actions';
-var url_public = 'https://' + url_base + '/public';
+var url_status = 'https://' + url_base + '/status';
 var connection;
 var reconnect_token = null;
 
@@ -70,7 +71,6 @@ var reconnecting = false;
 var actions;
 //all public existences
 var public_exist;
-var testActions  = ["-bean", "-exit", "-theme"];
 var  searching = false;
 
 
