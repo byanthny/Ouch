@@ -1,8 +1,11 @@
 package com.sim.ouch
 
 import com.sim.ouch.EndPoints.*
-import com.sim.ouch.logic.Quiddity
-import com.sim.ouch.web.*
+import com.sim.ouch.logic.Action
+import com.sim.ouch.logic.Existence
+import com.sim.ouch.web.DAO
+import com.sim.ouch.web.Websocket
+import com.sim.ouch.web.json
 import io.javalin.Javalin
 import kotlinx.coroutines.runBlocking
 import java.lang.System.getenv
@@ -23,7 +26,7 @@ val OUCH = OuchData("0.0.0", "https://anthnyd.github.io/Ouch/",
 fun main() = javalin.apply {
     enableRouteOverview("/route")
     enableCorsForAllOrigins()
-    //defaultContentType("application/json")
+
 
     get("/") { it.redirect(OUCH.uri) }
     ws(SOCKET.point, Websocket)
@@ -31,11 +34,11 @@ fun main() = javalin.apply {
         val limit = it.queryParam("limit")?.toIntOrNull()
         val json = runBlocking { DAO.getPublicExistences() }
             .let { el -> limit?.let { el.subList(0, limit) } ?: el }
-            .map { it._id }
+            .filterNot(Existence::full).map(Existence::_id)
             .json()
         it.result(json)
     }
-    get(ACTIONS.point) { it.result(Quiddity.Action.values().json()) }
+    get(ACTIONS.point) { it.result(Action.values().map { it.callform }.json()) }
     get(ENDPOINTS.point) { it.render("/map.html") }
     get(STATUS.point) { it.result(runBlocking { DAO.status() }.json()) }
     get(LOGS.point) { it.result(runBlocking { DAO.getLogs() }.json()) }
