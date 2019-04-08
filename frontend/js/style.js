@@ -21,6 +21,7 @@ function switchState() {
     level.classList.toggle("opacity");
     leaderboard.classList.toggle("opacity");
     login = !login;
+    getHTTP(url_status,setPublicExist);
 }
 
 function switchLoginType() {

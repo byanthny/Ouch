@@ -12,7 +12,6 @@ function heartbeat() {
     if (connection.readyState !== 1) return;
     if (!here) return;
     connection.send(ping_packet);
-    setTimeout(heartbeat, 29000);
 }
 
 /* Handles communication to and from the server

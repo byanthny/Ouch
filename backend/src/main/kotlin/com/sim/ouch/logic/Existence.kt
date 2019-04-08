@@ -22,7 +22,7 @@ import java.time.OffsetDateTime
 )
 sealed class Existence(
     val name: Name,
-    var capacity: Long = 1,
+    var capacity: Int = -1,
     var public: Boolean = false
 ) {
 
@@ -34,6 +34,7 @@ sealed class Existence(
     open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
 
     val size: Int get() = quidities.size + infraQuidities.size
+    val full: Boolean get() = qSize == capacity
     val qSize: Int get() = quidities.size
     val sessionCount: Int get() = sessionTokens.size
 
@@ -48,9 +49,9 @@ sealed class Existence(
             field = value
         }
         get() {
-        if (sessionTokens.isEmpty()) field = Status.DORMANT
-        return field
-    }
+            if (sessionTokens.isEmpty()) field = Status.DORMANT
+            return field
+        }
 
     val chat: Chat = Chat()
 
@@ -84,16 +85,16 @@ sealed class Existence(
 }
 
 open class DefaultExistence(
-    name: String  = DefaultNameGenerator.next(),
-    capacity: Long = -1
+    name: String = DefaultNameGenerator.next(),
+    capacity: Int = -1
 ) : Existence(name, capacity) {
     override fun generateQuidity(name: String) = Quiddity(name)
         .also { enter(it) }
 }
 
 /** A public [Existence]. */
-class PublicExistence : DefaultExistence("Public", 1_000) {
-    //override val capacity: Long = 1_000
+class PublicExistence : DefaultExistence("Public", 69) {
+    // override val capacity: Long = 1_000
     init {
         public = true
     }

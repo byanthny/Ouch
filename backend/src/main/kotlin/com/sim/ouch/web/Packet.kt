@@ -28,9 +28,9 @@ fun readPacket(json: String) = quickLoad<Packet>(json)
  * @author Jonathan Augustine
  */
 data class Packet(
-        val dataType: DataType,
-        var data: Any? = null,
-        @Transient val prebuild: Boolean = false
+    val dataType: DataType,
+    var data: Any? = null,
+    @Transient val prebuild: Boolean = false
 ) {
 
     enum class DataType {
@@ -81,4 +81,3 @@ fun Iterable<WsSession>.broadcast(
     vararg excludeIDs: String
 ) = filterNot { it.id in excludeIDs }
     .forEach { it.send(Packet(dataType, data, isString).pack()) }
-

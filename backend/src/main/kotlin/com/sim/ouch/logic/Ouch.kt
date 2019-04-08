@@ -1,5 +1,10 @@
 package com.sim.ouch.logic
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonSubTypes.*
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.sim.ouch.logic.Achievements.*
+
 open class Ouch(var degree: Int = 0) {
 
     operator fun inc(): Ouch {
@@ -12,13 +17,27 @@ open class Ouch(var degree: Int = 0) {
         return this.apply { degree-- }
     }
 
-    sealed class Achievements(val name: String, val description: String) {
-        class MaxOuch : Achievements("OOF", "You hit the maximum Ouch!")
-        class SucksToBeYou : Achievements("Sucks_2_Suck", "You're halfway to Max Ouch!")
-        class FirstOof : Achievements("Baby's First Off", "Aww look at you, so...you.")
-    }
-
     companion object {
         var OUCH_RANGE = 0..100 // TODO Test range
+    }
+}
+
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.CLASS,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "@class"
+)
+@JsonSubTypes(
+        Type(value = `Lord Of Oof`::class, name = "lordofoof"),
+        Type(value = `Sucks 2 Suck`::class, name = "suckstobeyou"),
+        Type(value = `Baby's First Oof`::class, name = "firstoof")
+)
+sealed class Achievements(val name: String, val description: String) {
+    object `Lord Of Oof` : Achievements("Lord of ooF", "You hit the maximum Ouch!")
+    object `Sucks 2 Suck` : Achievements("Sucks 2 Suck", "You're halfway to Max Ouch!")
+    object `Baby's First Oof` : Achievements("Baby's First ooF", "Aww look at you, so...you.")
+
+    companion object {
+        val values = listOf(`Lord Of Oof`, `Sucks 2 Suck`, `Baby's First Oof`)
     }
 }

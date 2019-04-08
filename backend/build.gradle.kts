@@ -6,10 +6,11 @@ plugins {
     kotlin("jvm") version "1.3.21"
     id("kotlinx-serialization") version "1.3.21"
     id("com.github.johnrengelman.shadow") version "4.0.3"
+    id("org.jmailen.kotlinter") version "1.23.0"
 }
 
 group = "com.sim"
-version = "0.0.1"
+version = "0.0.2"
 
 val ktor_version = "1.1.3"
 
@@ -33,10 +34,11 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.9.8")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     implementation("com.google.code.gson:gson:2.8.5")
-    implementation("io.jsonwebtoken:jjwt-api:0.10.5")
+    
+    implementation("io.jsonwebtoken:jjwt-external-api:0.10.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.10.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.10.5")
-    // https://mvnrepository.com/artifact/commons-io/commons-io
+
     implementation(group = "commons-io", name = "commons-io", version = "2.6")
 
 
