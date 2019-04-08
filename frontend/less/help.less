@@ -10,6 +10,8 @@
 }
 
 #help .panel {
+  position: relative;
+  z-index: 100;
   background: @white-color;
   width: 100%;
   height: 100%;
@@ -46,4 +48,8 @@
   &:hover {
     .button-hover()
   }
+}
+
+#help .panel > div > h1, p {
+  margin: 0;
 }
