@@ -20,6 +20,10 @@ function switchState() {
     exist_input.classList.toggle("disappear");
     level.classList.toggle("opacity");
     leaderboard.classList.toggle("opacity");
+    login_status.classList.toggle("hidden");
+    login_status.classList.toggle("disappear");
+    login_style.classList.toggle("opacity");
+    login_style.classList.toggle("disappear");
     login = !login;
     getHTTP(url_status,setPublicExist);
 }
