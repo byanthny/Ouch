@@ -20,7 +20,7 @@ function switchState() {
     exist_input.classList.toggle("disappear");
     level.classList.toggle("opacity");
     leaderboard.classList.toggle("opacity");
-    login_status.classList.toggle("hidden");
+    login_status.classList.toggle("opacity");
     login_status.classList.toggle("disappear");
     login_style.classList.toggle("opacity");
     login_style.classList.toggle("disappear");
@@ -97,12 +97,12 @@ var bottom = function () {
  * Or shows new message indicator if user is scrolling
  */
 function scrollBottom() {
-
+    bottom();
     //TODO make scroll stay in place if you scroll up
     //check previous
     //prevChatSize = chat.scrollHeight;
     //console.log(document.documentElement.clientWidth*.20 < chat.scrollHeight);
-    console.log(+" " + prevChatSize + " " + chat.offsetTop); //- prevChatSize ===
+    /*console.log(+" " + prevChatSize + " " + chat.offsetTop); //- prevChatSize ===
     if ((chat.scrollTop === prevChatSize) && (document.documentElement.clientWidth * .20 < chat.scrollHeight)) {
         //if(!chatScrolling) {
         bottom;
@@ -110,7 +110,7 @@ function scrollBottom() {
     } else if (!(chat.scrollHeight < 0)) {
         switchChatIndic();
     }
-    prevChatSize = chat.scrollHeight;
+    prevChatSize = chat.scrollHeight;*/
 }
 
 //Animations
@@ -165,6 +165,8 @@ function addChat(name, content, type) {
     }
 
     chat.innerHTML += html;
+
+    scrollBottom();
 
 }
 

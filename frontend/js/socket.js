@@ -55,7 +55,6 @@ function createConnection(endpoint) {
                 break;
             case "CHAT": //Chat message
                 addChat(parsedData.authorName, parsedData.content, "client");
-                scrollBottom();
                 break;
             case "ENTER": //New user has entered
                 //Add new user to leaderboard
@@ -64,7 +63,6 @@ function createConnection(endpoint) {
                     + parsedData.ouch.degree + '</span></p></div>';
                 //Announce user joined
                 addChat(parsedData.name, "has joined the Existence.", "system");
-                scrollBottom();
                 break;
             case "EXIT": //New user has left
                 //Remove user leaderboard item
@@ -72,7 +70,6 @@ function createConnection(endpoint) {
                 quidleaderboard.parentNode.removeChild(quidleaderboard);
                 //Announce user left
                 addChat(parsedData.name, "has left the Existence.", "system");
-                scrollBottom();
                 break;
             case "PING": //Ping
                 break;

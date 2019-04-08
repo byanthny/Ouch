@@ -68,6 +68,9 @@ function processCommands (command) {
             usr_disconnected = true;
             connection.close();
             break;
+        case "-helo":
+            ouch.innerHTML = "Ouch";
+            break;
         default:
             console.log("action " + command);
     }
