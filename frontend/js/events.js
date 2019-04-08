@@ -80,6 +80,10 @@ helpicon.onclick = function () {
     togglePopUp();
 };
 
+login_style.onclick = function () {
+    switchLoginType();
+};
+
 //Page load-in and load-out
 
 /* Execute before page loads out */

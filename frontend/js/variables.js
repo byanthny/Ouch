@@ -23,11 +23,16 @@ var commands = document.getElementById("commands");
 var chatindic = document.getElementById("chat-indic");
 var helpicon = document.getElementById("help-icon");
 var login_status = document.getElementById("login-status");
+var login_style = document.getElementById("login-type-toggle");
 
-var search_items = document.getElementsByClassName("search-item")
+var search_items = document.getElementsByClassName("search-item");
 
 //Login In
 //
+
+//Login message
+var existing_msg = "have an existing existence?";
+var new_exist_msg= "dont have an existence?";
 
 //Is on login page?
 var login = false;

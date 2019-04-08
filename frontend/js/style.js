@@ -23,6 +23,16 @@ function switchState() {
     login = !login;
 }
 
+function switchLoginType() {
+    if(existing_msg === login_style.innerHTML) {
+        login_style.innerHTML = new_exist_msg;
+        exist_input.classList.remove("input-shrink");
+    } else {
+        login_style.innerHTML = existing_msg;
+        exist_input.classList.add("input-shrink");
+    }
+}
+
 
 /* Toggles predictive search panel */
 function switchSearch() {

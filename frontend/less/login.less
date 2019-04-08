@@ -14,6 +14,7 @@
 
 #submit-button {
   &:extend(.button);
+
   &:hover {
     .button-hover()
   }
@@ -21,6 +22,7 @@
 
 #reconnect-button {
   &:extend(.button);
+
   &:hover {
     .button-hover();
   }
@@ -29,6 +31,14 @@
 #exist-input {
   .user-input();
   margin-top: 10px;
+  margin-bottom: 10px;
+
+  &.input-shrink {
+    height: 0px;
+    overflow: hidden;
+    opacity: 0;
+    margin-bottom: 0px;
+  }
 }
 
 #exist-input::placeholder {
@@ -48,5 +58,17 @@
 
   &:hover {
     .button-hover();
+  }
+}
+
+#login-type-toggle {
+  display: block;
+  color: @dark-color;
+  font-family: @secondary-font;
+  text-decoration: none;
+  opacity: .5;
+  .transition();
+  &:hover {
+    opacity: .8;
   }
 }
