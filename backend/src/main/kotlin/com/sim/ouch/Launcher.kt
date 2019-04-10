@@ -26,7 +26,6 @@ private val port get() = getenv("PORT")?.toIntOrNull() ?: 7_000
 
 /** Base [Javalin] "builder" */
 private val javalin get() = Javalin.create().apply {
-
     enableCorsForAllOrigins()
     getenv("PORT") ?: enableDebugLogging()
 }
@@ -55,6 +54,6 @@ val static_endpoints: Javalin by lazy {
 }
 
 fun main() {
-    Ouch.keywords.entries.joinToString { (k, v) -> "$k=$v" }
-    static_endpoints.start(port)
+    println(Ouch.keywords.entries.joinToString("") { (k, v) -> "$k=$v\n" })
+    //static_endpoints.start(port)
 }

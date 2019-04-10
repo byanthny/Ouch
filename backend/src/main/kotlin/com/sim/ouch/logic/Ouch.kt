@@ -63,13 +63,13 @@ private fun loadKeyWords(): Map<Regex, Double> {
     val map = mutableMapOf<Regex, Double>()
     fun parse(string: String, value: Double? = null) {
         // Split by line-final (;)
-        string.split(';').apply {
+        string.split(';').filterNot(String::isBlank).apply {
             // If this step produced any values, reparse
             if (size > 1) return forEach { parse(it) }
             // else continue to the next check
         }
         // Split digit and save to reparse
-        string.split('|').apply {
+        string.split('|').filterNot(String::isBlank).apply {
             // This split should turn this:
             // "word:some phrase:another one|20"
             // into this: ["word:some phrase:another one", "20"]
@@ -81,14 +81,14 @@ private fun loadKeyWords(): Map<Regex, Double> {
                 // Then convert it to a milliOof double
                 // then parse again
                 return this[1].toLongOrNull()?.div(1_000.0)
-                    ?.let { v -> forEach { parse(it, v) } }
+                    ?.let { v -> parse(this[0], v) }
                     ?: throw IllegalStateException(
                         "invalid parse state. value must be an long or integer"
                     )
             }
         }
         // Split by word-linker (:)
-        string.split(':').apply {
+        string.split(':').filterNot(String::isBlank).apply {
             // results in a list of words that need to be parsed one last time
             if (size > 1) return forEach { parse(it, value) }
         }
@@ -97,11 +97,11 @@ private fun loadKeyWords(): Map<Regex, Double> {
         string.replace(Regex("\\s+"), "\\s+")
             .let {
                 it.replace(Regex("\\((?s).*\\)")) { res ->
-                    res.value.replace(":", "|")
+                    res.value.replace("&", "|")
                 }
             }.let { Regex("(?i)$it") }.also { map[it] = value }
     }
-    Ouch::class.java.getResource("keywords.oof")?.openStream()
+    Ouch::class.java.getResource("/keywords.oof")?.openStream()
         ?.use { it.reader().readLines() }
         ?.filterNot { it.trim().startsWith("//") } // Filter comments
         ?.joinToString("")
