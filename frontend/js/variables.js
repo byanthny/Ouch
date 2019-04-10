@@ -24,6 +24,7 @@ var chatindic = document.getElementById("chat-indic");
 var helpicon = document.getElementById("help-icon");
 var login_status = document.getElementById("login-status");
 var login_style = document.getElementById("login-type-toggle");
+var actions_help = document.getElementById("actions-help");
 
 var search_items = document.getElementsByClassName("search-item");
 

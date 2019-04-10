@@ -138,6 +138,9 @@ var setActions = function (data) {
     if (actions === "") {
         console.log("Error");
     }
+
+    //Load actions into help
+    loadActionsHelp();
 };
 
 var setPublicExist = function (data) {

@@ -170,6 +170,17 @@ function addChat(name, content, type) {
 
 }
 
+function loadActionsHelp() {
+    var html = '<p>';
+    for(var i = 0; i < actions.length; i++) {
+        html += '<span class="bold">'+actions[i]+'</span> | Something<br>';
+        console.log(html);
+    }
+
+    html += '</p>';
+    actions_help.innerHTML = html;
+}
+
 //Other
 
 /* When chat indicator is clicked scroll to bottom */

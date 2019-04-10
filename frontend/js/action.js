@@ -56,6 +56,7 @@ function processInput(clicked) {
     }
 }
 
+/* Performs the commands that are client based */
 function processCommands (command) {
     switch (command) {
         case "-theme":
@@ -78,7 +79,10 @@ function processCommands (command) {
 
 //Search Autocomplete
 
-/* Autocomplete funct */
+/*
+ * Autocomplete function
+ * @param is the the input that is currently in the search field
+ */
 function autocompleteSearch(currentInput) {
     search.innerHTML = "";
     var count =  0;
@@ -104,6 +108,7 @@ function autocompleteSearch(currentInput) {
 
 }
 
+/* Being autocomplete */
 function autofill(input) {
     user_input.value = "";
     processCommands(input);

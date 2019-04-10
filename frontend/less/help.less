@@ -18,6 +18,7 @@
   border-radius: @help-rounded;
   margin: 0 auto;
   .box-shadow;
+  overflow: scroll;
 }
 
 #help .panel .close {
@@ -50,6 +51,17 @@
   }
 }
 
-#help .panel > div > h1, p {
+#help .panel > div > h1, p, ul, a {
+  font-family: @secondary-font;
   margin: 0;
+  line-height: @help-line-height;
+  color: @dark-color;
+}
+
+#help .panel > div > p, ul, div > p {
+  padding: @help-content-padding/2
+}
+
+#help-content {
+  padding: @help-content-padding;
 }
