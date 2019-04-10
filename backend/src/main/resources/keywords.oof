@@ -1,0 +1,11 @@
+// A file containing all "ouch-oof" keywords/phrases for scaling Ouch levels
+// all words are case-insensitive, in standard Kotlin/Java Regex and in the
+// following format, where values are in "milli-oofs"
+// (1 milliOof = 0.001 oof | 100 mf = 0.1 f)
+// word|value;
+// Words can be stacked for simplicity and redundancy reduction
+// word:word_2:word_3|value;
+// ONE BIG THING: regex multi-groups are (like:this:now) and (NOT|like|this)
+
+oof:ouch:owie:eek:feels bad ((wo)?man)?:|1;
+f(u:a)*ck me (dud(e?))?|5;guess i('|')?ll die (then)?:time to die:kms:kmp|1;

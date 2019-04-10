@@ -190,6 +190,7 @@ class Dao {
         // Remove from existence
         getSessionData(token)?.ec?.let { getExistence(it) }?.also {
             it.removeSession(token)
+            if (it.sessionCount == 0) it.status = DORMANT
             if (!saveExistence(it))
                 logger.err("Failed to save updated Existence", Dao::disconnect)
         } ?: logger.err("Failed to remove session from Existence", Dao::disconnect)
