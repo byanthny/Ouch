@@ -51,16 +51,21 @@
   }
 }
 
-#help .panel > div > h1, p, ul, a {
+#help .panel > div > h1, p, ul, a,table {
   font-family: @secondary-font;
   margin: 0;
   line-height: @help-line-height;
   color: @dark-color;
 }
 
-#help .panel > div > p, ul, div > p {
+#help .panel > div > p, ul, div > p, table {
   padding: @help-content-padding/2
 }
+
+td {
+  padding-right: @help-content-padding/2;
+}
+
 
 #help-content {
   padding: @help-content-padding;
