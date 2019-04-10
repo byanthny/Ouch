@@ -7,11 +7,7 @@ import java.nio.file.FileAlreadyExistsException
 import java.util.*
 import kotlin.streams.asSequence
 
-val RAND = Random(420_69_98_4829 / (NOW().minute + 1))
-
-const val alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const val digi = "0123456789"
-const val alphaDigi = alpha + "123456789" // Exclued Zero
+// Generators
 
 /**
  * An random ID generator. 0-9, A-Z (caps)
@@ -32,11 +28,13 @@ val DefaultNameGenerator = NameGenerator()
 
 // TODO
 class NameGenerator(val lengthRange: IntRange = 2..7) {
-    fun next(): String {
-        return RAND.ints(lengthRange.random().toLong(), 0, alpha.length)
-            .asSequence().map(alpha.toLowerCase()::get).joinToString("")
-    }
+    fun next() = RAND.ints(lengthRange.random().toLong(), 0, alpha.length)
+        .asSequence().map(alpha.toLowerCase()::get).joinToString("")
 }
+
+// File
+
+// Collections
 
 /**
  * Print the List to file, each index its own line.
@@ -64,10 +62,30 @@ fun List<Any>.toFile(name: String = "file"): File {
     return file
 }
 
-fun <T> Collection<T>.avgBy(f: (T) -> Int) = if (isEmpty()) 0.0 else sumBy(f) / size.toDouble()
+fun <T> Collection<T>.avgBy(f: (T) -> Int) =
+    if (isEmpty()) 0.0 else sumBy(f) / size.toDouble()
 
 /** Remove and return the last entry of the [list][MutableList]. `null` if empty. */
-internal fun <E> MutableList<E>.removeLastOrNull() = if (isEmpty()) null else removeAt(this.size - 1)
+fun <E> MutableList<E>.removeLastOrNull() =
+    if (isEmpty()) null else removeAt(this.size - 1)
+
+// String & Regex
+
+fun String.allMatches(vararg patterns: String) =
+    allMatches(*patterns.map(String::toRegex).toTypedArray())
+
+fun String.allMatches(vararg regex: Regex) = allMatches(regex.toList())
+
+fun String.allMatches(regex: Iterable<Regex>) = regex.filter { matches(it) }
+
+// Misc
+
+val RAND = Random(420_69_98_4829 / (NOW().minute + 1))
+
+const val alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const val digi = "0123456789"
+/** Excludes Zero */
+const val alphaDigi = alpha + "123456789"
 
 val Any.unit get() = Unit
 

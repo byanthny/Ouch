@@ -55,14 +55,32 @@
             <td>/actions</td>
             <td>GET</td>
             <td>get a list of all actions</td>
-            <td><code lang="json">["ACTION_NAME", "ACTION_NAME_2",...]</code>
-            </td>
+            <td rowspan="5"><pre><code lang="json">
+[
+  {
+    "callform": "-bean",
+    "description": "get beaned"
+  },
+  {
+    "callform": "-music",
+    "description": "feel the ouchie vibes"
+  },
+  {
+    "callform": "-theme",
+    "description": "darkmode best mode"
+  },
+  {
+    "callform": "-exit",
+    "description": "disconnect from the Existence"
+  }
+]
+            </code></pre></td>
         </tr>
         <tr>
             <td>/status</td>
             <td>GET</td>
             <td>get a JSON summery of the state of ouch API</td>
-            <td><code lang="JSON">
+            <td rowspan="10"><pre><code lang="JSON">
                 {
                 "numLiveEx": 31,
                 "numDormEx": 41,
@@ -87,7 +105,7 @@
                 }
                 }
                 }
-            </code></td>
+            </code></pre></td>
         </tr>
         <tr>
             <td>/ws</td>
@@ -186,7 +204,8 @@
   "existence": {
     "initialQuiddity": {
       "ouch": {
-        "degree": 0
+        "level": 1,
+        "exp": 0.0
       },
       "name": "Jono",
       "id": "P52NLYKF66"
@@ -219,7 +238,8 @@
       "quidities": {
         "P52NLYKF66": {
           "ouch": {
-            "degree": 0
+            "level": 1,
+            "exp": 0.0
           },
           "name": "Jono",
           "id": "P52NLYKF66"
@@ -233,7 +253,8 @@
     },
     "quiddity": {
       "ouch": {
-        "degree": 0
+        "level": 1,
+        "exp": 0.0
       },
       "name": "Jono",
       "id": "P52NLYKF66"
@@ -266,20 +287,11 @@
 </div>
 <button id="pingpong" class="accordion"> Ping-Pong Heartbeat</button>
 <div class="panel">
-    <h4>1.) Client sends PING heartbeat on a sub-20 second interval. </h4>
+    <p><strong>1.) Client sends PING heartbeat on a sub-20 second interval.</strong></p>
     <code clas="json">
         { "dataType": "PING", "data": "PING" // anything can go here doesn't matter }
     </code>
-    Server responds with another PING heartbeat to confirm.
-    <ol>
-        <li> Client sends PING heartbeat on regular (under 5 min) interval.</li>
-    </ol>
-    <pre><code clas="json">
-        {
-            "dataType": "PING",
-            "data": "PONG" // (anything can go here doesn't matter)
-        }
-    </code></pre>
+    <p><strong>2.) Server responds with another PING heartbeat to confirm.</strong></p>
 </div>
 <button id="actionsp" class="accordion"> Actions (WIP)</button>
 <div class="panel">
@@ -298,7 +310,31 @@
         </li>
     </ol>
 </div>
-
+<button id="levle-up" class="accordion">Quiddity Update Events</button>
+<div class="panel">
+    There are time throught the life a <code>Quiddity</code> when it goes through
+    changes... usually just leveling up but whatever. When one of these events
+    occurs, the entire <code>Quiddity</code> is sent to all connected sessions
+    (for leader-board and other updates).
+    <pre><code>
+{
+    "dataType": "QUIDDITY",
+    "data": "{...}"
+}
+    </code></pre>
+    Parsing the <code>Packet.data</code> will give you the updated <code>Quiddity</code>
+    object:
+    <pre><code>
+{
+  "ouch": {
+    "level": 1,
+    "exp": 0.0
+  },
+  "name": "Jono",
+  "id": "P52NLYKF66"
+}
+    </code></pre>
+</div>
 <script>
     var acc = document.getElementsByClassName("accordion");
     var i;

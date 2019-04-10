@@ -17,6 +17,12 @@ inline fun <reified T> quickLoad(json: String) =
 /** Loads a Packet from a JSON */
 fun readPacket(json: String) = quickLoad<Packet>(json)
 
+@DslMarker
+annotation class PacketDsl
+
+@PacketDsl
+fun pack(type: Packet.DataType, data: Any? = null) = Packet(type, data).pack()
+
 /**
  * A Packet is used to send data in a uniform matter
  * between the Server & clients
@@ -34,7 +40,7 @@ data class Packet(
 ) {
 
     enum class DataType {
-        INIT, QUIDITY, EXISTENCE, ENTER, EXIT, ACTION, CHAT, INTERNAL, PING
+        INIT, QUIDDITY, EXISTENCE, ENTER, EXIT, ACTION, CHAT, INTERNAL, PING
     }
 
     init {

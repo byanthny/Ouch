@@ -3,6 +3,7 @@ package com.sim.ouch.logic
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.sim.ouch.allMatches
 import com.sim.ouch.logic.Achievements.*
 
 /*
@@ -13,20 +14,33 @@ import com.sim.ouch.logic.Achievements.*
  *
  */
 
-open class Ouch(var degree: Int = 0) {
+open class Ouch(var level: Int = 1, var exp: Double = 0.0) {
 
     operator fun inc(): Ouch {
-        check((degree + 1) <= OUCH_RANGE.endInclusive) { "Ouch at max." }
-        return this.apply { degree++ }
+        check((exp + 1) <= OUCH_RANGE.endInclusive) { "Ouch at max." }
+        return this.apply { exp++ }
     }
 
     operator fun dec(): Ouch {
-        check((degree - 1) <= OUCH_RANGE.start) { "Ouch at min." }
-        return this.apply { degree-- }
+        check((exp - 1) <= OUCH_RANGE.start) { "Ouch at min." }
+        return this.apply { exp-- }
+    }
+
+    /** @return `true` if [Ouch.level] increased */
+    fun add(double: Double): Boolean {
+        return if (exp + double in OUCH_RANGE) {
+            if (exp + double > level / 2.0) {
+                exp = (exp + double) - (level / 2.0)
+                true
+            } else {
+                exp += double
+                false
+            }
+        } else false
     }
 
     companion object {
-        var OUCH_RANGE = 0..100 // TODO Test range
+        var OUCH_RANGE = 0.0..100.0 // TODO Test range
         val keywords: Map<Regex, Double> by lazy { loadKeyWords() }
     }
 }
@@ -37,9 +51,9 @@ open class Ouch(var degree: Int = 0) {
     property = "@class"
 )
 @JsonSubTypes(
-        Type(value = `Lord Of Oof`::class, name = "lordofoof"),
-        Type(value = `Sucks 2 Suck`::class, name = "suckstobeyou"),
-        Type(value = `Baby's First Oof`::class, name = "firstoof")
+    Type(value = `Lord Of Oof`::class, name = "lordofoof"),
+    Type(value = `Sucks 2 Suck`::class, name = "suckstobeyou"),
+    Type(value = `Baby's First Oof`::class, name = "firstoof")
 )
 sealed class Achievements(val name: String, val description: String) {
     object `Lord Of Oof` : Achievements("Lord of ooF", "You hit the maximum Ouch!")
@@ -50,6 +64,10 @@ sealed class Achievements(val name: String, val description: String) {
         val values = listOf(`Lord Of Oof`, `Sucks 2 Suck`, `Baby's First Oof`)
     }
 }
+
+/** Parse the Oof value of a String using the [Ouch.keywords]. */
+val String.parseOof
+    get() = allMatches(Ouch.keywords.keys).map(Ouch.keywords::getValue).sum()
 
 /**
  * Recursively load the keywords from the `keywords.oof` file in `src/main/resources/`.
@@ -99,7 +117,7 @@ private fun loadKeyWords(): Map<Regex, Double> {
                 it.replace(Regex("\\((?s).*\\)")) { res ->
                     res.value.replace("&", "|")
                 }
-            }.let { Regex("(?i)$it") }.also { map[it] = value }
+            }.let { Regex("(?i).*\\s*$it\\s*.*") }.also { map[it] = value }
     }
     Ouch::class.java.getResource("/keywords.oof")?.openStream()
         ?.use { it.reader().readLines() }
