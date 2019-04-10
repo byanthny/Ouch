@@ -25,8 +25,10 @@ var helpicon = document.getElementById("help-icon");
 var login_status = document.getElementById("login-status");
 var login_style = document.getElementById("login-type-toggle");
 var actions_help = document.getElementById("actions-help");
+var help_background = document.getElementById("help");
 
 var search_items = document.getElementsByClassName("search-item");
+var search_items = document.getElementsByClassName("panel");
 
 //Login In
 //

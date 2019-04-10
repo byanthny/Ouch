@@ -87,9 +87,9 @@ function autocompleteSearch(currentInput) {
     search.innerHTML = "";
     var count =  0;
     for (var i = 0; i < actions.length; i++) {
-        if(actions[i].includes(currentInput)) {
+        if(actions[i].callform.includes(currentInput)) {
             count++;
-            search.innerHTML += '<div class="search-item">'+actions[i]+'</div>';
+            search.innerHTML += '<div class="search-item">'+actions[i].callform+'</div>';
         }
     }
     if(count === 0) {

@@ -60,7 +60,7 @@ function createConnection(endpoint) {
                 //Add new user to leaderboard
                 leaderboard.innerHTML += '<div class="data-leaderboard-cont"><p class="data-leaderboard '
                     + parsedData.id + '">' + parsedData.name + ' <span class="normal">'
-                    + parsedData.ouch.degree + '</span></p></div>';
+                    + parsedData.ouch.level + '</span></p></div>';
                 //Announce user joined
                 addChat(parsedData.name, "has joined the Existence.", "system");
                 break;
@@ -134,6 +134,7 @@ function getHTTP(url, func) {
 /* Load in actions from given data*/
 var setActions = function (data) {
     actions = data;
+    console.log(actions);
     //Actions went wrong
     if (actions === "") {
         console.log("Error");

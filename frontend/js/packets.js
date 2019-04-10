@@ -25,7 +25,7 @@ function handleInit(init_packet) {
     //Update level with data received
     level.innerHTML = quiddity.name
         + '<span id="world-value" class="normal"> '
-        + quiddity.ouch.degree + '</span>';
+        + quiddity.ouch.level + '</span>';
     //Set existence ID
     world_value.innerHTML = init_packet.existence._id;
 
@@ -43,7 +43,7 @@ function handleInit(init_packet) {
             '<p class="data-leaderboard ' + usersArray[quid].id + '">'
             + usersArray[quid].name +
             ' <span class="normal">'
-            + usersArray[quid].ouch.degree +
+            + usersArray[quid].ouch.level +
             '</span></p></div>';
     }
 

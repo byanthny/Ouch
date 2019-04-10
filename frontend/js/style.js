@@ -171,13 +171,13 @@ function addChat(name, content, type) {
 }
 
 function loadActionsHelp() {
-    var html = '<p>';
+    var html = '<table>';
     for(var i = 0; i < actions.length; i++) {
-        html += '<span class="bold">'+actions[i]+'</span> | Something<br>';
+        html += '<tr><td><span class="bold">'+actions[i].callform+'</span></td><td>'+actions[i].description+'</td></tr>';
         console.log(html);
     }
 
-    html += '</p>';
+    html += '</table>';
     actions_help.innerHTML = html;
 }
 
