@@ -35,12 +35,11 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     implementation("com.google.code.gson:gson:2.8.5")
     
-    implementation("io.jsonwebtoken:jjwt-external-api:0.10.5")
+    implementation("io.jsonwebtoken:jjwt-api:0.10.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.10.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.10.5")
 
     implementation(group = "commons-io", name = "commons-io", version = "2.6")
-
 
     implementation("org.litote.kmongo:kmongo-async:3.10.0")
     implementation("org.litote.kmongo:kmongo-coroutine:3.10.0")

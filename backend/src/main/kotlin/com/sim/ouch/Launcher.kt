@@ -4,14 +4,13 @@ import com.sim.ouch.EndPoints.*
 import com.sim.ouch.logic.Achievements
 import com.sim.ouch.logic.Action
 import com.sim.ouch.logic.Existence
+import com.sim.ouch.logic.Ouch
 import com.sim.ouch.web.DAO
 import com.sim.ouch.web.Websocket
 import com.sim.ouch.web.json
 import io.javalin.Javalin
 import kotlinx.coroutines.runBlocking
-import java.io.File
 import java.lang.System.getenv
-import javax.sound.sampled.AudioSystem
 
 enum class EndPoints(val point: String) {
     ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status"),
@@ -27,7 +26,6 @@ private val port get() = getenv("PORT")?.toIntOrNull() ?: 7_000
 
 /** Base [Javalin] "builder" */
 private val javalin get() = Javalin.create().apply {
-
     enableCorsForAllOrigins()
     getenv("PORT") ?: enableDebugLogging()
 }
@@ -51,13 +49,11 @@ val static_endpoints: Javalin by lazy {
         get(STATUS.point) { it.result(runBlocking { DAO.status() }.json()) }
         get(LOGS.point) { it.result(runBlocking { DAO.getLogs() }.json()) }
         get("/") { it.redirect(OUCH.uri) }
-        get("/music") {
-            it.result(AudioSystem.getAudioInputStream(File("backend/red/Halpe - Ocean.mp3")))
-        }
         secret(this)
     }
 }
 
 fun main() {
-    static_endpoints.start(port)
+    println(Ouch.keywords.entries.joinToString("") { (k, v) -> "$k=$v\n" })
+    //static_endpoints.start(port)
 }
