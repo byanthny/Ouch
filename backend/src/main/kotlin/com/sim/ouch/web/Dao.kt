@@ -7,6 +7,7 @@ import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Existence.Status.DORMANT
 import com.sim.ouch.logic.PublicExistence
 import com.sim.ouch.logic.Quiddity
+import com.sim.ouch.logic.UserData
 import com.sim.ouch.web.Dao.DaoLogger.Log
 import io.javalin.websocket.WsSession
 import io.jsonwebtoken.ExpiredJwtException
@@ -38,16 +39,9 @@ val DAO: Dao by lazy { Dao() }
 private val mongo by lazy {
     KMongoConfiguration.extendedJsonMapper.enableDefaultTyping()
     KMongo.createClient(
-        "mongodb://jono:G3lassenheit@ds023523.mlab.com:23523/heroku_4f8vnwwf")
-        .getDatabase("heroku_4f8vnwwf").coroutine
+        "mongodb://jono:G3lassenheit@ds023523.mlab.com:23523/heroku_4f8vnwwf"
+    ).getDatabase("heroku_4f8vnwwf").coroutine
 }
-
-suspend fun WsSession.existence(): Existence? = DAO.getToken(this)
-    ?.let { token -> DAO.getSessionData(token)
-        ?.let { DAO.getExistence(it.ec) } }
-suspend fun WsSession.quidity(): Quiddity? = DAO.getToken(this)
-    ?.let { t -> DAO.getSessionData(t) }
-    ?.let { (ec, qc) -> DAO.getExistence(ec)?.qOf(qc) }
 
 /**
  *
@@ -62,6 +56,7 @@ class Dao {
     data class SessionData(@BsonId var _id: Token, var ec: EC, var qc: QC)
 
     private val logger = DaoLogger()
+    private val users get() = mongo.getCollection<UserData>()
     /** Mongo DB [Existence] collection. */
     private val existences get() = mongo.getCollection<Existence>()
     /** Mongo DB [SessionData] collection */
@@ -339,3 +334,11 @@ class Dao {
         }
     }
 }
+
+suspend fun WsSession.existence(): Existence? = DAO.getToken(this)
+    ?.let { token -> DAO.getSessionData(token)
+        ?.let { DAO.getExistence(it.ec) } }
+suspend fun WsSession.quidity(): Quiddity? = DAO.getToken(this)
+    ?.let { t -> DAO.getSessionData(t) }
+    ?.let { (ec, qc) -> DAO.getExistence(ec)?.qOf(qc) }
+
