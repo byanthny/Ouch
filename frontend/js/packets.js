@@ -61,7 +61,9 @@ function handleInit(init_packet) {
 
 function handleQuid (id, name, level) {
     if (name === nickname) {
+
         world_value.innerHTML = level;
+        console.log("I am here" + level);
     }
     var quidleaderboard = document.getElementsByClassName(id)[0].childNodes[0];
     quidleaderboard.innerHTML = level;
