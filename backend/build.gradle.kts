@@ -35,6 +35,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
     implementation("com.google.code.gson:gson:2.8.5")
 
+    implementation("at.favre.lib:bcrypt:0.7.0")
     implementation("io.jsonwebtoken:jjwt-api:0.10.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.10.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.10.5")
