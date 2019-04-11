@@ -174,7 +174,6 @@ function loadActionsHelp() {
     var html = '<table>';
     for(var i = 0; i < actions.length; i++) {
         html += '<tr><td><span class="bold">'+actions[i].callform+'</span></td><td>'+actions[i].description+'</td></tr>';
-        console.log(html);
     }
 
     html += '</table>';
