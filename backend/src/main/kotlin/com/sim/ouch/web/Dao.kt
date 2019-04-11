@@ -1,10 +1,6 @@
 package com.sim.ouch.web
 
-import com.sim.ouch.IDGenerator
-import com.sim.ouch.NOW
-import com.sim.ouch.NOW_STR
-import com.sim.ouch.Slogger
-import com.sim.ouch.avgBy
+import com.sim.ouch.*
 import com.sim.ouch.datastructures.ExpiringKache
 import com.sim.ouch.datastructures.MutableBiMap
 import com.sim.ouch.logic.Existence
@@ -12,8 +8,6 @@ import com.sim.ouch.logic.Existence.Status.DORMANT
 import com.sim.ouch.logic.PublicExistence
 import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.logic.UserData
-import com.sim.ouch.threadName
-import com.sim.ouch.web.logger.Log
 import io.javalin.websocket.WsSession
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
@@ -23,13 +17,9 @@ import io.jsonwebtoken.security.SignatureException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.bson.codecs.pojo.annotations.BsonId
-import org.litote.kmongo.`in`
+import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.coroutine
-import org.litote.kmongo.eq
-import org.litote.kmongo.lt
-import org.litote.kmongo.ne
 import org.litote.kmongo.reactivestreams.KMongo
-import org.litote.kmongo.size
 import org.litote.kmongo.util.KMongoConfiguration
 import java.time.OffsetDateTime
 import javax.crypto.KeyGenerator
@@ -45,16 +35,15 @@ typealias ID = String
 typealias EC = ID
 typealias QC = ID
 
-private val MAX_DORMANT_DAYS = 31L
-private val cutoffDate get() = NOW().minusDays(MAX_DORMANT_DAYS)
-
-
 /**
  * @property _id The session key used for verification and reconnection
  * @property ec [Existence._id]
  * @property qc [Quiddity.id]
  */
 data class SessionData(@BsonId var _id: Token, var ec: EC, var qc: QC)
+
+private const val MAX_DORMANT_DAYS = 31L
+private val cutoffDate get() = NOW().minusDays(MAX_DORMANT_DAYS)
 
 private val mongo by lazy {
     KMongoConfiguration.extendedJsonMapper.enableDefaultTyping()
@@ -63,6 +52,7 @@ private val mongo by lazy {
             "mongodb://jono:G3lassenheit@ds023523.mlab.com:23523/heroku_4f8vnwwf"
     ).getDatabase("heroku_4f8vnwwf").coroutine
 }
+/** Mongo DB [UserData] collection. */
 private val users get() = mongo.getCollection<UserData>()
 /** Mongo DB [Existence] collection. */
 private val existences get() = mongo.getCollection<Existence>()
@@ -85,6 +75,13 @@ private val disconnectedTokens = ExpiringKache<Token, Unit?> { m ->
             )
     }
 }
+
+suspend fun getUserByName(name: String) = users.find(UserData::name eq name).first()
+
+suspend fun saveUser(userData: UserData) =
+    users.save(userData)?.wasAcknowledged() ?: false
+
+suspend fun getUsers() = users.find().toList()
 
 /**
  * Add an [Existence] to the database, generate a token.
@@ -203,10 +200,8 @@ suspend fun saveExistence(existence: Existence): Boolean {
     return existences.save(existence)?.wasAcknowledged() ?: false
 }
 
-suspend fun getUserByName(name: String) =
-        users.find(UserData::name eq name).first()
-
 suspend fun getExistence(id: EC) = existences.findOneById(id)
+
 /** Get non-[DORMANT] Existences */
 suspend fun getLive() = existences.find(Existence::status ne DORMANT).toList()
 
@@ -221,13 +216,24 @@ suspend fun getPublicExistences() = existences.find(Existence::public eq true)
 suspend fun getDormant() = existences.find(Existence::status eq DORMANT).toList()
 
 suspend fun getSessionData(token: Token) = sessionData.findOneById(token)
+
 suspend fun getSessionData(session: WsSession) =
         sessionTokens.fromValue(session)?.let { sessionData.findOneById(it) }
 
 fun getToken(session: WsSession) = sessionTokens.fromValue(session)
+
 fun getSession(token: Token) = sessionTokens[token]
+
 val liveSessionsCount get() = sessionTokens.size
-suspend fun getLogs() = logger.logCollection.find().toList()
+
+data class StatusPacket(
+    val numLiveEx: Int,
+    val numDormEx: Int,
+    val numLiveSes: Int,
+    val avgQpe: Double,
+    val oldest: OffsetDateTime?
+)
+
 suspend fun status(): StatusPacket {
     val le = getLive()
     val de = getDormant()
@@ -238,11 +244,11 @@ suspend fun status(): StatusPacket {
 
 /** Removes old dormant [Existence] */
 private suspend fun cleanDB() {
-    existences.deleteMany(
-            Existence::dormantSince lt cutoffDate).wasAcknowledged().also {
-        if (!it)
-            logger.err("Failed to delete old dormant existences", ::cleanDB)
-    }
+    existences.deleteMany(Existence::dormantSince lt cutoffDate).wasAcknowledged()
+        .also {
+            if (!it)
+                logger.err("Failed to delete old dormant existences", ::cleanDB)
+        }
     existences.find(
             Existence::sessionTokens size 0,
             Existence::status ne DORMANT
@@ -254,13 +260,7 @@ private suspend fun cleanDB() {
     }
 }
 
-data class StatusPacket(
-        val numLiveEx: Int,
-        val numDormEx: Int,
-        val numLiveSes: Int,
-        val avgQpe: Double,
-        val oldest: OffsetDateTime?
-)
+
 
 private fun genToken(session: WsSession, existence: Existence, quiddity: Quiddity) =
         genToken(session, existence._id, quiddity.id)
@@ -309,48 +309,46 @@ private val instanceKey by lazy {
     }
 }
 
-suspend fun WsSession.existence(): Existence? = getToken(this)
-        ?.let { token -> getSessionData(token)?.let { getExistence(it.ec) } }
 
-suspend fun WsSession.quidity(): Quiddity? = getToken(this)
-        ?.let { t -> getSessionData(t) }
-        ?.let { (ec, qc) -> getExistence(ec)?.qOf(qc) }
-
+/****** Logging *******/
 
 /** A [Slogger] which saves a [Log] to the `logs` logCollection collection. */
-object logger : Slogger("") {
-    data class Log(
-            @BsonId val _id: ID = next(),
-            val loog: MutableList<String> = mutableListOf(),
-            val date: OffsetDateTime = OffsetDateTime.now()
-    ) {
-        companion object idGen : IDGenerator(10)
+private object logger : Slogger("")
 
-        operator fun invoke(string: String) = string.also { loog.add(it) }
-        val size get() = loog.size
-    }
+data class Log internal constructor(
+    @BsonId val _id: ID = next(),
+    val loog: MutableList<String> = mutableListOf(),
+    val date: OffsetDateTime = OffsetDateTime.now()
+) {
+    companion object idGen : IDGenerator(10)
+    operator fun invoke(string: String) = string.also { loog.add(it) }
+    val size get() = loog.size
+}
 
-    val logCollection by lazy { mongo.getCollection<Log>() }
-    private val log: Log = Log()
+private val logCollection by lazy { mongo.getCollection<Log>() }
+/** Get [Log]s from mongo */
+suspend fun getLogs() = logCollection.find().toList()
 
-    suspend fun <F : KFunction<*>> info(any: Any? = "", function: F? = null) =
-            log(any, function, "info")
+/** The [Log] used for this run of the program. */
+private val instanceLog: Log = Log()
 
-    suspend fun <F : KFunction<*>> err(any: Any? = "", function: F? = null) =
-            log(any, function, "err")
+private suspend fun <F : KFunction<*>> logger.info(any: Any? = "", function: F? = null) =
+    logger.log(any, function, "info")
 
-    private suspend fun <F : KFunction<*>> log(
-            any: Any? = "",
-            f: F?,
-            level: String
-    ) {
-        println(log("[${NOW_STR()}] [$threadName] [$name] ${
-        f?.let { "[${f.name}]" } ?: ""} [$level] $any"))
-        if (log.size % 10 == 0) {
-            println("Updating Log Collection...")
-            if (logCollection.save(log)?.wasAcknowledged() == true) {
-                println("\tSuccessful")
-            } else System.err.println("\tFailed!")
-        }
+private suspend fun <F : KFunction<*>> logger.err(any: Any? = "", function: F? = null) =
+    logger.log(any, function, "err")
+
+private suspend fun <F : KFunction<*>> logger.log(
+    any: Any? = "",
+    f: F?,
+    level: String
+) {
+    println(instanceLog("[${NOW_STR()}] [$threadName] [${logger.name}] ${
+    f?.let { "[${f.name}]" } ?: ""} [$level] $any"))
+    if (instanceLog.size % 10 == 0) {
+        println("Updating Log Collection...")
+        if (logCollection.save(instanceLog)?.wasAcknowledged() == true) {
+            println("\tSuccessful")
+        } else System.err.println("\tFailed!")
     }
 }

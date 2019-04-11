@@ -48,7 +48,7 @@ val server: Javalin by lazy {
         // Static endpoints
         get("/public") {
             val limit = it.queryParam("limit")?.toIntOrNull()
-            val json = runBlocking { DAO.getPublicExistences() }
+            val json = runBlocking { getPublicExistences() }
                 .let { el -> limit?.let { el.subList(0, limit) } ?: el }
                 .filterNot(Existence::full).map(Existence::_id).json()
             it.result(json)
@@ -57,8 +57,8 @@ val server: Javalin by lazy {
         get(ACHIVEMENTS.point) { it.result(Achievements.values.json()) }
         enableRouteOverview("/route")
         get(ENDPOINTS.point) { it.render("/map.html") }
-        get(STATUS.point) { it.result(runBlocking { DAO.status() }.json()) }
-        get(LOGS.point) { it.result(runBlocking { DAO.getLogs() }.json()) }
+        get(STATUS.point) { it.result(runBlocking { status() }.json()) }
+        get(LOGS.point) { it.result(runBlocking { getLogs() }.json()) }
         get("/") { it.redirect(OUCH.uri) }
         secret(this)
     }.start(port)

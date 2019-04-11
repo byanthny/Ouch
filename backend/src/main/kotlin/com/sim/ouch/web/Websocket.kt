@@ -25,9 +25,9 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
         // Check for reconnection token
         session.queryParam("token")?.also { token ->
             // Attempt to validate the token
-            runBlocking { DAO.refreshSession(token, session) }?.also { (_, sd) ->
+            runBlocking { refreshSession(token, session) }?.also { (_, sd) ->
                 // Attempt to locate existence
-                val ex = runBlocking { DAO.getExistence(sd.ec) }
+                val ex = runBlocking { getExistence(sd.ec) }
                     ?: return@ch session.close(ER_EX_NOT_FOUND)
                 val q = ex.qOf(sd.qc)
                     ?: return@ch session.close(ER_Q_NOT_FOUND)
@@ -44,14 +44,14 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
         val name = session.queryParam("name")
             ?: return@ch session.close(ER_NO_NAME)
         val ex = session.queryParam("exID")?.let { ec ->
-            runBlocking { DAO.getExistence(ec) }?.also { e ->
+            runBlocking { getExistence(ec) }?.also { e ->
                 qd = e.qOfName(name) // ?.also { TODO("Check for duplicates") }
                     ?: e.generateQuidity(name)
-                t = runBlocking { DAO.addSession(session, e, qd) }
+                t = runBlocking { addSession(session, e, qd) }
                     ?: return@ch session.close(ER_INTERNAL)
             } ?: return@ch session.close(ER_EX_NOT_FOUND)
         } ?: run {
-            runBlocking { DAO.addExistence(session, DefaultExistence(), name) }
+            runBlocking { addExistence(session, DefaultExistence(), name) }
                 ?.let {
                     t = it.first
                     qd = it.third
@@ -65,9 +65,9 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     }
 
     val message = MessageHandler { session, msg ->
-        val sd = runBlocking { DAO.getSessionData(session) }
+        val sd = runBlocking { getSessionData(session) }
         val packet = readPacket(msg)
-        val ex = sd?.let { runBlocking { DAO.getExistence(it.ec) } }
+        val ex = sd?.let { runBlocking { getExistence(it.ec) } }
         val qd = sd?.let { ex?.qOf(it.qc) }
         when (packet.dataType) {
             ACTION -> TODO()
@@ -81,9 +81,9 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     }
 
     suspend fun close(session: WsSession) = session.let {
-        val qc = DAO.getSessionData(session)?.qc
+        val qc = getSessionData(session)?.qc
         it.existence()?.broadcast(EXIT, qc ?: "", true)
-        DAO.disconnect(it)
+        .disconnect(it)
     }
 
     wsHandler.onClose { session, code, reason ->
@@ -110,7 +110,7 @@ private fun handleChat(
     // Parse for keywords
     if (qd.ouch.add(text.parseOof)) ex.broadcast(QUIDDITY, qd)
     // Save existence
-    if (!runBlocking { DAO.saveExistence(ex) })
+    if (!runBlocking { saveExistence(ex) })
         sl.elog("Failed to update Existence after chat")
 }
 
@@ -126,3 +126,10 @@ val handler = CoroutineExceptionHandler { _, thr ->
 
 fun launch(block: suspend CoroutineScope.() -> Unit) =
         GlobalScope.launch(handler, block = block)
+
+suspend fun WsSession.existence(): Existence? = getToken(this)
+    ?.let { token -> getSessionData(token)?.let { getExistence(it.ec) } }
+
+suspend fun WsSession.quidity(): Quiddity? = getToken(this)
+    ?.let { t -> getSessionData(t) }
+    ?.let { (ec, qc) -> getExistence(ec)?.qOf(qc) }
