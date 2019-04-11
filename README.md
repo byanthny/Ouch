@@ -1,3 +1,8 @@
+**Testing  and Development:** Currently being used as a playground for us to test different features and learn. Nothing here is guranteed to work or be inplemented into Ouch.
+
+Currently working on login system and making existences "permanent".
+
+---
 <p align="center">
 <img src="docs/imgs/logo.png" width="250"/>
 </p>
