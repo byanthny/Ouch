@@ -2,22 +2,16 @@ package com.sim.ouch.web
 
 import com.sim.ouch.Slogger
 import com.sim.ouch.logic.DefaultExistence
+import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quiddity
+import com.sim.ouch.logic.parseOof
 import com.sim.ouch.web.Packet.DataType.*
 import io.javalin.UnauthorizedResponse
-import io.javalin.websocket.ConnectHandler
-import io.javalin.websocket.ErrorHandler
-import io.javalin.websocket.MessageHandler
-import io.javalin.websocket.WsHandler
-import io.javalin.websocket.WsSession
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import io.javalin.websocket.*
+import kotlinx.coroutines.*
 import java.util.function.Consumer
 
-private const val IDLE_TIMOUT = 1_020_000L
+private const val IDLE_TIMOUT_MS = 1_000L * 60
 
 val ER_EX_NOT_FOUND = 4004 to "existence not found"
 val ER_NO_NAME = 4005 to "no name"
@@ -26,7 +20,7 @@ val ER_BAD_TOKEN = 4007 to "invalid token"
 val ER_INTERNAL = 4010 to "internal err"
 val ER_Q_NOT_FOUND = 4040 to "quididty not found"
 
-val sl = Slogger("Socket Handler")
+private val sl = Slogger("Socket Handler")
 
 /** Server side [WsHandler] implementation. */
 val Websocket = Consumer<WsHandler> { wsHandler ->
@@ -41,7 +35,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
                     ?: return@ch session.close(ER_EX_NOT_FOUND)
                 val q = ex.qOf(sd.qc)
                     ?: return@ch session.close(ER_Q_NOT_FOUND)
-                session.idleTimeout = IDLE_TIMOUT
+                session.idleTimeout = IDLE_TIMOUT_MS
                 return@ch session.initWith(ex, q, token)
                     .also { ex.broadcast(ENTER, q, false, session.id) }
                     .also { sl.slog("Init reconnect session. Ex=${ex._id} SID=${session.id}") }
@@ -68,10 +62,23 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
                     it.second
                 } ?: return@ch session.close(ER_INTERNAL)
         }
-        session.idleTimeout = IDLE_TIMOUT
+        session.idleTimeout = IDLE_TIMOUT_MS
         session.initWith(ex, qd, t)
             .also { sl.slog("Init session. Ex=${ex._id} SID=${session.id}") }
             .also { ex.broadcast(ENTER, qd, false, session.id) }
+    }
+
+    /** Handle chat broadcasting and parsing. */
+    fun handleChat(
+        ex: Existence, qd: Quiddity, ses: WsSession, msg: String, text: String
+    ) {
+        // Update chat
+        ex.chat.update(qd, text).let { m -> ex.broadcast(chatPacket(m)) }
+        // Parse for keywords
+        if (qd.ouch.add(text.parseOof)) ses.send(pack(QUIDDITY, qd))
+        // Save existence
+        if (!runBlocking { DAO.saveExistence(ex) })
+            sl.elog("Failed to update Existence after chat")
     }
 
     val message = MessageHandler { session, msg ->
@@ -80,15 +87,13 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
         val ex = sd?.let { runBlocking { DAO.getExistence(it.ec) } }
         val qd = sd?.let { ex?.qOf(it.qc) }
         when (packet.dataType) {
-            QUIDITY -> TODO()
+            QUIDDITY -> TODO()
             EXISTENCE -> TODO()
             ACTION -> TODO()
             CHAT -> {
-                qd?.let { ex?.chat?.update(it, packet.data as String) }
-                    ?.let { m -> ex?.broadcast(chatPacket(m)) }
-                    ?: sl.elog("Failed to broadcast chat")
-                ex?.also { runBlocking { DAO.saveExistence(it) } }
-                    ?: sl.elog("Failed to update Existence after chat")
+                if (ex != null && qd != null)
+                    handleChat(ex, qd, session, msg, packet.data as String)
+                else sl.elog("Failed to handle chat.")
             }
             PING -> session.send(Packet(PING, "pong").pack())
             else -> throw UnauthorizedResponse(
@@ -108,8 +113,8 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
         launch { close(session) }
     }
 
-    val err = ErrorHandler { session, _: Throwable? ->
-        if (session.isOpen) session.send(Packet(INTERNAL, "err", true).pack())
+    val err = ErrorHandler { session, t: Throwable? ->
+        if (session.isOpen) session.send(Packet(INTERNAL, t.toString(), true).pack())
         else launch { close(session) }
     }
 

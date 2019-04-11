@@ -19,13 +19,14 @@ open class Quiddity(open var name: String) : Entity() {
 
 abstract class InfraQuidity : Entity()
 
-enum class Action(val callform: String, val description: String) {
-    BEAN("-bean", "get beaned"),
-    MUSIC("-music", "feel the ouchie vibes"),
-    THEME("-theme", "darkmode best mode"),
-    EXIT("-exit", "disconnect from the Existence");
+sealed class Action(val callform: String, val description: String) {
 
     companion object {
-        val callForms get() = values().map(Action::callform)
+        val values = Action::class.sealedSubclasses.mapNotNull { it.objectInstance }
     }
+
+    object BEAN : Action("-bean", "get beaned")
+    object MUSIC : Action("-music", "feel the ouchie vibes")
+    object THEME : Action("-theme", "darkmode best mode")
+    object EXIT : Action("-exit", "disconnect from the Existence")
 }

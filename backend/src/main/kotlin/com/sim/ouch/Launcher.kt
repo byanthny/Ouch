@@ -4,7 +4,6 @@ import com.sim.ouch.EndPoints.*
 import com.sim.ouch.logic.Achievements
 import com.sim.ouch.logic.Action
 import com.sim.ouch.logic.Existence
-import com.sim.ouch.logic.Ouch
 import com.sim.ouch.web.DAO
 import com.sim.ouch.web.Websocket
 import com.sim.ouch.web.json
@@ -42,7 +41,7 @@ val static_endpoints: Javalin by lazy {
                 .filterNot(Existence::full).map(Existence::_id).json()
             it.result(json)
         }
-        get(ACTIONS.point) { it.result(Action.callForms.json()) }
+        get(ACTIONS.point) { it.result(Action.values.json()) }
         get(ACHIVEMENTS.point) { it.result(Achievements.values.json()) }
         enableRouteOverview("/route")
         get(ENDPOINTS.point) { it.render("/map.html") }
@@ -53,7 +52,4 @@ val static_endpoints: Javalin by lazy {
     }
 }
 
-fun main() {
-    println(Ouch.keywords.entries.joinToString("") { (k, v) -> "$k=$v\n" })
-    //static_endpoints.start(port)
-}
+fun main() = static_endpoints.start(port).unit

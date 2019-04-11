@@ -199,6 +199,8 @@ class Dao {
     /**
      * Save the [Existence] to the database. Use this only when a serialized
      * property is changed.
+     *
+     * @return `true` if the save was Acknowledged
      */
     suspend fun saveExistence(existence: Existence): Boolean {
         return existences.save(existence)?.wasAcknowledged() ?: false
