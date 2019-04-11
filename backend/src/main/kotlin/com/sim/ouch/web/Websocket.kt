@@ -3,7 +3,6 @@ package com.sim.ouch.web
 import com.sim.ouch.Slogger
 import com.sim.ouch.logic.*
 import com.sim.ouch.web.Packet.DataType.*
-import io.javalin.UnauthorizedResponse
 import io.javalin.websocket.*
 import kotlinx.coroutines.*
 import java.util.function.Consumer
@@ -71,18 +70,13 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
         val ex = sd?.let { runBlocking { DAO.getExistence(it.ec) } }
         val qd = sd?.let { ex?.qOf(it.qc) }
         when (packet.dataType) {
-            QUIDDITY -> TODO()
-            EXISTENCE -> TODO()
             ACTION -> TODO()
             CHAT -> {
-                if (ex != null && qd != null)
-                    handleChat(ex, qd, session, msg, packet.data as String)
-                else sl.elog("Failed to handle chat.")
+                if (ex == null || qd == null) sl.elog("Failed to handle chat.")
+                else handleChat(ex, qd, session, msg, packet.data as String)
             }
-            PING -> session.send(Packet(PING, "pong").pack())
-            else -> throw UnauthorizedResponse(
-                "Client cannot make ${packet.dataType} requests."
-            )
+            PING -> session.send(pack(PING, "pong"))
+            else -> session.send("Client cannot make ${packet.dataType} requests.")
         }
     }
 
@@ -98,7 +92,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     }
 
     val err = ErrorHandler { session, t: Throwable? ->
-        if (session.isOpen) session.send(Packet(INTERNAL, t.toString(), true).pack())
+        if (session.isOpen) session.send(Packet(INTERNAL, t?.message, true).pack())
         else launch { close(session) }
     }
 
