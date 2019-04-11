@@ -24,7 +24,7 @@ function handleInit(init_packet) {
 
     //Update level with data received
     level.innerHTML = quiddity.name
-        + '<span id="world-value" class="normal"> '
+        + ' <span id="world-value" class="normal">'
         + quiddity.ouch.level + '</span>';
     //Set existence ID
     world_value.innerHTML = init_packet.existence._id;
@@ -57,4 +57,12 @@ function handleInit(init_packet) {
     setTimeout(function () {
         switchLoading(false);
     }, 1000);
+}
+
+function handleQuid (id, name, level) {
+    if (name === nickname) {
+        world_value.innerHTML = level;
+    }
+    var quidleaderboard = document.getElementsByClassName(id)[0].childNodes[0];
+    quidleaderboard.innerHTML = level;
 }

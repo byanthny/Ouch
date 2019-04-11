@@ -45,6 +45,7 @@ function createConnection(endpoint) {
 
         //parse the socket data
         var JSONdata = JSON.parse(e.data);
+        //console.log(e);
         //parse JSONdata.data
         var parsedData = JSON.parse(JSONdata.data);
 
@@ -55,6 +56,9 @@ function createConnection(endpoint) {
                 break;
             case "CHAT": //Chat message
                 addChat(parsedData.authorName, parsedData.content, "client");
+                break;
+            case "QUIDDITY":
+                handleQuid(parsedData.id, parsedData.name, parsedData.ouch.level);
                 break;
             case "ENTER": //New user has entered
                 //Add new user to leaderboard
@@ -134,7 +138,7 @@ function getHTTP(url, func) {
 /* Load in actions from given data*/
 var setActions = function (data) {
     actions = data;
-    console.log(actions);
+    //console.log(actions);
     //Actions went wrong
     if (actions === "") {
         console.log("Error");
@@ -146,7 +150,7 @@ var setActions = function (data) {
 
 var setPublicExist = function (data) {
     public_exist = data;
-    console.log(public_exist.numLiveSes);
+    //console.log(public_exist.numLiveSes);
     //Actions went wrong
     if (public_exist === "") {
         console.log("Error");
