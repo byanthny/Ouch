@@ -201,6 +201,9 @@ class Dao {
         return existences.save(existence)?.wasAcknowledged() ?: false
     }
 
+    suspend fun getUserByName(name: String) =
+        users.find(UserData::name eq name).first()
+
     suspend fun getExistence(id: EC) = existences.findOneById(id)
     /** Get non-[DORMANT] Existences */
     suspend fun getLive() = existences.find(Existence::status ne DORMANT).toList()
