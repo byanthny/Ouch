@@ -64,9 +64,9 @@ function handleQuid (id, name, level) {
     if (name === nickname) {
 
         level_value.innerHTML = level;
-        console.log("I am here" + level);
+        //console.log("I am here" + level);
     }
     var quidleaderboard = document.getElementsByClassName(id)[0].childNodes[1];
-    console.log(quidleaderboard);
+    //console.log(quidleaderboard);
     quidleaderboard.innerHTML = level;
 }
