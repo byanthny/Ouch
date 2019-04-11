@@ -37,7 +37,7 @@
 <body>
 <h1>Ouch API Specifications</h1>
 <div>
-    <table>
+    <table border=".5">
         <tbody>
         <tr>
             <th>Endpoint</th>
@@ -46,7 +46,7 @@
             <th>JSON</th>
         </tr>
         <tr>
-            <td>/</td>
+            <td>/ (<em>home</em>)</td>
             <td>GET</td>
             <td>redirects to ouch site</td>
             <td>NA</td>
@@ -55,7 +55,9 @@
             <td>/actions</td>
             <td>GET</td>
             <td>get a list of all actions</td>
-            <td rowspan="5"><pre><code lang="json">
+            <td>
+                <button class="accordion">expand</button>
+                <pre class="panel"><code lang="json">
 [
   {
     "callform": "-bean",
@@ -74,38 +76,42 @@
     "description": "disconnect from the Existence"
   }
 ]
-            </code></pre></td>
+            </code></pre>
+            </td>
         </tr>
         <tr>
             <td>/status</td>
             <td>GET</td>
             <td>get a JSON summery of the state of ouch API</td>
-            <td rowspan="10"><pre><code lang="JSON">
-                {
-                "numLiveEx": 31,
-                "numDormEx": 41,
-                "numLiveSes": 0,
-                "avgQpe": 1.0138888888888888,
-                "oldest": {
-                "dateTime": {
-                "date": {
-                "year": 2019,
-                "month": 4,
-                "day": 3
-                },
-                "time": {
-                "hour": 20,
-                "minute": 50,
-                "second": 4,
-                "nano": 527000000
-                }
-                },
-                "offset": {
-                "totalSeconds": 0
-                }
-                }
-                }
-            </code></pre></td>
+            <td>
+                <button class="accordion">expand</button>
+                <pre class="panel"><code lang="JSON">
+{
+  "numLiveEx": 44,
+  "numDormEx": 103,
+  "numLiveSes": 4,
+  "avgQpe": 0.3673469387755102,
+  "oldest": {
+    "dateTime": {
+      "date": {
+        "year": 2019,
+        "month": 4,
+        "day": 7
+      },
+      "time": {
+        "hour": 22,
+        "minute": 41,
+        "second": 53,
+        "nano": 387000000
+      }
+    },
+    "offset": {
+      "totalSeconds": 0
+    }
+  }
+}
+            </code></pre>
+            </td>
         </tr>
         <tr>
             <td>/ws</td>
@@ -115,7 +121,6 @@
         </tbody>
     </table>
 </div>
-
 <h1 id="websocket-dialogue" style="text-align: center"> Gateway Dialogue </h1>
 <h3 id="_preface" style="text-align: center"> Preface </h3>
 <p>

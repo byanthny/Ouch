@@ -30,7 +30,7 @@ open class Ouch(var level: Int = 1, var exp: Double = 0.0) {
     fun add(double: Double): Boolean {
         return if (exp + double in OUCH_RANGE) {
             if (exp + double > level / 2.0) {
-                exp = (exp + double) - (level / 2.0)
+                exp = (exp + double) - (level++ / 2.0)
                 true
             } else {
                 exp += double

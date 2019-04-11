@@ -1,10 +1,7 @@
 package com.sim.ouch.web
 
 import com.sim.ouch.Slogger
-import com.sim.ouch.logic.DefaultExistence
-import com.sim.ouch.logic.Existence
-import com.sim.ouch.logic.Quiddity
-import com.sim.ouch.logic.parseOof
+import com.sim.ouch.logic.*
 import com.sim.ouch.web.Packet.DataType.*
 import io.javalin.UnauthorizedResponse
 import io.javalin.websocket.*
@@ -68,19 +65,6 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
             .also { ex.broadcast(ENTER, qd, false, session.id) }
     }
 
-    /** Handle chat broadcasting and parsing. */
-    fun handleChat(
-        ex: Existence, qd: Quiddity, ses: WsSession, msg: String, text: String
-    ) {
-        // Update chat
-        ex.chat.update(qd, text).let { m -> ex.broadcast(chatPacket(m)) }
-        // Parse for keywords
-        if (qd.ouch.add(text.parseOof)) ses.send(pack(QUIDDITY, qd))
-        // Save existence
-        if (!runBlocking { DAO.saveExistence(ex) })
-            sl.elog("Failed to update Existence after chat")
-    }
-
     val message = MessageHandler { session, msg ->
         val sd = runBlocking { DAO.getSessionData(session) }
         val packet = readPacket(msg)
@@ -121,6 +105,23 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     wsHandler.onConnect(connect)
     wsHandler.onMessage(message)
     wsHandler.onError(err)
+}
+
+/** Handle chat broadcasting and parsing. */
+private fun handleChat(
+    ex: Existence, qd: Quiddity, ses: WsSession, msg: String, text: String
+) {
+    // Update chat
+    ex.chat.update(qd, text).let { m -> ex.broadcast(chatPacket(m)) }
+    // Parse for keywords
+    if (qd.ouch.add(text.parseOof)) ex.broadcast(QUIDDITY, qd)
+    // Save existence
+    if (!runBlocking { DAO.saveExistence(ex) })
+        sl.elog("Failed to update Existence after chat")
+}
+
+private fun handleAction(ex: Existence, qd: Quiddity, ses: WsSession, action: Action) {
+    // TODO
 }
 
 fun WsSession.close(pair: Pair<Int, String>) = close(pair.first, pair.second)
