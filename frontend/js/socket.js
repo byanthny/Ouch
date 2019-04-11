@@ -58,6 +58,7 @@ function createConnection(endpoint) {
                 addChat(parsedData.authorName, parsedData.content, "client");
                 break;
             case "QUIDDITY":
+                //console.log(parsedData);
                 handleQuid(parsedData.id, parsedData.name, parsedData.ouch.level);
                 break;
             case "ENTER": //New user has entered
