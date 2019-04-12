@@ -43,8 +43,7 @@ private val mongo by lazy {
 }
 
 suspend fun WsSession.existence(): Existence? = DAO.getToken(this)
-    ?.let { token -> DAO.getSessionData(token)
-        ?.let { DAO.getExistence(it.ec) } }
+    ?.let { token -> DAO.getSessionData(token)?.let { DAO.getExistence(it.ec) } }
 suspend fun WsSession.quidity(): Quiddity? = DAO.getToken(this)
     ?.let { t -> DAO.getSessionData(t) }
     ?.let { (ec, qc) -> DAO.getExistence(ec)?.qOf(qc) }
