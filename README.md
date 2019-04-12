@@ -6,9 +6,10 @@
 * [The Simulation](#the-simulation)
 * [Project Description](#description)
 * [Commands](#commands)
+* [Features](#features)
 * [Technical Stuff](#technical-stuff)
     * [File Structure](#file-organization)
-    * [Client-Server Communication](#client-server-communcation)
+    * [Client-Server Communication](#client-server-communication)
 * [Updates](#updates)
 ---
 
@@ -55,6 +56,8 @@
   
   
   or https://sim-ouch.herokuapp.com/actions 
+  
+## Features
 
 ## Technical Stuff
 Current status of Ouch API: https://sim-ouch.herokuapp.com/status 
@@ -91,5 +94,6 @@ Refer to: https://sim-ouch.herokuapp.com/map
 * Cleaned Up Code
 * -bean
 * Added status bar for Ouch Status
+* Leveling System now works.
  
 ---

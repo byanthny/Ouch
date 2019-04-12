@@ -92,6 +92,8 @@ document.onbeforeunload = function () {
     connection.close();
 };
 
+//TODO Fix spazzing out
+
 /* One page load retrieve all actions from actions_url*/
 window.onload = function () {
     //get actions from url and then load them
