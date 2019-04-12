@@ -261,7 +261,6 @@ private suspend fun cleanDB() {
 }
 
 
-
 private fun genToken(session: WsSession, existence: Existence, quiddity: Quiddity) =
         genToken(session, existence._id, quiddity.id)
 

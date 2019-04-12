@@ -36,8 +36,10 @@ val server: Javalin by lazy {
                 ?: throw BadRequestResponse("no password")
             val usr  = it.basicAuthCredentials()?.username
                 ?: throw BadRequestResponse("no username")
-            signup(usr, pass.toCharArray())
-            TODO("")
+            launch {
+                val ud = signup(usr, pass.toCharArray())
+                it.json(ud)
+            }
         }
         post(AUTH.point) {
             TODO()
