@@ -1,0 +1,21 @@
+.leaderboard {
+  max-height: 30vh !important;
+  max-width: 25vw;
+  overflow-y: scroll;
+  .top();
+  margin-top: calc(~"@{data-height} + 54px");
+  right: calc(~"20px - @{data-leaderboard-margin}");
+  .scrollbar-hidden();
+}
+
+.data-leaderboard-cont {
+  width: 100%;
+  height: @data-size;
+}
+
+.data-leaderboard {
+  &:extend(.data);
+  display: table;
+  margin: @data-leaderboard-margin;
+  float: right;
+}

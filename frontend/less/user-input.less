@@ -1,0 +1,27 @@
+.user-input() {
+  width: 100%;
+  height: @usr-input-height;
+  border-radius: @default-rounded;
+  padding-left: @usr-input-left;
+  color: @dark-color;
+  border-width: 0;
+  outline: none;
+  font-size: @default-font-size;
+  .transition();
+  .box-shadow;
+}
+
+#user-input {
+  .user-input();
+}
+
+.placeholder() {
+  font-family: @secondary-font;
+  text-align: center;
+  font-size: @default-font-size;
+  overflow: visible;
+}
+
+#user-input::placeholder {
+  .placeholder();
+}
