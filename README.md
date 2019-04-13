@@ -11,6 +11,7 @@
     * [File Structure](#file-organization)
     * [Client-Server Communication](#client-server-communication)
 * [Updates](#updates)
+* [Testing](#testing)
 ---
 
 ## The Simulation
@@ -97,3 +98,6 @@ Refer to: https://sim-ouch.herokuapp.com/map
 * Leveling System now works.
  
 ---
+
+## Testing
+[Refer to the logins branch](https://github.com/anthnyd/Ouch/tree/logins)
