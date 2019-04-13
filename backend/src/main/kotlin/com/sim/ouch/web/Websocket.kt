@@ -1,22 +1,10 @@
 package com.sim.ouch.web
 
 import com.sim.ouch.Slogger
-import com.sim.ouch.logic.Action
-import com.sim.ouch.logic.DefaultExistence
-import com.sim.ouch.logic.Existence
-import com.sim.ouch.logic.Quiddity
-import com.sim.ouch.logic.parseOof
+import com.sim.ouch.logic.*
 import com.sim.ouch.web.Packet.DataType.*
-import io.javalin.websocket.ConnectHandler
-import io.javalin.websocket.ErrorHandler
-import io.javalin.websocket.MessageHandler
-import io.javalin.websocket.WsHandler
-import io.javalin.websocket.WsSession
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import io.javalin.websocket.*
+import kotlinx.coroutines.*
 import java.util.function.Consumer
 
 private const val IDLE_TIMOUT_MS = 1_000L * 60
@@ -29,6 +17,9 @@ val ER_INTERNAL = 4010 to "internal err"
 val ER_Q_NOT_FOUND = 4040 to "quididty not found"
 
 private val sl = Slogger("Socket Handler")
+
+
+// TODO Autho token's to allow websocket connections
 
 /** Server side [WsHandler] implementation. */
 val Websocket = Consumer<WsHandler> { wsHandler ->

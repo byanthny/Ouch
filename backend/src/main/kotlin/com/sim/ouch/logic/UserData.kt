@@ -1,13 +1,9 @@
 package com.sim.ouch.logic
 
 import at.favre.lib.crypto.bcrypt.BCrypt
-import at.favre.lib.crypto.bcrypt.BCrypt.MAX_COST
-import com.sim.ouch.IDGenerator
+import com.sim.ouch.*
 import com.sim.ouch.web.*
-import io.javalin.BadRequestResponse
-import io.javalin.ConflictResponse
-import io.javalin.InternalServerErrorResponse
-import io.javalin.NotFoundResponse
+import io.javalin.*
 import org.bson.codecs.pojo.annotations.BsonId
 
 private val USER_ID_GEN = IDGenerator(16)
@@ -21,36 +17,47 @@ private val USER_ID_GEN = IDGenerator(16)
  * @property _id Bson ID
  */
 data class UserData(
-    var name: String,
+    var name: Name,
     var hash: CharArray,
     val existences: MutableMap<EC, QC> = mutableMapOf(),
     @BsonId var _id: ID = USER_ID_GEN.next()
 )
 
-/**
+fun UserData.sendPacket(token: Token? = null) =
+    mutableMapOf("id" to _id, "name" to name, "ex_qd_ids" to existences)
+        .also { m -> token?.also { m["token"] = it} }
+
+        /**
  * Attempt to create a new [UserData] and store it to mongo.
  *
  * @return The created [UserData]
  * @throws ConflictResponse if the [name] has already been taken.
  */
-suspend fun signup(name: String, password: CharArray): UserData {
+suspend fun signup(name: Name, password: CharArray): UserData {
+    slog("Starting signup")
     // Duplicate name check
     getUserByName(name)?.also { throw ConflictResponse("duplicate name") }
+    slog("hashing password")
     // Password hash
-    val hash = BCrypt.withDefaults().hashToChar(MAX_COST, password)
+    val hash = BCrypt.withDefaults().hashToChar(16, password)
+    slog("building user")
     // return new user data
     val user = UserData(name, hash)
+    slog("saving user")
     if (!saveUser(user)) throw InternalServerErrorResponse("failed to sign-up")
+    slog("returning $user")
     return user
 }
 
 /**
- *
+ * Attempt to login and get the [UserData] associated with the [name] and [password].
+ * @throws NotFoundResponse if no user was found with the name
+ * @throws BadRequestResponse if invalid password
  */
 @Throws(NotFoundResponse::class, BadRequestResponse::class)
-suspend fun login(name: String, password: String): UserData {
+suspend fun login(name: Name, password: CharArray): UserData {
     val user = getUserByName(name) ?: throw NotFoundResponse("no user found")
-    val verified = BCrypt.verifyer().verify(password.toCharArray(), user.hash).verified
-    if (!verified) throw BadRequestResponse("bad login")
+    BCrypt.verifyer().verify(password, user.hash)
+            .given({!it.verified}) { throw BadRequestResponse("bad login") }
     return user
 }

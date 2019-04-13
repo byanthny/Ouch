@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.sim"
-version = "0.0.3"
+version = "0.5.0"
 
 val ktor_version = "1.1.3"
 
