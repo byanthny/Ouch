@@ -8,8 +8,12 @@ import com.sim.ouch.logic.signup
 import com.sim.ouch.secret
 import com.sim.ouch.web.EndPoints.*
 import io.javalin.BadRequestResponse
+import io.javalin.Context
 import io.javalin.Javalin
 import kotlinx.coroutines.runBlocking
+import kotlinx.html.TagConsumer
+import kotlinx.html.div
+import kotlinx.html.stream.createHTML
 
 enum class EndPoints(val point: String) {
     ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status"),
@@ -19,16 +23,9 @@ enum class EndPoints(val point: String) {
 
 private val port get() = System.getenv("PORT")?.toIntOrNull() ?: 7_000
 
-/** Base [Javalin] "builder" */
-private val javalin get() = Javalin.create().apply {
-    enableCorsForAllOrigins()
-    System.getenv("PORT") ?: enableDebugLogging()
-}
-
 
 val server: Javalin by lazy {
-    javalin.apply {
-
+    Javalin.create().apply {
         ws(SOCKET.point, Websocket)
         // Auth endpoints
         post(AUTH_NEW.point) {
@@ -36,8 +33,10 @@ val server: Javalin by lazy {
                 ?: throw BadRequestResponse("no password")
             val usr  = it.basicAuthCredentials()?.username
                 ?: throw BadRequestResponse("no username")
-            signup(usr, pass.toCharArray())
-            TODO("")
+            runBlocking {
+                val ud = signup(usr, pass.toCharArray())
+                it.json(ud)
+            }
         }
         post(AUTH.point) {
             TODO()
@@ -48,7 +47,7 @@ val server: Javalin by lazy {
         // Static endpoints
         get("/public") {
             val limit = it.queryParam("limit")?.toIntOrNull()
-            val json = runBlocking { DAO.getPublicExistences() }
+            val json = runBlocking { getPublicExistences() }
                 .let { el -> limit?.let { el.subList(0, limit) } ?: el }
                 .filterNot(Existence::full).map(Existence::_id).json()
             it.result(json)
@@ -57,9 +56,18 @@ val server: Javalin by lazy {
         get(ACHIVEMENTS.point) { it.result(Achievements.values.json()) }
         enableRouteOverview("/route")
         get(ENDPOINTS.point) { it.render("/map.html") }
-        get(STATUS.point) { it.result(runBlocking { DAO.status() }.json()) }
-        get(LOGS.point) { it.result(runBlocking { DAO.getLogs() }.json()) }
+        get(STATUS.point) { it.result(runBlocking { status() }.json()) }
+        get(LOGS.point) { it.result(runBlocking { getLogs() }.json()) }
         get("/") { it.redirect(OUCH.uri) }
+        exception(Exception::class.java) { e: Exception, ctx: Context ->
+            ctx.html { div { text("""Encountered Err: ${e.message}""") } }
+        }
+        enableCorsForAllOrigins()
+        System.getenv("PORT") ?: enableDebugLogging()
         secret(this)
     }.start(port)
 }
+
+fun Context.html(html: TagConsumer<String>.() -> Unit) =
+    this.html(createHTML().apply(html).finalize())
+

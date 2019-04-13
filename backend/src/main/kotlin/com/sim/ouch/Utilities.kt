@@ -87,6 +87,15 @@ const val digi = "0123456789"
 /** Excludes Zero */
 const val alphaDigi = alpha + "123456789"
 
+inline fun <T> T.given(condition: Boolean, action: (T) -> Any) {
+    if (condition) action(this)
+}
+
+inline fun <T> T.given(condition: (T) -> Boolean, action: (T) -> Any) {
+    if (condition(this)) action(this)
+}
+
+val Any.nil get() = null
 val Any.unit get() = Unit
 
 fun secret(javalin: Javalin) {

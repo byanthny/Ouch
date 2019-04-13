@@ -3,11 +3,11 @@ package com.sim.ouch.logic
 import at.favre.lib.crypto.bcrypt.BCrypt
 import at.favre.lib.crypto.bcrypt.BCrypt.MAX_COST
 import com.sim.ouch.IDGenerator
-import com.sim.ouch.web.DAO
-import com.sim.ouch.web.EC
-import com.sim.ouch.web.ID
-import com.sim.ouch.web.QC
+import com.sim.ouch.web.*
+import io.javalin.BadRequestResponse
 import io.javalin.ConflictResponse
+import io.javalin.InternalServerErrorResponse
+import io.javalin.NotFoundResponse
 import org.bson.codecs.pojo.annotations.BsonId
 
 private val USER_ID_GEN = IDGenerator(16)
@@ -27,12 +27,30 @@ data class UserData(
     @BsonId var _id: ID = USER_ID_GEN.next()
 )
 
-suspend fun signup(user: String, password: CharArray): UserData? {
-    DAO.getUserByName(user)?.also { throw ConflictResponse("duplicate name") }
+/**
+ * Attempt to create a new [UserData] and store it to mongo.
+ *
+ * @return The created [UserData]
+ * @throws ConflictResponse if the [name] has already been taken.
+ */
+suspend fun signup(name: String, password: CharArray): UserData {
+    // Duplicate name check
+    getUserByName(name)?.also { throw ConflictResponse("duplicate name") }
+    // Password hash
     val hash = BCrypt.withDefaults().hashToChar(MAX_COST, password)
-    return UserData(user, hash)
+    // return new user data
+    val user = UserData(name, hash)
+    if (!saveUser(user)) throw InternalServerErrorResponse("failed to sign-up")
+    return user
 }
 
-fun login(user: String, password: String): UserData? {
-
+/**
+ *
+ */
+@Throws(NotFoundResponse::class, BadRequestResponse::class)
+suspend fun login(name: String, password: String): UserData {
+    val user = getUserByName(name) ?: throw NotFoundResponse("no user found")
+    val verified = BCrypt.verifyer().verify(password.toCharArray(), user.hash).verified
+    if (!verified) throw BadRequestResponse("bad login")
+    return user
 }
