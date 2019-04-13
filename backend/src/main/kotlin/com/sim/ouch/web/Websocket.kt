@@ -81,19 +81,18 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     }
 
     suspend fun close(session: WsSession) = session.let {
-        val qc = DAO.getSessionData(session)?.qc
-        it.existence()?.broadcast(EXIT, qc ?: "", true)
+        it.existence()!!.broadcast(EXIT, it.quidity()!!.id, true)
         DAO.disconnect(it)
     }
 
     wsHandler.onClose { session, code, reason ->
         sl.slog("Close session. $code \"$reason\"")
-        launch { close(session) }
+        runBlocking { close(session) }
     }
 
     val err = ErrorHandler { session, t: Throwable? ->
         if (session.isOpen) session.send(Packet(INTERNAL, t?.message, true).pack())
-        else launch { close(session) }
+        else runBlocking { close(session) }
     }
 
     wsHandler.onConnect(connect)
