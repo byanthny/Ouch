@@ -19,16 +19,9 @@ enum class EndPoints(val point: String) {
 
 private val port get() = System.getenv("PORT")?.toIntOrNull() ?: 7_000
 
-/** Base [Javalin] "builder" */
-private val javalin get() = Javalin.create().apply {
-    enableCorsForAllOrigins()
-    System.getenv("PORT") ?: enableDebugLogging()
-}
-
 
 val server: Javalin by lazy {
-    javalin.apply {
-
+    Javalin.create().apply {
         ws(SOCKET.point, Websocket)
         // Auth endpoints
         post(AUTH_NEW.point) {
@@ -36,7 +29,7 @@ val server: Javalin by lazy {
                 ?: throw BadRequestResponse("no password")
             val usr  = it.basicAuthCredentials()?.username
                 ?: throw BadRequestResponse("no username")
-            launch {
+            runBlocking {
                 val ud = signup(usr, pass.toCharArray())
                 it.json(ud)
             }
@@ -62,6 +55,8 @@ val server: Javalin by lazy {
         get(STATUS.point) { it.result(runBlocking { status() }.json()) }
         get(LOGS.point) { it.result(runBlocking { getLogs() }.json()) }
         get("/") { it.redirect(OUCH.uri) }
+        enableCorsForAllOrigins()
+        System.getenv("PORT") ?: enableDebugLogging()
         secret(this)
     }.start(port)
 }

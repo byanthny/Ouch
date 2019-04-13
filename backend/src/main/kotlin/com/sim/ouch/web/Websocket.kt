@@ -1,10 +1,22 @@
 package com.sim.ouch.web
 
 import com.sim.ouch.Slogger
-import com.sim.ouch.logic.*
+import com.sim.ouch.logic.Action
+import com.sim.ouch.logic.DefaultExistence
+import com.sim.ouch.logic.Existence
+import com.sim.ouch.logic.Quiddity
+import com.sim.ouch.logic.parseOof
 import com.sim.ouch.web.Packet.DataType.*
-import io.javalin.websocket.*
-import kotlinx.coroutines.*
+import io.javalin.websocket.ConnectHandler
+import io.javalin.websocket.ErrorHandler
+import io.javalin.websocket.MessageHandler
+import io.javalin.websocket.WsHandler
+import io.javalin.websocket.WsSession
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.function.Consumer
 
 private const val IDLE_TIMOUT_MS = 1_000L * 60
@@ -83,7 +95,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     suspend fun close(session: WsSession) = session.let {
         val qc = getSessionData(session)?.qc
         it.existence()?.broadcast(EXIT, qc ?: "", true)
-        .disconnect(it)
+        disconnect(it)
     }
 
     wsHandler.onClose { session, code, reason ->

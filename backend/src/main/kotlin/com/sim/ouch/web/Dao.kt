@@ -1,13 +1,19 @@
 package com.sim.ouch.web
 
-import com.sim.ouch.*
+import com.sim.ouch.IDGenerator
+import com.sim.ouch.NOW
+import com.sim.ouch.NOW_STR
+import com.sim.ouch.avgBy
 import com.sim.ouch.datastructures.ExpiringKache
 import com.sim.ouch.datastructures.MutableBiMap
+import com.sim.ouch.given
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Existence.Status.DORMANT
 import com.sim.ouch.logic.PublicExistence
 import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.logic.UserData
+import com.sim.ouch.nil
+import com.sim.ouch.threadName
 import io.javalin.websocket.WsSession
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
@@ -17,9 +23,13 @@ import io.jsonwebtoken.security.SignatureException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.bson.codecs.pojo.annotations.BsonId
-import org.litote.kmongo.*
+import org.litote.kmongo.`in`
 import org.litote.kmongo.coroutine.coroutine
+import org.litote.kmongo.eq
+import org.litote.kmongo.lt
+import org.litote.kmongo.ne
 import org.litote.kmongo.reactivestreams.KMongo
+import org.litote.kmongo.size
 import org.litote.kmongo.util.KMongoConfiguration
 import java.time.OffsetDateTime
 import javax.crypto.KeyGenerator
@@ -41,6 +51,7 @@ typealias QC = ID
  * @property qc [Quiddity.id]
  */
 data class SessionData(@BsonId var _id: Token, var ec: EC, var qc: QC)
+private fun sessionOf(token: Token, ec: EC, qc: QC) = SessionData(token, ec, qc)
 
 private const val MAX_DORMANT_DAYS = 31L
 private val cutoffDate get() = NOW().minusDays(MAX_DORMANT_DAYS)
@@ -69,7 +80,7 @@ private val disconnectedTokens = ExpiringKache<Token, Unit?> { m ->
     runBlocking {
         val a = sessionData.deleteMany(SessionData::_id `in` m.keys)
         if (!a.wasAcknowledged())
-            logger.err(
+            err(
                     "Failed to delete expired disconnected token",
                     ExpiringKache<*, *>::trashAction.reflect()
             )
@@ -100,11 +111,11 @@ suspend fun addExistence(session: WsSession, existence: Existence, qName: String
     val sd = SessionData(token, existence._id, ini.id)
     return when {
         sessionData.save(sd)?.wasAcknowledged() == false -> {
-            logger.err("Failed to save new SessionData", ::addExistence)
+            err("Failed to save new SessionData", ::addExistence)
             null
         }
         existences.save(existence)?.wasAcknowledged() == false -> {
-            logger.err("Failed to save new Existence", ::addExistence)
+            err("Failed to save new Existence", ::addExistence)
             null
         }
         else -> Triple(token, existence, ini)
@@ -112,28 +123,23 @@ suspend fun addExistence(session: WsSession, existence: Existence, qName: String
 }
 
 /**
- * Add a new [WsSession] [Token] to the []. Adds [quiddity] to [existence]
+ * Add a new [WsSession] [Token] to the []. Adds [qd] to [ex]
  * Returns the [Token] generated for the session.
  */
-suspend fun addSession(session: WsSession, existence: Existence, quiddity: Quiddity):
+suspend fun addSession(session: WsSession, ex: Existence, qd: Quiddity):
         Token? {
     // Generate new key
-    val token = genToken(session, existence, quiddity)
+    val token = genToken(session, ex, qd)
     // Update Existence
-    existence.addSession(token)
-    existence.enter(quiddity)
-    if (existences.save(existence)?.wasAcknowledged() == false) {
-        logger.err("Failed to add session to Existence", ::addSession)
-        return null
+    ex.addSession(token)
+    ex.enter(qd)
+    return when {
+        existences.save(ex)?.wasAcknowledged() == false ->
+            err("Failed to add session to Existence", ::addSession).nil
+        sessionData.save(sessionOf(token, ex._id, qd.id))?.wasAcknowledged() == false ->
+            err("Failed to save new SessionData", ::addSession).nil
+        else -> token.also { sessionTokens[it] = session }
     }
-    // Update sessionData
-    val sd = SessionData(token, existence._id, quiddity.id)
-    if (sessionData.save(sd)?.wasAcknowledged() == false) {
-        logger.err("Failed to save new SessionData", ::addSession)
-        return null
-    }
-    sessionTokens[token] = session
-    return token
 }
 
 /**
@@ -144,27 +150,21 @@ suspend fun refreshSession(token: Token, session: WsSession):
         Pair<Token, SessionData>? {
     // Validate Token
     val (exID, qID) = readToken(session, token)
-            ?: run {
-                logger.err("Token validation failed", ::refreshSession)
-                return null
-            }
+            ?: return err("Token validation failed", ::refreshSession).nil
+
     // Generate new token
     val nToken = genToken(session, exID, qID)
     // Update existence
     existences.findOneById(exID)?.also {
         it.removeSession(token)
         it.addSession(nToken)
-        if (!saveExistence(it))
-            logger.err("Failed to save Existence", ::refreshSession)
-    } ?: run {
-        logger.err("Failed to find existence.", ::refreshSession)
-        return null
-    }
+        if (!saveExistence(it)) err("Failed to save Existence", ::refreshSession)
+    } ?: return err("Failed to find existence.", ::refreshSession).nil
+
     // Update sessionData
     val sd = SessionData(nToken, exID, qID)
     if (!sessionData.replaceOneById(token, sd).wasAcknowledged()) {
-        logger.err("Failed to replace SessionData", ::refreshSession)
-        return null
+        return err("Failed to replace SessionData", ::refreshSession).nil
     }
     // Update SessionToken
     sessionTokens[token] = session
@@ -178,16 +178,15 @@ suspend fun refreshSession(token: Token, session: WsSession):
 suspend fun disconnect(session: WsSession) {
     // Remove token from sessionTokens
     val token = sessionTokens.removeValue(session)
-            ?: return logger.err("No token found", ::disconnect)
+            ?: return err("No token found", ::disconnect)
     // add token to disconnect
     disconnectedTokens[token] = Unit
     // Remove from existence
     getSessionData(token)?.ec?.let { getExistence(it) }?.also {
         it.removeSession(token)
         if (it.sessionCount == 0) it.status = DORMANT
-        if (!saveExistence(it))
-            logger.err("Failed to save updated Existence", ::disconnect)
-    } ?: logger.err("Failed to remove session from Existence", ::disconnect)
+        if (!saveExistence(it)) err("Failed to save updated Existence", ::disconnect)
+    } ?: err("Failed to remove session from Existence", ::disconnect)
 }
 
 /**
@@ -196,9 +195,8 @@ suspend fun disconnect(session: WsSession) {
  *
  * @return `true` if the save was Acknowledged
  */
-suspend fun saveExistence(existence: Existence): Boolean {
-    return existences.save(existence)?.wasAcknowledged() ?: false
-}
+suspend fun saveExistence(existence: Existence) =
+        existences.save(existence)?.wasAcknowledged() ?: false
 
 suspend fun getExistence(id: EC) = existences.findOneById(id)
 
@@ -245,21 +243,17 @@ suspend fun status(): StatusPacket {
 /** Removes old dormant [Existence] */
 private suspend fun cleanDB() {
     existences.deleteMany(Existence::dormantSince lt cutoffDate).wasAcknowledged()
-        .also {
-            if (!it)
-                logger.err("Failed to delete old dormant existences", ::cleanDB)
-        }
+        .given({it}) { err("Failed to delete old dormant existences", ::cleanDB) }
     existences.find(
             Existence::sessionTokens size 0,
             Existence::status ne DORMANT
     ).toList().forEach {
         it.status = DORMANT
         if (existences.save(it)?.wasAcknowledged() == false) {
-            logger.err("", ::cleanDB)
+            err("", ::cleanDB)
         }
     }
 }
-
 
 private fun genToken(session: WsSession, existence: Existence, quiddity: Quiddity) =
         genToken(session, existence._id, quiddity.id)
@@ -300,7 +294,7 @@ private val instanceKey by lazy {
         mongo.getCollection<Key>().let { c ->
             c.find().first()?.let { SecretKeySpec(it.key, "HMACSHA256") }
                     ?: let {
-                        logger.err("Failed to load key. Loading new key", ::readToken)
+                        err("Failed to load key. Loading new key", ::readToken)
                         KeyGenerator.getInstance("HMACSHA256").generateKey()
                                 ?.also { it.encoded.let { c.insertOne(Key(it)) } }
                     }
@@ -311,17 +305,12 @@ private val instanceKey by lazy {
 
 /****** Logging *******/
 
-/** A [Slogger] which saves a [Log] to the `logs` logCollection collection. */
-private object logger : Slogger("")
-
-data class Log internal constructor(
-    @BsonId val _id: ID = next(),
-    val loog: MutableList<String> = mutableListOf(),
-    val date: OffsetDateTime = OffsetDateTime.now()
-) {
-    companion object idGen : IDGenerator(10)
-    operator fun invoke(string: String) = string.also { loog.add(it) }
+data class Log internal constructor(@BsonId val _id: ID = next()) {
     val size get() = loog.size
+    val loog: MutableList<String> = mutableListOf()
+    val date: OffsetDateTime = OffsetDateTime.now()
+    operator fun invoke(string: String) = string.also { loog.add(it) }
+    companion object idGen : IDGenerator(10)
 }
 
 private val logCollection by lazy { mongo.getCollection<Log>() }
@@ -331,18 +320,14 @@ suspend fun getLogs() = logCollection.find().toList()
 /** The [Log] used for this run of the program. */
 private val instanceLog: Log = Log()
 
-private suspend fun <F : KFunction<*>> logger.info(any: Any? = "", function: F? = null) =
-    logger.log(any, function, "info")
+private suspend fun <F : KFunction<*>> info(any: Any? = "", function: F? = null) =
+    log(any, function, "info")
 
-private suspend fun <F : KFunction<*>> logger.err(any: Any? = "", function: F? = null) =
-    logger.log(any, function, "err")
+private suspend fun <F : KFunction<*>> err(any: Any? = "", function: F? = null) =
+    log(any, function, "err")
 
-private suspend fun <F : KFunction<*>> logger.log(
-    any: Any? = "",
-    f: F?,
-    level: String
-) {
-    println(instanceLog("[${NOW_STR()}] [$threadName] [${logger.name}] ${
+private suspend fun <F : KFunction<*>> log(any: Any? = "", f: F?, level: String) {
+    println(instanceLog("[${NOW_STR()}] [$threadName] [DAO] ${
     f?.let { "[${f.name}]" } ?: ""} [$level] $any"))
     if (instanceLog.size % 10 == 0) {
         println("Updating Log Collection...")
