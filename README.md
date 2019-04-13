@@ -2,6 +2,8 @@
 
 Currently working on login system and making existences "permanent".
 
+[Refer to master branch for updated README](https://github.com/anthnyd/Ouch)
+
 ---
 <p align="center">
 <img src="docs/imgs/logo.png" width="250"/>
