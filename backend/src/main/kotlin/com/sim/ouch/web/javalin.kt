@@ -8,8 +8,12 @@ import com.sim.ouch.logic.signup
 import com.sim.ouch.secret
 import com.sim.ouch.web.EndPoints.*
 import io.javalin.BadRequestResponse
+import io.javalin.Context
 import io.javalin.Javalin
 import kotlinx.coroutines.runBlocking
+import kotlinx.html.TagConsumer
+import kotlinx.html.div
+import kotlinx.html.stream.createHTML
 
 enum class EndPoints(val point: String) {
     ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status"),
@@ -55,8 +59,15 @@ val server: Javalin by lazy {
         get(STATUS.point) { it.result(runBlocking { status() }.json()) }
         get(LOGS.point) { it.result(runBlocking { getLogs() }.json()) }
         get("/") { it.redirect(OUCH.uri) }
+        exception(Exception::class.java) { e: Exception, ctx: Context ->
+            ctx.html { div { text("""Encountered Err: ${e.message}""") } }
+        }
         enableCorsForAllOrigins()
         System.getenv("PORT") ?: enableDebugLogging()
         secret(this)
     }.start(port)
 }
+
+fun Context.html(html: TagConsumer<String>.() -> Unit) =
+    this.html(createHTML().apply(html).finalize())
+
