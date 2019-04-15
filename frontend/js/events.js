@@ -7,7 +7,7 @@
 //User Inputs
 
 /* When existence field has a keydown */
-exist_input.addEventListener("keydown", function (event) {
+pass_input.addEventListener("keydown", function (event) {
     if (processInput()) {
         submit_button.click();
     }
@@ -48,7 +48,7 @@ submit_button.onclick = function () {
 
     //Get input
     nickname = user_input.value;
-    id = exist_input.value;
+    id = pass_input.value;
 
     //Process input
     if (processInput(true)) {

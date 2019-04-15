@@ -94,10 +94,10 @@ function createConnection(endpoint) {
                 shake(user_input);
                 break;
             case close_code.ER_BAD_ID:
-                exist_input.value = "";
-                exist_input.placeholder = "Unknown ID";
+                pass_input.value = "";
+                pass_input.placeholder = "Unknown ID";
                 user_input.value = nickname;
-                shake(exist_input);
+                shake(pass_input);
                 break;
             case close_code.ER_INTERNAL_GENERIC:
                 alert("Sorry, an internal error occurred. Please try again");

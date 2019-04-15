@@ -5,7 +5,7 @@
 //HTML elements
 //
 var header = document.getElementById("header");
-var exist_input = document.getElementById("exist-input");
+var pass_input = document.getElementById("pass-input");
 var user_input = document.getElementById("user-input");
 var chat = document.getElementById("chat");
 var leaderboard = document.getElementsByClassName("leaderboard")[0];
@@ -34,8 +34,8 @@ var search_items = document.getElementsByClassName("panel");
 //
 
 //Login message
-var existing_msg = "have an existing existence?";
-var new_exist_msg= "dont have an existence?";
+var existing_msg = "have an existing login?";
+var new_exist_msg= "dont have an account?";
 
 //Is on login page?
 var login = false;
@@ -53,7 +53,7 @@ var allowedInput = /^[a-z0-9]+$/i;
 //
 
 // Base endpoint
-var url_base = 'sim-ouch.herokuapp.com';
+var url_base = 'ouchie.herokuapp.com';
 
 //Socket
 var url_ws = 'wss://' + url_base + '/ws';

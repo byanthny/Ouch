@@ -14,10 +14,10 @@ function switchState() {
     } else submit_button.classList.toggle("hidden");
     box.classList.toggle("opacity");
     user_input.classList.toggle("login");
-    exist_input.classList.toggle("login");
+    pass_input.classList.toggle("login");
     header.classList.toggle("login");
-    exist_input.classList.toggle("opacity");
-    exist_input.classList.toggle("disappear");
+    pass_input.classList.toggle("opacity");
+    pass_input.classList.toggle("disappear");
     level.classList.toggle("opacity");
     leaderboard.classList.toggle("opacity");
     login_status.classList.toggle("opacity");
@@ -31,10 +31,10 @@ function switchState() {
 function switchLoginType() {
     if(existing_msg === login_style.innerHTML) {
         login_style.innerHTML = new_exist_msg;
-        exist_input.classList.remove("input-shrink");
+        pass_input.classList.remove("input-shrink");
     } else {
         login_style.innerHTML = existing_msg;
-        exist_input.classList.add("input-shrink");
+        pass_input.classList.add("input-shrink");
     }
 }
 
