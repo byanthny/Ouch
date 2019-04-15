@@ -2,20 +2,20 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
+        .accordion.red {
+        }
+
         .accordion {
             background-color: #eee;
             color: #000000;
             cursor: pointer;
-            padding: 18px;
+            padding: 10px;
             width: 100%;
             border: none;
-            text-align: left;
+            text-align: center;
             outline: none;
             font-size: 15px;
             transition: 0.4s;
-        }
-
-        .accordion.red {
         }
 
         .accordion.red:hover {
@@ -30,31 +30,34 @@
             padding: 0 18px;
             display: none;
             background-color: #e5e5e5;
-            overflow: hidden;
+            overflow: auto;
         }
     </style>
 </head>
 <body>
 <h1>Ouch API Specifications</h1>
-<div>
-    <table border=".5">l
+<div id="TABLE">
+    <table border=".5">
         <tbody>
         <tr>
             <th>Endpoint</th>
             <th>Method</th>
             <th>Description</th>
-            <th>JSON</th>
+            <th>Request</th>
+            <th>JSON Response</th>
         </tr>
         <tr>
             <td>/ (<em>home</em>)</td>
             <td>GET</td>
             <td>redirects to ouch site</td>
-            <td>NA</td>
+            <td>N/A</td>
+            <td>N/A</td>
         </tr>
         <tr>
             <td>/actions</td>
             <td>GET</td>
             <td>get a list of all actions</td>
+            <td>N/A</td>
             <td>
                 <button class="accordion">expand</button>
                 <pre class="panel"><code lang="json">
@@ -83,6 +86,7 @@
             <td>/status</td>
             <td>GET</td>
             <td>get a JSON summery of the state of ouch API</td>
+            <td>N/A</td>
             <td>
                 <button class="accordion">expand</button>
                 <pre class="panel"><code lang="JSON">
@@ -112,6 +116,43 @@
 }
             </code></pre>
             </td>
+        </tr>
+        <tr>
+            <td>/signup</td>
+            <td>POST</td>
+            <td>Create a new account with a Unique username and a password</td>
+            <td>Basic-Auth username & password</td>
+            <td>
+                <button class="accordion">user data</button>
+                <pre class="panel"><code>
+{
+    "id": "USER_ID",
+    "name": "USER_NAME",
+    "ex_qd_ids": {
+    /* Map of Existence IDs to the user's
+     * Quiddity ID in that existence
+     */
+        "exi_1_id": "qid_id",
+        ...
+    },
+    "token": "SESSION_TOKEN"
+}
+                </code></pre>
+            </td>
+        </tr>
+        <tr>
+            <td>/login</td>
+            <td>POST</td>
+            <td>Log in to user account</td>
+            <td>same as /signup</td>
+            <td>same as /signup</td>
+        </tr>
+        <tr>
+            <td>/user/:user_id</td>
+            <td>GET</td>
+            <td>Get user data</td>
+            <td>header: "token": "SESSION_TOKEN"</td>
+            <td>same as /signup (without token)</td>
         </tr>
         <tr>
             <td>/ws</td>
@@ -169,6 +210,11 @@
             <td><code>ER_BAD_TOKEN</code></td>
             <td>4007</td>
             <td>"invalid token"</td>
+        </tr>
+        <tr>
+            <td><code>ER_BAD_PACKET</code></td>
+            <td>4008</td>
+            <td>"invalid packet"</td>
         </tr>
         <tr>
             <td><code>ER_INTERNAL</code></td>
