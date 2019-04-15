@@ -13,7 +13,8 @@ import kotlinx.html.stream.createHTML
 enum class EndPoints(val point: String) {
     ACTIONS("/actions"), SOCKET("/ws"), STATUS("/status"),
     ENDPOINTS("/map"), LOGS("/logs"), ACHIVEMENTS("/achivements"),
-    LOGIN("/login"), SIGNUP("/signup"), USER("/user/:id")
+    LOGIN("/login"), SIGNUP("/signup"), USER("/user/:id"),
+    EXISTENCE_CREATE("/existence")
 }
 
 private val port get() = System.getenv("PORT")?.toIntOrNull() ?: 7_000
@@ -26,13 +27,14 @@ val server: Javalin by lazy {
         post(SIGNUP.point) {
             val (name, pass) = it.getCredentials()
             val ud = runBlocking { signup(name, pass) }
-            it.json(ud.sendPacket(genSessionToken(ud)))
+            it.json(ud.sendPacket(authTokenOf(ud)))
         }
         post(LOGIN.point) {
             val (name, pass) = it.getCredentials()
             val ud = runBlocking { login(name, pass) }
-            it.json(ud.sendPacket(genSessionToken(ud)))
+            it.json(ud.sendPacket(authTokenOf(ud)))
         }
+        // API Endpoints
         get(USER.point) {
             val token = it.header("token") ?: throw UnauthorizedResponse()
             val ud = try {
@@ -42,6 +44,9 @@ val server: Javalin by lazy {
             }
             if (it.pathParam("id") != ud._id) throw UnauthorizedResponse()
             it.json(ud.sendPacket())
+        }
+        post(EXISTENCE_CREATE.point) {
+            TODO("auth, then add to DB then add to user")
         }
         // Static endpoints
         get("/public") {

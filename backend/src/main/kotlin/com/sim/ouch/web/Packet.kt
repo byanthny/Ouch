@@ -1,7 +1,6 @@
 package com.sim.ouch.web
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import com.google.gson.*
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.Packet.DataType.INIT
@@ -11,8 +10,11 @@ val gson: Gson by lazy { GsonBuilder().setPrettyPrinting().create() }
 
 fun Any.json(): String = gson.toJson(this)
 
-inline fun <reified T> quickLoad(json: String) =
-        gson.fromJson(json, T::class.java)!!
+inline fun <reified T> quickLoad(json: String) = try {
+    gson.fromJson(json, T::class.java)
+} catch (e: JsonSyntaxException) {
+    null
+}
 
 /** Loads a Packet from a JSON */
 fun readPacket(json: String) = quickLoad<Packet>(json)
@@ -40,7 +42,8 @@ data class Packet(
 ) {
 
     enum class DataType {
-        INIT, QUIDDITY, EXISTENCE, ENTER, EXIT, ACTION, CHAT, INTERNAL, PING
+        INIT, QUIDDITY, EXISTENCE, ENTER, EXIT, ACTION, CHAT, INTERNAL, PING,
+        TOKEN_AUTH, TOKEN_RECON
     }
 
     init {
@@ -58,11 +61,9 @@ data class Packet(
 
 data class InitPacket(
     val existence: Existence,
-    val quiddity: Quiddity,
-    val token: String
-)
+    val quiddity: Quiddity, val token: Token)
 
-fun WsSession.initWith(existence: Existence, quiddity: Quiddity, token: String) {
+fun WsSession.initWith(existence: Existence, quiddity: Quiddity, token: Token) {
     send(Packet(INIT, InitPacket(existence, quiddity, token)).pack())
 }
 

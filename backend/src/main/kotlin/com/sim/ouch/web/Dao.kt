@@ -17,7 +17,7 @@ import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.KMongoConfiguration
 import java.time.Instant
 import java.time.OffsetDateTime
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.MINUTES
 import java.util.*
 import javax.crypto.KeyGenerator
 import javax.crypto.spec.SecretKeySpec
@@ -44,6 +44,22 @@ private val cutoffDate get() = NOW().minusDays(MAX_DORMANT_DAYS)
 data class SessionData(@BsonId var _id: Token, var ec: EC, var qc: QC)
 private fun sessionOf(token: Token, ec: EC, qc: QC) = SessionData(token, ec, qc)
 
+val clean: () -> Unit = {
+    runBlocking {
+        existences.deleteMany(Existence::dormantSince lt cutoffDate)
+            .given({ it.wasAcknowledged() }) {
+                err("Failed to delete old dormant existences", null)
+            }
+        existences.find(Existence::sessionTokens size 0,
+            Existence::status ne DORMANT).toList().forEach {
+            it.status = DORMANT
+            if (existences.save(it)?.wasAcknowledged() == false) {
+                err("", null)
+            }
+        }
+    }
+}
+
 private val mongo by lazy {
     KMongoConfiguration.extendedJsonMapper.enableDefaultTyping()
     KMongo.createClient(
@@ -52,7 +68,7 @@ private val mongo by lazy {
             .also {
                 launch {
                     do {
-                        cleanDB(); delay(1_000 * 60)
+                        clean(); delay(1_000 * 60)
                     } while (true)
                 } // TODO
             }
@@ -63,7 +79,7 @@ private val users get() = mongo.getCollection<UserData>()
 private val existences get() = mongo.getCollection<Existence>()
 /** Mongo DB [SessionData] collection */
 private val sessionData get() = mongo.getCollection<SessionData>()
-/** Token -> [WsSession]? */
+/** Token <-> [WsSession]? */
 private val sessionTokens = MutableBiMap<Token, WsSession>()
 
 /**
@@ -92,11 +108,12 @@ suspend fun getUsers() = users.find().toList()
  * Add an [Existence] to the database, generate a token.
  * `null` if a DB insert failed.
  */
-suspend fun addExistence(session: WsSession, existence: Existence, qName: String):
-        Triple<Token, Existence, Quiddity>? {
+suspend fun addExistence(user: UserData, session: WsSession,
+                         existence: Existence,
+                         qName: String): Triple<Token, Existence, Quiddity>? {
     val ini = existence.generateQuidity(qName)
     // Generate new Token
-    val token = genReconnectToken(session, existence, ini)
+    val token = reconnectTokenOf(user, existence, ini)
     // Add key to Existence
     existence.addSession(token)
     // Add key to sessionTokens
@@ -118,10 +135,10 @@ suspend fun addExistence(session: WsSession, existence: Existence, qName: String
  * Add a new [WsSession] [Token] to the []. Adds [qd] to [ex]
  * Returns the [Token] generated for the session.
  */
-suspend fun addSession(session: WsSession, ex: Existence, qd: Quiddity):
-        Token? {
+suspend fun addSession(user: UserData, session: WsSession, ex: Existence,
+                       qd: Quiddity): Token? {
     // Generate new key
-    val token = genReconnectToken(session, ex, qd)
+    val token = reconnectTokenOf(user, ex, qd)
     // Update Existence
     ex.addSession(token)
     ex.enter(qd)
@@ -138,27 +155,30 @@ suspend fun addSession(session: WsSession, ex: Existence, qd: Quiddity):
  * Verifies a client [Token] and on success returns the [SessionData] paired
  * to a NEW [Token]. Returns `null` on token validation failure.
  */
-suspend fun refreshSession(token: Token, session: WsSession):
+suspend fun Token.refreshWith(user: UserData, session: WsSession):
         Pair<Token, SessionData>? {
     // Validate Token
-    val (exID, qID) = token.readReconnect()
-        ?: return err("Token validation failed", ::refreshSession).nil
+    val (exID, qID) = try {
+        readReconnect()
+    } catch (e: Exception) {
+        return err("Token validation failed: ${e.message}", ::refreshWith).nil
+    }
     // Generate new token
-    val nToken = genReconnectToken(session, exID, qID)
+    val nToken = reconnectTokenOf(user, exID, qID)
     // Update existence
     existences.findOneById(exID)?.also {
-        it.removeSession(token)
+        it.removeSession(this)
         it.addSession(nToken)
-        if (!saveExistence(it)) err("Failed to save Existence", ::refreshSession)
-    } ?: return err("Failed to find existence.", ::refreshSession).nil
+        if (!saveExistence(it)) err("Failed to save Existence", ::refreshWith)
+    } ?: return err("Failed to find existence.", ::refreshWith).nil
 
     // Update sessionData
     val sd = SessionData(nToken, exID, qID)
-    if (!sessionData.replaceOneById(token, sd).wasAcknowledged()) {
-        return err("Failed to replace SessionData", ::refreshSession).nil
+    if (!sessionData.replaceOneById(this, sd).wasAcknowledged()) {
+        return err("Failed to replace SessionData", ::refreshWith).nil
     }
     // Update SessionToken
-    sessionTokens[token] = session
+    sessionTokens[this] = session
     return nToken to sd
 }
 
@@ -232,33 +252,17 @@ suspend fun status(): StatusPacket {
 }
 
 /** Removes old dormant [Existence] */
-private suspend fun cleanDB() {
-    existences.deleteMany(Existence::dormantSince lt cutoffDate).wasAcknowledged()
-        .given({it}) { err("Failed to delete old dormant existences", ::cleanDB) }
-    existences.find(
-            Existence::sessionTokens size 0,
-            Existence::status ne DORMANT
-    ).toList().forEach {
-        it.status = DORMANT
-        if (existences.save(it)?.wasAcknowledged() == false) {
-            err("", ::cleanDB)
-        }
-    }
-}
+
 
 /********** Tokens *****************/
 
 /** Generate a JWT token for REST authentication. */
-fun genSessionToken(userData: UserData) = Jwts.builder().apply {
-    setSubject(userData._id)
-    claim("name", userData.name)
-    claim("ex_map", userData.existences)
-    claim("type", "auth")
-    setExpiration(Date.from(Instant.now().plus(30, ChronoUnit.MINUTES)))
-    signWith(instanceKey, SignatureAlgorithm.HS256)
-}.compact()!!
+fun authTokenOf(userData: UserData) = Jwts.builder().addClaims(
+    mapOf("ex_map" to userData.existences, "type" to "auth")).setSubject(
+        userData._id).claim("name", userData.name).setExpiration(
+        Date.from(Instant.now().plus(30, MINUTES))).signWith(instanceKey,
+        SignatureAlgorithm.HS256).compact()!!
 
-/** @return pair  */
 @Throws(
     ExpiredJwtException::class, UnsupportedJwtException::class,
     MalformedJwtException::class, SignatureException::class,
@@ -272,37 +276,30 @@ suspend fun Token.readAuth(): UserData? {
 }
 
 /** Generate a JWT token for reconnecting to a Websocket. */
-private fun genReconnectToken(
-    session: WsSession,
+private fun reconnectTokenOf(userData: UserData,
     existence: Existence,
-    quiddity: Quiddity
-) = genReconnectToken(session, existence._id, quiddity.id)
+    quiddity: Quiddity) = reconnectTokenOf(userData, existence._id, quiddity.id)
 
 /** Generate a JWT token for reconnecting to a Websocket. */
-private fun genReconnectToken(session: WsSession, exID: EC, qID: QC) =
-    Jwts.builder().apply {
-        setSubject("quiddity.$qID").claim("exID", exID)
-        // claim("ip", session.remoteAddress.address.address)
-        // setExpiration(Date.from(Instant.now().plusSeconds(60 * 30))) TODO?
-        signWith(instanceKey, SignatureAlgorithm.HS256)
-    }.compact()
+private fun reconnectTokenOf(user: UserData, exID: EC,
+                             qID: QC): Token = Jwts.builder().setSubject(
+    user._id).claim("qc", qID).claim("ec", exID).claim("type",
+        "recon").setExpiration(
+        Date.from(Instant.now().plusSeconds(60 * 5))).signWith(instanceKey,
+        SignatureAlgorithm.HS256).compact()
 
 /** Returns `null` on invalid token. */
-private fun Token.readReconnect(): Pair<EC, QC>? {
-    return try {
-        val claims = tokenParser.parseClaimsJws(this).body
-        // require(claims["ip"] == session.remoteAddress.address.address)
-        require(claims["exID"] is String)
-        require(claims.subject.matches(Regex("quiddity\\.([\\dA-Z]){10}")))
-        claims["exID"] as String to claims.subject.removePrefix("quiddity.")
-    } catch (e: SignatureException) {
-        null
-    } catch (e: ExpiredJwtException) {
-        null
-    } catch (e: Exception) {
-        null
-    }
+@Throws(ExpiredJwtException::class, UnsupportedJwtException::class,
+    MalformedJwtException::class, SignatureException::class,
+    IllegalArgumentException::class)
+fun Token.readReconnect(): Pair<EC, QC> {
+    val claims = tokenParser.parseClaimsJws(this).body
+    require(claims["ec"] is EC)
+    require(claims["qc"] is QC)
+    require(claims["type"] == "recon")
+    return claims["ec"] as String to claims["qc"] as String
 }
+
 
 private val tokenParser get() = Jwts.parser().setSigningKey(instanceKey)!!
 

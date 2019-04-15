@@ -1,6 +1,7 @@
 package com.sim.ouch
 
 import io.javalin.Javalin
+import kotlinx.coroutines.*
 import java.io.BufferedWriter
 import java.io.File
 import java.nio.file.FileAlreadyExistsException
@@ -78,6 +79,15 @@ fun String.allMatches(vararg regex: Regex) = allMatches(regex.toList())
 
 fun String.allMatches(regex: Iterable<Regex>) = regex.filter { matches(it) }
 
+// Coroutine
+
+val handler = CoroutineExceptionHandler { _, thr ->
+    thr.cause?.printStackTrace() ?: thr.printStackTrace()
+}
+
+fun launch(block: suspend CoroutineScope.() -> Unit) = GlobalScope.launch(
+    handler, block = block)
+
 // Misc
 
 val RAND = Random(420_69_98_4829 / (NOW().minute + 1))
@@ -93,6 +103,14 @@ inline fun <T> T.given(condition: Boolean, action: (T) -> Any) {
 
 inline fun <T> T.given(condition: (T) -> Boolean, action: (T) -> Any) {
     if (condition(this)) action(this)
+}
+
+inline fun Boolean.`if`(action: () -> Any) {
+    if (this) action()
+}
+
+inline fun Boolean.ifNot(action: () -> Any) {
+    if (!this) action()
 }
 
 val Any.nil get() = null
