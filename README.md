@@ -52,7 +52,7 @@
   | Commands  | Description |
   | ------------- | ------------- |
   | -theme  | Toggles between themes.  |
-  | -music  | Cause SoundCloud doesn't want to share it's API.  |
+  | -music  | Doesn't work cause SoundCloud doesn't want to share it's API.  |
   | -bean  | A surprise. But once you bean you can't go back.  |
   | -exit  | Exit the simulation  |
   
