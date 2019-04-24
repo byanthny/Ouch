@@ -52,6 +52,7 @@
   | Commands  | Description |
   | ------------- | ------------- |
   | -theme  | Toggles between themes.  |
+  | -music  | Cause SoundCloud doesn't want to share it's API.  |
   | -bean  | A surprise. But once you bean you can't go back.  |
   | -exit  | Exit the simulation  |
   
@@ -59,7 +60,13 @@
   or https://sim-ouch.herokuapp.com/actions 
   
 ## Features
-
+* Real-Time Chat
+* Existences (Chat-Rooms)
+* XP System
+* Predictive command box.
+* Beautiful UI
+* Reconnect with token system
+* API Status Bar
 ## Technical Stuff
 Current status of Ouch API: https://sim-ouch.herokuapp.com/status 
 Map of Ouch API: https://sim-ouch.herokuapp.com/map 
