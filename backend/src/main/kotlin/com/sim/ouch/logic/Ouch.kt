@@ -3,7 +3,7 @@ package com.sim.ouch.logic
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.sim.ouch.allMatches
+import com.sim.ouch.extension.allMatches
 import com.sim.ouch.logic.Achievements.*
 
 /*
@@ -128,4 +128,3 @@ private fun loadKeyWords(): Map<Regex, Double> {
 
     return map
 }
-

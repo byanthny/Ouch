@@ -1,13 +1,11 @@
 package com.sim.ouch.logic
 
 import com.sim.ouch.IDGenerator
-import com.sim.ouch.web.QC
+import com.sim.ouch.QC
+import kotlinx.serialization.Serializable
 
 sealed class Entity {
-    open val id: QC = DEFAULT_ID_GEN.next()
-    companion object {
-        val DEFAULT_ID_GEN = IDGenerator(10)
-    }
+    @Serializable open val id: QC = IDGenerator.nextDefault
 }
 
 /** The essence of... */

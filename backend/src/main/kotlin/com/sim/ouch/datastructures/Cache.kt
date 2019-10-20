@@ -1,6 +1,8 @@
 package com.sim.ouch.datastructures
 
-import com.sim.ouch.removeLastOrNull
+import com.sim.ouch.extension.removeLastOrNull
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -115,7 +117,7 @@ class ExpiringKache<K, V>(
     val maxSize: Int = DEFAULT_MAX,
     val minSize: Int = DEFAULT_MIN,
     val trashSize: Int = DEFAULT_TRASH_SIZE,
-    val trashAction: (Map<K, V?>) -> Unit = {}
+    val trashAction: suspend (Map<K, V?>) -> Unit
 ) : UsagePriorityKache<K, V>() {
     private val map = ConcurrentHashMap<K, V>()
     override val size get() = map.size
@@ -141,12 +143,12 @@ class ExpiringKache<K, V>(
             usageRanks += key
             // Downsize on max-size
             if (size == maxSize) {
-                val map = mutableMapOf<K, V?>()
+                val removeMap = mutableMapOf<K, V?>()
                 var i = 0
                 while (size > minSize && i++ < trashSize) evictTarget?.also {
-                    map[key] = this.remove(it)
+                    removeMap[key] = this.remove(it)
                 } ?: break
-                trashAction(map)
+                GlobalScope.launch { trashAction(removeMap) }
             }
         }
         return map.put(key, value)

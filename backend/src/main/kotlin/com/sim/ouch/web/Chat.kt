@@ -2,8 +2,10 @@ package com.sim.ouch.web
 
 import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.web.Packet.DataType.CHAT
+import kotlinx.serialization.ImplicitReflectionSerializer
 
 /** An easy way to make an outgoing typed [Packet] with a message. */
+@ImplicitReflectionSerializer
 fun chatPacket(message: Chat.Message) = Packet(CHAT, message)
 
 class Chat {

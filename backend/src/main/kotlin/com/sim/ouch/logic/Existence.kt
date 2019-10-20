@@ -1,50 +1,46 @@
 package com.sim.ouch.logic
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type
-import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.sim.ouch.DefaultNameGenerator
-import com.sim.ouch.IDGenerator
-import com.sim.ouch.NOW
-import com.sim.ouch.web.*
-import org.bson.codecs.pojo.annotations.BsonId
-import java.time.OffsetDateTime
+import com.sim.ouch.*
+import com.sim.ouch.extension.nowISO
+import com.sim.ouch.web.Chat
+import com.soywiz.klock.DateTime
+import kotlinx.serialization.SerialName
 
-/** The simulation. */
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.CLASS,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "@class"
-)
-@JsonSubTypes(
-    Type(value = DefaultExistence::class, name = "default"),
-    Type(value = PublicExistence::class, name = "public")
-)
-sealed class Existence(
+/**
+ * The simulation.
+ *
+ * @property capacity The maximum number of entities allowed in this existence.
+ * `-1` if unlimited.
+ * @property public Whether this existence should be publicly available.
+ */
+class Existence(
     val name: Name,
     var capacity: Int = -1,
     var public: Boolean = false
 ) {
 
-    @BsonId open val _id: EC = EXISTENCE_ID_GEN.next()
-    open val init = NOW()
+    @SerialName("id")
+    val id: EC = IDGenerator.nextDefault
+    val init = DateTime.now()
 
     /** The first [Quiddity] to enter the [Existence]. */
-    open val quidities: MutableMap<String, Quiddity> = mutableMapOf()
-    open val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
+    val quidities: MutableMap<String, Quiddity> = mutableMapOf()
+    val infraQuidities: MutableMap<String, InfraQuidity> = mutableMapOf()
 
     val size: Int get() = quidities.size + infraQuidities.size
     val full: Boolean get() = qSize == capacity
     val qSize: Int get() = quidities.size
     val sessionCount: Int get() = sessionTokens.size
 
-    open val sessionTokens: MutableList<Token> = mutableListOf()
-    open var dormantSince: OffsetDateTime? = null
+     val sessionTokens: MutableList<Token> = mutableListOf()
+
+    var dormantSince: String? = null
+
     var status: Status = Status.DRY
         set(value) {
-            when (value) {
-                Status.DORMANT -> dormantSince = NOW()
-                else -> dormantSince = null
+            dormantSince = when (value) {
+                Status.DORMANT -> DateTime.now().nowISO
+                else -> null
             }
             field = value
         }
@@ -56,10 +52,10 @@ sealed class Existence(
     val chat: Chat = Chat()
 
     /** Generate a new [Quiddity] and add it to the [Existence]. */
-    abstract fun generateQuidity(name: String): Quiddity
+    fun generateQuidity(name: String): Quiddity = Quiddity(name).also { enter(it) }
 
     /** Add an [entity] to the [Existence]. */
-    open fun enter(entity: Entity) {
+    fun enter(entity: Entity) {
         when (entity) {
             is Quiddity -> quidities[entity.id] = entity
             is InfraQuidity -> infraQuidities[entity.id] = entity
@@ -70,33 +66,20 @@ sealed class Existence(
     fun qOf(id: QC) = quidities[id]
     fun qOfName(name: String) =
         quidities.values.firstOrNull { it.name.equals(name, true) }
+
     fun infraOf(id: ID) = infraQuidities[id]
 
     /** Add a new [Session token][Token]. */
     fun addSession(token: Token) = sessionTokens.add(token)
+
     /** Remove a [Session token][Token]. */
     fun removeSession(token: Token) = sessionTokens.remove(token)
 
     enum class Status { DORMANT, WET, DRY }
 
     companion object {
-        val EXISTENCE_ID_GEN = IDGenerator(10)
-    }
-}
-
-open class DefaultExistence(
-    name: String = DefaultNameGenerator.next(),
-    capacity: Int = -1
-) : Existence(name, capacity) {
-    override fun generateQuidity(name: String) = Quiddity(name)
-        .also { enter(it) }
-}
-
-/** A public [Existence]. */
-class PublicExistence : DefaultExistence("Public", 69) {
-    // override val capacity: Long = 1_000
-    init {
-        public = true
+        val newDefault get() = Existence(NameGenerator.nextDefault)
+        val newPublic get() = Existence("Public", 100, true)
     }
 }
 

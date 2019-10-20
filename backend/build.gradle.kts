@@ -3,16 +3,19 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     java
     application
-    kotlin("jvm") version "1.3.21"
-    id("kotlinx-serialization") version "1.3.21"
+    kotlin("jvm") version "1.3.50"
+    id("kotlinx-serialization") version "1.3.50"
+    id("org.jmailen.kotlinter") version "2.1.2"
     id("com.github.johnrengelman.shadow") version "4.0.3"
-    id("org.jmailen.kotlinter") version "1.23.0"
 }
 
 group = "com.sim"
 version = "0.0.3"
 
-val ktor_version = "1.1.3"
+object Version {
+    const val ktor = "1.1.3"
+    const val klock = "1.7.0"
+}
 
 repositories {
     mavenCentral()
@@ -20,34 +23,46 @@ repositories {
 }
 
 dependencies {
+    // Kotlin libraries
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0-alpha")
 
+    // Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.13.0")
+
+    // Time
+    implementation("com.soywiz.korlibs.klock:klock-jvm:${Version.klock}")
+
+    // Javalin Server
     implementation("io.javalin:javalin:3.5.0")
+
+    // HTML
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.6.10")
     implementation("org.thymeleaf:thymeleaf:3.0.9.RELEASE")
     implementation("com.atlassian.commonmark:commonmark:0.11.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.9.8")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
-    implementation("com.google.code.gson:gson:2.8.5")
 
+    // Database
+    implementation("org.litote.kmongo:kmongo-coroutine:3.11.1")
+
+    // Cache
     implementation("com.github.ben-manes.caffeine:caffeine:2.8.0")
 
     implementation("io.jsonwebtoken:jjwt-api:0.10.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.10.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.10.5")
 
-    implementation(group = "commons-io", name = "commons-io", version = "2.6")
+    implementation("commons-io", "commons-io", "2.6")
 
-    implementation("org.litote.kmongo:kmongo-coroutine:3.11.1")
-
+    // Misc
     implementation("org.slf4j:slf4j-simple:1.7.26")
+
+    // Testing
+    testImplementation("junit:junit:4.12")
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.3.21")
     testImplementation("org.jetbrains.kotlin:kotlin-test-annotations-common:1.3.21")
-    testImplementation("junit:junit:4.12")
-    testImplementation("io.ktor:ktor-client-websocket:$ktor_version")
-    testImplementation("io.ktor:ktor-client-cio:$ktor_version")
+    testImplementation("io.ktor:ktor-client-websocket:${Version.ktor}")
+    testImplementation("io.ktor:ktor-client-cio:${Version.ktor}")
 
 }
 

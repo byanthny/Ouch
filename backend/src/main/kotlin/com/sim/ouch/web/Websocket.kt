@@ -1,98 +1,66 @@
 package com.sim.ouch.web
 
+import com.sim.ouch.EC
+import com.sim.ouch.Name
 import com.sim.ouch.Slogger
-import com.sim.ouch.logic.*
+import com.sim.ouch.Token
+import com.sim.ouch.logic.Action
+import com.sim.ouch.logic.Existence
+import com.sim.ouch.logic.Quiddity
+import com.sim.ouch.logic.parseOof
 import com.sim.ouch.web.Packet.DataType.*
+import com.soywiz.klock.minutes
 import io.javalin.websocket.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.serialization.ImplicitReflectionSerializer
 import java.util.function.Consumer
 
-private const val IDLE_TIMOUT_MS = 1_000L * 60
-
-val ER_EX_NOT_FOUND = 4004 to "existence not found"
-val ER_NO_NAME = 4005 to "no name"
-val ER_DUPLICATE_NAME = 4006 to "duplicate name"
-val ER_BAD_TOKEN = 4007 to "invalid token"
-val ER_INTERNAL = 4010 to "internal err"
-val ER_Q_NOT_FOUND = 4040 to "quididty not found"
+private val IDLE_TIMOUT_MS = 5.minutes.millisecondsLong
 
 private val sl = Slogger("Socket Handler")
 
+object Err {
+    val EX_NOT_FOUND = 4004 to "existence not found"
+    val NO_NAME = 4005 to "no name"
+    val DUPLICATE_NAME = 4006 to "duplicate name"
+    val BAD_TOKEN = 4007 to "invalid token"
+    val INTERNAL = 4010 to "internal err"
+    val Q_NOT_FOUND = 4040 to "quididty not found"
+}
+
 /** Server side [WsHandler] implementation. */
+@ImplicitReflectionSerializer
 val Websocket = Consumer<WsHandler> { wsHandler ->
 
-    val connect = ConnectHandler ch@{ session ->
+    val connect = WsConnectHandler ch@{ ctx: WsConnectContext ->
         // Check for reconnection token
-        session.queryParam("token")?.also { token ->
-            // Attempt to validate the token
-            runBlocking { DAO.refreshSession(token, session) }?.also { (_, sd) ->
-                // Attempt to locate existence
-                val ex = runBlocking { DAO.getExistence(sd.ec) }
-                    ?: return@ch session.close(ER_EX_NOT_FOUND)
-                val q = ex.qOf(sd.qc)
-                    ?: return@ch session.close(ER_Q_NOT_FOUND)
-                session.idleTimeout = IDLE_TIMOUT_MS
-                return@ch session.initWith(ex, q, token)
-                    .also { ex.broadcast(ENTER, q, false, session.id) }
-                    .also { sl.slog("Init reconnect session. Ex=${ex._id} SID=${session.id}") }
-            } ?: return@ch session.close(ER_BAD_TOKEN)
-        }
+        ctx.queryParam("token")
+            ?.let { tkn -> GlobalScope.launch { reconnect(ctx, tkn) } }
 
         // Standard Start Connection
-        lateinit var t: Token
-        lateinit var qd: Quiddity
-        val name = session.queryParam("name")
-            ?: return@ch session.close(ER_NO_NAME)
-        val ex = session.queryParam("exID")?.let { ec ->
-            runBlocking { DAO.getExistence(ec) }?.also { e ->
-                qd = e.qOfName(name) // ?.also { TODO("Check for duplicates") }
-                    ?: e.generateQuidity(name)
-                t = runBlocking { DAO.addSession(session, e, qd) }
-                    ?: return@ch session.close(ER_INTERNAL)
-            } ?: return@ch session.close(ER_EX_NOT_FOUND)
-        } ?: run {
-            runBlocking { DAO.addExistence(session, DefaultExistence(), name) }
-                ?.let {
-                    t = it.first
-                    qd = it.third
-                    it.second
-                } ?: return@ch session.close(ER_INTERNAL)
-        }
-        session.idleTimeout = IDLE_TIMOUT_MS
-        session.initWith(ex, qd, t)
-            .also { sl.slog("Init session. Ex=${ex._id} SID=${session.id}") }
-            .also { ex.broadcast(ENTER, qd, false, session.id) }
+        val name = ctx.queryParam("name") ?: return@ch ctx.close(Err.NO_NAME)
+        val exID = ctx.queryParam("exID")
+        GlobalScope.launch { newConnection(ctx, name, exID) }
     }
 
-    val message = MessageHandler { session, msg ->
-        val sd = runBlocking { DAO.getSessionData(session) }
-        val packet = readPacket(msg)
-        val ex = sd?.let { runBlocking { DAO.getExistence(it.ec) } }
-        val qd = sd?.let { ex?.qOf(it.qc) }
-        when (packet.dataType) {
-            ACTION -> TODO()
-            CHAT -> {
-                if (ex == null || qd == null) sl.elog("Failed to handle chat.")
-                else handleChat(ex, qd, session, msg, packet.data as String)
-            }
-            PING -> session.send(pack(PING, "pong"))
-            else -> session.send("Client cannot make ${packet.dataType} requests.")
-        }
+    val message = WsMessageHandler { ctx -> GlobalScope.launch { handleMessage(ctx) } }
+
+    suspend fun WsContext.end() = apply {
+        if (existence != null && quiddity != null)
+            existence!!.broadcast(EXIT, quiddity!!.id, true)
+    }.remove()
+
+    wsHandler.onClose { ctx: WsCloseContext ->
+        sl.slog("Close session. ${ctx.status()} \"${ctx.reason()}\"")
+        GlobalScope.launch { ctx.end() }
     }
 
-    suspend fun close(session: WsSession) = session.let {
-        it.existence()!!.broadcast(EXIT, it.quidity()!!.id, true)
-        DAO.disconnect(it)
-    }
-
-    wsHandler.onClose { session, code, reason ->
-        sl.slog("Close session. $code \"$reason\"")
-        runBlocking { close(session) }
-    }
-
-    val err = ErrorHandler { session, t: Throwable? ->
-        if (session.isOpen) session.send(Packet(INTERNAL, t?.message, true).pack())
-        else runBlocking { close(session) }
+    val err = WsErrorHandler { ctx: WsErrorContext ->
+        if (ctx.session.isOpen)
+            ctx.send(Packet(INTERNAL, ctx.error()?.message, true).pack())
+        else GlobalScope.launch { ctx.end() }
     }
 
     wsHandler.onConnect(connect)
@@ -100,28 +68,93 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     wsHandler.onError(err)
 }
 
+/**
+ * Setup a new connection.
+ *
+ * TODO Deny duplicate names
+ *
+ * @param context
+ * @param name
+ * @param exID
+ */
+@ImplicitReflectionSerializer
+private suspend fun newConnection(context: WsConnectContext, name: Name, exID: EC?) {
+
+    // Get the Existence if it's not null, else get a public one
+    val ex = if (exID != null) {
+        getExistence(exID) ?: return context.close(Err.EX_NOT_FOUND)
+    } else getNextPublicExistence() ?: return context.close(Err.INTERNAL)
+
+    ex.modify {
+        val (tkn, qdy) = join(name, context)
+
+        context.session.idleTimeout = IDLE_TIMOUT_MS
+
+        context.initWith(ex, qdy, tkn)
+
+        broadcast(ENTER, qdy, false, context.sessionId)
+    }
+
+    sl.slog("Init session. Ex=${ex.id} SID=${context.sessionId}")
+}
+
+/**
+ * Attempt a reconnection with a [token]
+ *
+ * @param context
+ * @param token
+ */
+@ImplicitReflectionSerializer
+private fun reconnect(context: WsConnectContext, token: Token) {
+    // Attempt to validate the token
+    val (info, tkn) = token.refresh(context) ?: return context.close(Err.BAD_TOKEN)
+    // Attempt to locate existence
+    val ex = getExistence(info.ec) ?: return context.close(Err.EX_NOT_FOUND)
+    val q = ex.qOf(info.qc) ?: return context.close(Err.Q_NOT_FOUND)
+    context.session.idleTimeout = IDLE_TIMOUT_MS
+    context.initWith(ex, q, tkn)
+    ex.broadcast(ENTER, q, false, context.sessionId)
+    sl.slog("Init reconnect session. Ex=${ex.id} SID=${context.sessionId}")
+}
+
+@ImplicitReflectionSerializer
+private suspend fun handleMessage(context: WsMessageContext) {
+    val sd = context.info ?: return
+    val packet = context.message<Packet>()
+    val ex = getExistence(sd.ec)
+    val qd = sd.let { ex?.qOf(it.qc) }
+    when (packet.dataType) {
+        ACTION -> TODO()
+        CHAT -> {
+            if (ex == null || qd == null) sl.elog("Failed to handle chat.")
+            else handleChat(ex, qd, packet.data as String)
+        }
+        PING -> context.send(pack(PING, "pong"))
+        else -> context.send("Client cannot make ${packet.dataType} requests.")
+    }
+}
+
 /** Handle chat broadcasting and parsing. */
-private fun handleChat(
-    ex: Existence, qd: Quiddity, ses: WsSession, msg: String, text: String
-) {
-    // Update chat
-    ex.chat.update(qd, text).let { m -> ex.broadcast(chatPacket(m)) }
-    // Parse for keywords
-    if (qd.ouch.add(text.parseOof)) ex.broadcast(QUIDDITY, qd)
-    // Save existence
-    if (!runBlocking { DAO.saveExistence(ex) })
-        sl.elog("Failed to update Existence after chat")
+@ImplicitReflectionSerializer
+private suspend fun handleChat(ex: Existence, qd: Quiddity, text: String) {
+    ex.modify {
+        // Update chat
+        ex.chat.update(qd, text).let { m -> ex.broadcast(chatPacket(m)) }
+        // Parse for keywords
+        if (qd.ouch.add(text.parseOof)) ex.broadcast(QUIDDITY, qd)
+    }
 }
 
-private fun handleAction(ex: Existence, qd: Quiddity, ses: WsSession, action: Action) {
-    // TODO
-}
+private fun handleAction(
+    ex: Existence,
+    qd: Quiddity,
+    context: WsMessageContext,
+    action: Action
+): Unit = TODO()
 
-fun WsSession.close(pair: Pair<Int, String>) = close(pair.first, pair.second)
+fun WsConnectContext.close(pair: Pair<Int, String>) =
+    session.close(pair.first, pair.second)
 
 val handler = CoroutineExceptionHandler { _, thr ->
     thr.cause?.printStackTrace() ?: thr.printStackTrace()
 }
-
-fun launch(block: suspend CoroutineScope.() -> Unit) =
-        GlobalScope.launch(handler, block = block)
