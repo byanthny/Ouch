@@ -17,6 +17,7 @@ fun List<Any>.toFile(name: String = "file"): File {
         this.write(line.toString())
         this.newLine()
     }
+
     val file = File(name)
     // Leave if the file already exists
     if (file.exists()) {

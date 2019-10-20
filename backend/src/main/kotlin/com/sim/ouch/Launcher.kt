@@ -3,12 +3,17 @@ package com.sim.ouch
 import com.sim.ouch.extension.secret
 import com.sim.ouch.extension.unit
 import com.sim.ouch.logic.Achievements
-import com.sim.ouch.logic.Action
-import com.sim.ouch.web.*
+import com.sim.ouch.logic.action.Action
+import com.sim.ouch.web.Websocket
+import com.sim.ouch.web.getPublicExistences
+import com.sim.ouch.web.json
+import com.sim.ouch.web.logs
+import com.sim.ouch.web.status
 import io.javalin.Javalin
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.UnstableDefault
 import java.lang.System.getenv
 
 object OuchInfo {
@@ -40,11 +45,12 @@ private val port get() = getenv("PORT")?.toIntOrNull() ?: 7_000
 
 /** Base [Javalin] "builder" */
 private val javalin
-    get() = Javalin.create().apply {
-        config.enableCorsForAllOrigins()
-        getenv("PORT") ?: config.enableDevLogging()
+    get() = Javalin.create {
+        it.enableCorsForAllOrigins()
+        it.enableDevLogging()
     }
 
+@UnstableDefault
 @ImplicitReflectionSerializer
 val static_endpoints = javalin.apply {
     ws(EndPoint.socket, Websocket)
@@ -69,5 +75,6 @@ val static_endpoints = javalin.apply {
     secret(this)
 }!!
 
+@UnstableDefault
 @ImplicitReflectionSerializer
 fun main() = static_endpoints.start(port).unit

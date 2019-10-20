@@ -1,12 +1,16 @@
 package com.sim.ouch.web
 
+import com.sim.ouch.Token
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quiddity
-import com.sim.ouch.web.Packet.DataType.INIT
 import io.javalin.websocket.WsConnectContext
-import io.javalin.websocket.WsContext
-import kotlinx.serialization.*
+import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.parse
+import kotlinx.serialization.serializer
+import java.util.concurrent.Future
 
 @UnstableDefault
 @ImplicitReflectionSerializer
@@ -18,84 +22,90 @@ inline fun <reified T : @Serializable Any> T.json(): String =
 inline fun <reified T : @Serializable Any> quickLoad(json: String): T =
     Json.nonstrict.parse(json)
 
-/** Loads a Packet from a JSON */
-@UnstableDefault
-@ImplicitReflectionSerializer
-fun readPacket(json: String) = quickLoad<Packet>(json)
-
-@DslMarker
-annotation class PacketDsl
-
-@ImplicitReflectionSerializer
-@PacketDsl
-fun pack(type: Packet.DataType, data: Any? = null) = Packet(type, data).pack()
-
 /**
  * A Packet is used to send data in a uniform matter
  * between the Server & clients
  *
- * @property dataType The DataType to parse from the data
- * @property data The Object being sent
- * @property prebuild Whether the data is already in JSON
+ * @property type The PacketType to parse from the data
+ * @property data The serialized data
  *
  * @author Jonathan Augustine
  */
-@ImplicitReflectionSerializer
-data class Packet(
-    val dataType: DataType,
-    var data: @Serializable Any? = null,
-    @Transient val prebuild: Boolean = false
-) {
+@Serializable
+data class Packet(val type: PacketType, var data: String? = null)
 
-    enum class DataType {
-        INIT, QUIDDITY, EXISTENCE, ENTER, EXIT, ACTION, CHAT, INTERNAL, PING
-    }
-
-    init {
-        data = if (prebuild) data else data?.json()
-    }
-
-    /** Returns The [Packet] as a JSON [String]. */
-    @ImplicitReflectionSerializer
-    fun pack() = this.json()
-
-    /** Returns The [data] unpacked from a JSON string. */
-    @ImplicitReflectionSerializer
-    inline fun <reified T : @Serializable Any> unpack() =
-        data?.let { quickLoad<T>(data as String) }
-
-    override fun toString() = "$dataType:$data"
+enum class PacketType {
+    INIT, QUIDDITY, EXISTENCE, ENTER, EXIT, ACTION, CHAT, INTERNAL, PING, ERR
 }
 
-data class InitPacket(
+@DslMarker
+annotation class PacketDsl
+
+@PacketDsl
+@UnstableDefault
+@ImplicitReflectionSerializer
+inline fun <reified T : @Serializable Any> packetOf(
+    type: PacketType,
+    t: T?
+): Packet = Packet(type, t?.json())
+
+@PacketDsl
+@UnstableDefault
+@ImplicitReflectionSerializer
+inline fun <reified T : @Serializable Any> pack(
+    type: PacketType,
+    data: T? = null
+): String = packetOf(type, data).packed
+
+/** Returns The [Packet] as a JSON [String]. */
+@PacketDsl
+@UnstableDefault
+@ImplicitReflectionSerializer
+val Packet.packed: String
+    get() = this.json()
+
+/** Attempts to read the [Packet.data] as type [T] */
+@PacketDsl
+@UnstableDefault
+@ImplicitReflectionSerializer
+inline fun <reified T : @Serializable Any> Packet.unpack(): T? =
+    data?.let { quickLoad(it) }
+
+/** Loads a [Packet] from this [String] as a JSON. */
+@PacketDsl
+@UnstableDefault
+@ImplicitReflectionSerializer
+val String.asPacket: Packet
+    get() = quickLoad(this)
+
+@Serializable
+private class Init(
     val existence: Existence,
     val quiddity: Quiddity,
-    val token: String
+    val token: Token
 )
 
+@UnstableDefault
 @ImplicitReflectionSerializer
-fun WsConnectContext.initWith(existence: Existence, quiddity: Quiddity, token: String) =
-    send(Packet(INIT, InitPacket(existence, quiddity, token)).pack())
+fun initPacket(ex: Existence, qd: Quiddity, tkn: Token): Packet =
+    Packet(PacketType.INIT, Init(ex, qd, tkn).json())
 
-/** Broadcast the [packet] to all connected websocket sessions. */
+@UnstableDefault
 @ImplicitReflectionSerializer
-fun Existence.broadcast(packet: Packet) =
-    sessionTokens.forEach { it.wsContext?.send(packet.pack()) }
+fun WsConnectContext.initWith(
+    existence: Existence,
+    quiddity: Quiddity,
+    token: String
+): Future<Void> = send(initPacket(existence, quiddity, token).packed)
 
+/**
+ * Broadcast the [packet] to all connected websocket sessions.
+ */
+@PacketDsl
+@UnstableDefault
 @ImplicitReflectionSerializer
-fun Existence.broadcast(
-    dataType: Packet.DataType,
-    data: Any,
-    isString: Boolean = false,
-    vararg excludeIDs: String
-) = sessionTokens.mapNotNull { it.wsContext }
-    .broadcast(dataType, data, isString, *excludeIDs)
-
-@ImplicitReflectionSerializer
-private fun Iterable<WsContext>.broadcast(
-    dataType: Packet.DataType,
-    data: Any,
-    isString: Boolean = false,
-    vararg excludeIDs: String
-) = filterNot { it.sessionId in excludeIDs }
-    .forEach { it.send(Packet(dataType, data, isString).pack()) }
+fun Existence.broadcast(packet: Packet, vararg excludeSessionIDs: String) =
+    sessionTokens
+        .mapNotNull { it.wsContext }
+        .filterNot { it.sessionId in excludeSessionIDs }
+        .forEach { it.send(packet.packed) }

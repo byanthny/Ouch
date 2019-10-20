@@ -1,11 +1,19 @@
 package com.sim.ouch.web
 
 import com.github.benmanes.caffeine.cache.Caffeine
-import com.sim.ouch.*
+import com.sim.ouch.EC
+import com.sim.ouch.ID
+import com.sim.ouch.IDGenerator
+import com.sim.ouch.Name
+import com.sim.ouch.OuchInfo
+import com.sim.ouch.QC
+import com.sim.ouch.Slogger
+import com.sim.ouch.Token
 import com.sim.ouch.datastructures.MutableBiMap
 import com.sim.ouch.extension.asDateTime
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quiddity
+import com.sim.ouch.threadName
 import com.sim.ouch.web.Dao.mongo
 import com.sim.ouch.web.DaoLogger.Log
 import com.soywiz.klock.DateFormat
@@ -13,7 +21,11 @@ import com.soywiz.klock.DateTime
 import com.soywiz.klock.ISO8601
 import com.soywiz.klock.days
 import io.javalin.websocket.WsContext
-import io.jsonwebtoken.*
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.JwtException
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.SignatureException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -24,7 +36,6 @@ import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
 import java.lang.System.err
-import java.lang.System.getenv
 import javax.crypto.KeyGenerator
 import javax.crypto.spec.SecretKeySpec
 import kotlin.reflect.KFunction
@@ -38,7 +49,11 @@ import kotlin.reflect.KFunction
  * @property qc [Quiddity.id]
  */
 @Serializable
-data class SessionInfo(@SerialName("token") var token: Token, var ec: EC, var qc: QC)
+data class SessionInfo(
+    @SerialName("token") var token: Token,
+    var ec: EC,
+    var qc: QC
+)
 
 private val cutoffDate
     get() = DateTime.now().plus(OuchInfo.Settings.max_dormant_age.days)
@@ -74,8 +89,8 @@ val WsContext.quiddity get() = info?.run { existence?.qOf(qc) }
  */
 fun Existence.join(name: Name, context: WsContext): Pair<Token, Quiddity> {
     val q = generateQuidity(name)
-    val tkn = genToken(context, this, q)
-    GlobalScope.launch { SessionInfo(tkn, this@join.id, q.id) }
+    val tkn = "" // genToken(this, q) todo
+    GlobalScope.launch { SessionInfo(tkn, this@join.id, q.id).insert(context) }
     return tkn to q
 }
 
@@ -84,9 +99,9 @@ fun Existence.join(name: Name, context: WsContext): Pair<Token, Quiddity> {
  * @return This [Token]'s associated [SessionInfo] and a new token. `null` if token
  * validation failed.
  */
-fun Token.refresh(context: WsContext): Pair<SessionInfo, Token>? {
-    val (ec, qc) = readToken(context, this) ?: return null
-    val ntkn = genToken(context, ec, qc)
+fun Token.refresh(): Pair<SessionInfo, Token>? {
+    val (ec, qc) = readToken(this) ?: return null
+    val ntkn = genToken(ec, qc)
     return sessionInfo?.let { it to ntkn }
 }
 
@@ -102,8 +117,10 @@ suspend fun getNextPublicExistence(): Existence? = getPublicExistences()
 /** Create a new [Existence] and save it to [Dao.existences]. */
 suspend fun existence(public: Boolean = false): Existence? {
     val e = if (public) Existence.newPublic else Existence.newDefault
-    return if (Dao.existences.save(e)?.wasAcknowledged() == true) e
-    else null
+    return if (Dao.existences.save(e)?.wasAcknowledged() == true) {
+        DaoLogger.info("New Existence ${e.id}", null)
+        e
+    } else null
 }
 
 // /////////////////////
@@ -129,7 +146,9 @@ suspend fun Token.dormant() {
 private object Dao {
     /** Mongo DB connection */
     val mongo by lazy {
-        KMongo.createClient(getenv("OUCH_MONGO"))
+        KMongo.createClient(
+            "mongodb://jono:G3lassenheit@ds023523.mlab.com:23523/heroku_4f8vnwwf"
+        )
             .getDatabase("heroku_4f8vnwwf").coroutine
     }
 
@@ -192,72 +211,76 @@ suspend fun getAllExistences(): Map<EC, Existence> =
     Dao.existences.find().toList().associateBy { it.id }
 
 suspend fun getPublicExistences(): Map<EC, Existence> =
-    Dao.existences.find(Existence::public eq true).toList().associateBy { it.id }
+    Dao.existences.find(
+        Existence::public eq true
+    ).toList().associateBy { it.id }
 
-suspend fun logs() = Dao.logs.find().toList().sortedByDescending { it.dateISO.asDateTime }
+suspend fun logs() =
+    Dao.logs.find().toList().sortedByDescending { it.dateISO.asDateTime }
 
 // /////////////////////
 // TOKEN GENERATION //
 // ////////////////////
 
-private object Key {
-    private val HMAC_SHA = "HMACSHA256"
+@Serializable
+private class Key(val key: ByteArray) {
 
-    private val key: ByteArray by lazy {
-        runBlocking {
+    override fun equals(other: Any?) = other is Key &&
+        other.key.contentEquals(this.key)
+
+    override fun hashCode() = key.hashCode()
+
+    companion object {
+        private val HMAC_SHA = "HMACSHA256"
+        private val key = runBlocking {
             mongo.getCollection<Key>().let { c ->
                 c.find()
                     .first()
                     ?.run { SecretKeySpec(key, HMAC_SHA).encoded }
                     ?: let {
-                        DaoLogger.err("Failed to load key. Loading new key", ::readToken)
+                        DaoLogger.err(
+                            "Failed to load key. Loading new key", ::readToken
+                        )
                         KeyGenerator.getInstance(HMAC_SHA)
                             .generateKey()
-                            ?.apply { c.insertOne(Key) }
+                            ?.apply { c.insertOne(Key(this.encoded)) }
                             ?.encoded
                             ?: throw Exception("Failed to generate new key.")
                     }
             }
         }
+
+        fun get() = SecretKeySpec(key, HMAC_SHA)
     }
-
-    val spec = SecretKeySpec(key, HMAC_SHA)
-
-    override fun equals(other: Any?) = other is Key && other.key.contentEquals(this.key)
-    override fun hashCode() = key.hashCode()
 }
 
 private val Token.claims: Claims
-    get() = Jwts.parser().setSigningKey(Key.spec)!!.parseClaimsJws(this).body
+    get() = Jwts.parser().setSigningKey(Key.get())!!.parseClaimsJws(this).body
 
-private fun genToken(wsContext: WsContext, existence: Existence, quiddity: Quiddity) =
-    genToken(wsContext, existence.id, quiddity.id)
+private fun genToken(existence: Existence, quiddity: Quiddity) =
+    genToken(existence.id, quiddity.id)
 
-private fun genToken(wsContext: WsContext, exID: EC, qID: QC) = Jwts.builder().apply {
-    setSubject("quiddity.$qID").claim("exID", exID)
-    // claim("ip", session.remoteAddress.address.address)
-    // setExpiration(Date.from(Instant.now().plusSeconds(60 * 30))) TODO?
-    signWith(Key.spec, SignatureAlgorithm.HS256)
+private fun genToken(exID: EC, qID: QC) = Jwts.builder().apply {
+    signWith(Key.get(), SignatureAlgorithm.HS256)
+    setSubject("quiddity.$qID")
+    claim("exID", exID)
 }.compact()
 
 /** Returns `null` on invalid token. */
-private fun readToken(wsContext: WsContext, token: String): Pair<EC, QC>? {
-    try {
-        val claims = token.claims
-        // require(claims["ip"] == session.remoteAddress.address.address)
-        require(claims["exID"] is String)
-        require(claims.subject.matches(Regex("quiddity\\.([\\dA-Z]){10}")))
-        return claims["exID"] as String to
-                claims.subject.removePrefix("quiddity.")
-    } catch (e: SignatureException) {
-        return null
-    } catch (e: ExpiredJwtException) {
-        return null
-    } catch (e: JwtException) {
-        return null
-    } catch (e: IllegalArgumentException) {
-        return null
-    }
+private fun readToken(token: String): Pair<EC, QC>? = try {
+    val claims = token.claims
+    require(claims["exID"] is String)
+    require(claims.subject.matches(Regex("quiddity\\.([\\dA-Z]){10}")))
+    claims["exID"] as String to
+        claims.subject.removePrefix("quiddity.")
+} catch (e: SignatureException) {
+    null
+} catch (e: ExpiredJwtException) {
+    null
+} catch (e: JwtException) {
+    null
+} catch (e: IllegalArgumentException) {
+    null
 }
 
 // /////////////////////
@@ -284,10 +307,16 @@ object DaoLogger : Slogger("") {
     suspend fun <F : KFunction<*>> err(any: Any? = "", function: F? = null) =
         log(any, function, "err")
 
-    private suspend fun <F : KFunction<*>> log(any: Any? = "", f: F?, level: String) {
+    private suspend fun <F : KFunction<*>> log(
+        any: Any? = "",
+        f: F?,
+        level: String
+    ) {
         println(
             log(buildString {
-                append('[').append(DateTime.now().format(DateFormat.DEFAULT_FORMAT))
+                append('[').append(
+                    DateTime.now().format(DateFormat.DEFAULT_FORMAT)
+                )
                 append("] ")
                 append('[').append(threadName).append("] ")
                 append('[').append(name).append("] ")

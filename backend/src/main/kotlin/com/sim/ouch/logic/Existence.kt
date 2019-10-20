@@ -1,10 +1,18 @@
 package com.sim.ouch.logic
 
-import com.sim.ouch.*
-import com.sim.ouch.extension.nowISO
+import com.sim.ouch.EC
+import com.sim.ouch.ID
+import com.sim.ouch.IDGenerator
+import com.sim.ouch.Name
+import com.sim.ouch.NameGenerator
+import com.sim.ouch.QC
+import com.sim.ouch.Token
+import com.sim.ouch.extension.asDateTime
+import com.sim.ouch.extension.iso
 import com.sim.ouch.web.Chat
 import com.soywiz.klock.DateTime
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * The simulation.
@@ -13,6 +21,7 @@ import kotlinx.serialization.SerialName
  * `-1` if unlimited.
  * @property public Whether this existence should be publicly available.
  */
+@Serializable
 class Existence(
     val name: Name,
     var capacity: Int = -1,
@@ -21,7 +30,8 @@ class Existence(
 
     @SerialName("id")
     val id: EC = IDGenerator.nextDefault
-    val init = DateTime.now()
+    val initISO = DateTime.now().iso
+    val init get() = initISO.asDateTime
 
     /** The first [Quiddity] to enter the [Existence]. */
     val quidities: MutableMap<String, Quiddity> = mutableMapOf()
@@ -32,27 +42,24 @@ class Existence(
     val qSize: Int get() = quidities.size
     val sessionCount: Int get() = sessionTokens.size
 
-     val sessionTokens: MutableList<Token> = mutableListOf()
+    val sessionTokens: MutableList<Token> = mutableListOf()
 
     var dormantSince: String? = null
 
     var status: Status = Status.DRY
         set(value) {
             dormantSince = when (value) {
-                Status.DORMANT -> DateTime.now().nowISO
+                Status.DORMANT -> DateTime.now().iso
                 else -> null
             }
             field = value
-        }
-        get() {
-            if (sessionTokens.isEmpty()) field = Status.DORMANT
-            return field
         }
 
     val chat: Chat = Chat()
 
     /** Generate a new [Quiddity] and add it to the [Existence]. */
-    fun generateQuidity(name: String): Quiddity = Quiddity(name).also { enter(it) }
+    fun generateQuidity(name: String): Quiddity =
+        Quiddity(name).also { enter(it) }
 
     /** Add an [entity] to the [Existence]. */
     fun enter(entity: Entity) {

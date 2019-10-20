@@ -50,7 +50,7 @@ function createConnection(endpoint) {
         var parsedData = JSON.parse(JSONdata.data);
 
         //Check if datatype is INIT
-        switch (JSONdata.dataType) {
+        switch (JSONdata.type) {
             case "INIT": //Init
                 handleInit(parsedData);
                 break;
@@ -79,8 +79,11 @@ function createConnection(endpoint) {
                 break;
             case "PING": //Ping
                 break;
+            case "ERR":
+                // TODO handle err
+                break;
             default: //Other
-                console.log("Unknown dataType");
+                console.log("Unknown packet type");
                 console.log(e.data);
                 break;
         }

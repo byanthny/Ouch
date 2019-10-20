@@ -1,28 +1,33 @@
 package com.sim.ouch.web
 
 import com.sim.ouch.logic.Quiddity
-import com.sim.ouch.web.Packet.DataType.CHAT
 import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UnstableDefault
 
 /** An easy way to make an outgoing typed [Packet] with a message. */
+@PacketDsl
+@UnstableDefault
 @ImplicitReflectionSerializer
-fun chatPacket(message: Chat.Message) = Packet(CHAT, message)
+fun chatPacket(message: Chat.Message) = packetOf(PacketType.CHAT, message)
 
+@Serializable
 class Chat {
 
+    @Serializable
     data class Message internal constructor(
         val authorID: String,
         val authorName: String,
         val content: String
     )
 
-    private var nextID = 0L
     private val history = mutableListOf<Message>()
 
     /** update from client */
     fun update(quiddity: Quiddity, content: String): Message {
         historySizing()
-        return Message(quiddity.id, quiddity.name, content).also { history.add(it) }
+        return Message(quiddity.id, quiddity.name, content)
+            .also { history.add(it) }
     }
 
     private fun historySizing() {

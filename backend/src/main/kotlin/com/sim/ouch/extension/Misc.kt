@@ -2,7 +2,7 @@ package com.sim.ouch.extension
 
 import com.soywiz.klock.DateTime
 import io.javalin.Javalin
-import java.util.*
+import java.util.Random
 
 val RAND by lazy { Random(420_69_98_4829 / (DateTime.now().seconds)) }
 

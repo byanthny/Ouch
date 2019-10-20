@@ -13,6 +13,7 @@ group = "com.sim"
 version = "0.0.3"
 
 object Version {
+    const val kmongo = "3.11.1"
     const val ktor = "1.1.3"
     const val klock = "1.7.0"
 }
@@ -43,7 +44,9 @@ dependencies {
     implementation("com.atlassian.commonmark:commonmark:0.11.0")
 
     // Database
-    implementation("org.litote.kmongo:kmongo-coroutine:3.11.1")
+    implementation(
+        "org.litote.kmongo", "kmongo-coroutine-serialization", Version.kmongo
+    )
 
     // Cache
     implementation("com.github.ben-manes.caffeine:caffeine:2.8.0")

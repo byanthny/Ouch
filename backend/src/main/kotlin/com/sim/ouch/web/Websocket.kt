@@ -4,17 +4,34 @@ import com.sim.ouch.EC
 import com.sim.ouch.Name
 import com.sim.ouch.Slogger
 import com.sim.ouch.Token
-import com.sim.ouch.logic.Action
 import com.sim.ouch.logic.Existence
 import com.sim.ouch.logic.Quiddity
+import com.sim.ouch.logic.action.Action
+import com.sim.ouch.logic.action.asAction
 import com.sim.ouch.logic.parseOof
-import com.sim.ouch.web.Packet.DataType.*
+import com.sim.ouch.web.PacketType.ACTION
+import com.sim.ouch.web.PacketType.CHAT
+import com.sim.ouch.web.PacketType.ENTER
+import com.sim.ouch.web.PacketType.ERR
+import com.sim.ouch.web.PacketType.EXIT
+import com.sim.ouch.web.PacketType.INTERNAL
+import com.sim.ouch.web.PacketType.PING
+import com.sim.ouch.web.PacketType.QUIDDITY
 import com.soywiz.klock.minutes
-import io.javalin.websocket.*
+import io.javalin.websocket.WsCloseContext
+import io.javalin.websocket.WsConnectContext
+import io.javalin.websocket.WsConnectHandler
+import io.javalin.websocket.WsContext
+import io.javalin.websocket.WsErrorContext
+import io.javalin.websocket.WsErrorHandler
+import io.javalin.websocket.WsHandler
+import io.javalin.websocket.WsMessageContext
+import io.javalin.websocket.WsMessageHandler
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.UnstableDefault
 import java.util.function.Consumer
 
 private val IDLE_TIMOUT_MS = 5.minutes.millisecondsLong
@@ -31,25 +48,40 @@ object Err {
 }
 
 /** Server side [WsHandler] implementation. */
+@UnstableDefault
 @ImplicitReflectionSerializer
 val Websocket = Consumer<WsHandler> { wsHandler ->
 
     val connect = WsConnectHandler ch@{ ctx: WsConnectContext ->
         // Check for reconnection token
         ctx.queryParam("token")
-            ?.let { tkn -> GlobalScope.launch { reconnect(ctx, tkn) } }
+            ?.let { tkn ->
+                GlobalScope.launch {
+                    sl.slog("Attempting reconnection")
+                    reconnect(ctx, tkn)
+                }
+            }
 
         // Standard Start Connection
         val name = ctx.queryParam("name") ?: return@ch ctx.close(Err.NO_NAME)
         val exID = ctx.queryParam("exID")
-        GlobalScope.launch { newConnection(ctx, name, exID) }
+        GlobalScope.launch {
+            sl.slog("Attempting new connection")
+            newConnection(ctx, name, exID)
+        }
     }
 
-    val message = WsMessageHandler { ctx -> GlobalScope.launch { handleMessage(ctx) } }
+    val message = WsMessageHandler { ctx ->
+        GlobalScope.launch {
+            handleMessage(
+                ctx
+            )
+        }
+    }
 
     suspend fun WsContext.end() = apply {
         if (existence != null && quiddity != null)
-            existence!!.broadcast(EXIT, quiddity!!.id, true)
+            existence!!.broadcast(packetOf(EXIT, quiddity!!.id))
     }.remove()
 
     wsHandler.onClose { ctx: WsCloseContext ->
@@ -58,8 +90,7 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
     }
 
     val err = WsErrorHandler { ctx: WsErrorContext ->
-        if (ctx.session.isOpen)
-            ctx.send(Packet(INTERNAL, ctx.error()?.message, true).pack())
+        if (ctx.session.isOpen) ctx.send(pack(INTERNAL, ctx.error()?.message))
         else GlobalScope.launch { ctx.end() }
     }
 
@@ -77,8 +108,13 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
  * @param name
  * @param exID
  */
+@UnstableDefault
 @ImplicitReflectionSerializer
-private suspend fun newConnection(context: WsConnectContext, name: Name, exID: EC?) {
+private suspend fun newConnection(
+    context: WsConnectContext,
+    name: Name,
+    exID: EC?
+) {
 
     // Get the Existence if it's not null, else get a public one
     val ex = if (exID != null) {
@@ -92,7 +128,7 @@ private suspend fun newConnection(context: WsConnectContext, name: Name, exID: E
 
         context.initWith(ex, qdy, tkn)
 
-        broadcast(ENTER, qdy, false, context.sessionId)
+        broadcast(packetOf(ENTER, qdy), context.sessionId)
     }
 
     sl.slog("Init session. Ex=${ex.id} SID=${context.sessionId}")
@@ -104,44 +140,54 @@ private suspend fun newConnection(context: WsConnectContext, name: Name, exID: E
  * @param context
  * @param token
  */
+@UnstableDefault
 @ImplicitReflectionSerializer
 private fun reconnect(context: WsConnectContext, token: Token) {
     // Attempt to validate the token
-    val (info, tkn) = token.refresh(context) ?: return context.close(Err.BAD_TOKEN)
+    val (info, tkn) = token.refresh() ?: return context.close(Err.BAD_TOKEN)
     // Attempt to locate existence
     val ex = getExistence(info.ec) ?: return context.close(Err.EX_NOT_FOUND)
     val q = ex.qOf(info.qc) ?: return context.close(Err.Q_NOT_FOUND)
     context.session.idleTimeout = IDLE_TIMOUT_MS
     context.initWith(ex, q, tkn)
-    ex.broadcast(ENTER, q, false, context.sessionId)
+    ex.broadcast(packetOf(ENTER, q), context.sessionId)
     sl.slog("Init reconnect session. Ex=${ex.id} SID=${context.sessionId}")
 }
 
+@UnstableDefault
 @ImplicitReflectionSerializer
 private suspend fun handleMessage(context: WsMessageContext) {
     val sd = context.info ?: return
     val packet = context.message<Packet>()
     val ex = getExistence(sd.ec)
     val qd = sd.let { ex?.qOf(it.qc) }
-    when (packet.dataType) {
-        ACTION -> TODO()
+    when (packet.type) {
+        ACTION -> {
+            if (ex != null && qd != null && packet.data != null)
+                packet.data!!.asAction
+                    ?.let { handleAction(ex, qd, context, it) }
+                    ?: context.send(
+                        pack(ERR, "no action with name ${packet.data}")
+                    )
+        }
         CHAT -> {
             if (ex == null || qd == null) sl.elog("Failed to handle chat.")
             else handleChat(ex, qd, packet.data as String)
         }
         PING -> context.send(pack(PING, "pong"))
-        else -> context.send("Client cannot make ${packet.dataType} requests.")
+        else -> context.send("client cannot make ${packet.type} requests.")
     }
 }
 
 /** Handle chat broadcasting and parsing. */
+@UnstableDefault
 @ImplicitReflectionSerializer
 private suspend fun handleChat(ex: Existence, qd: Quiddity, text: String) {
     ex.modify {
         // Update chat
         ex.chat.update(qd, text).let { m -> ex.broadcast(chatPacket(m)) }
         // Parse for keywords
-        if (qd.ouch.add(text.parseOof)) ex.broadcast(QUIDDITY, qd)
+        if (qd.ouch.add(text.parseOof)) ex.broadcast(packetOf(QUIDDITY, qd))
     }
 }
 

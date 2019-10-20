@@ -1,10 +1,7 @@
 package com.sim.ouch.logic
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.sim.ouch.extension.allMatches
-import com.sim.ouch.logic.Achievements.*
+import kotlinx.serialization.Serializable
 
 /*
  * File Contents:
@@ -13,7 +10,7 @@ import com.sim.ouch.logic.Achievements.*
  *          - Loads Ouch class keywords from the keywords.oof file
  *
  */
-
+@Serializable
 open class Ouch(var level: Int = 1, var exp: Double = 0.0) {
 
     operator fun inc(): Ouch {
@@ -45,20 +42,15 @@ open class Ouch(var level: Int = 1, var exp: Double = 0.0) {
     }
 }
 
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.CLASS,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "@class"
-)
-@JsonSubTypes(
-    Type(value = `Lord Of Oof`::class, name = "lordofoof"),
-    Type(value = `Sucks 2 Suck`::class, name = "suckstobeyou"),
-    Type(value = `Baby's First Oof`::class, name = "firstoof")
-)
 sealed class Achievements(val name: String, val description: String) {
-    object `Lord Of Oof` : Achievements("Lord of ooF", "You hit the maximum Ouch!")
-    object `Sucks 2 Suck` : Achievements("Sucks 2 Suck", "You're halfway to Max Ouch!")
-    object `Baby's First Oof` : Achievements("Baby's First ooF", "Aww look at you, so...you.")
+    object `Lord Of Oof` :
+        Achievements("Lord of ooF", "You hit the maximum Ouch!")
+
+    object `Sucks 2 Suck` :
+        Achievements("Sucks 2 Suck", "You're halfway to Max Ouch!")
+
+    object `Baby's First Oof` :
+        Achievements("Baby's First ooF", "Aww look at you, so...you.")
 
     companion object {
         val values = listOf(`Lord Of Oof`, `Sucks 2 Suck`, `Baby's First Oof`)
@@ -91,10 +83,13 @@ private fun loadKeyWords(): Map<Regex, Double> {
             // This split should turn this:
             // "word:some phrase:another one|20"
             // into this: ["word:some phrase:another one", "20"]
-            if (size > 2) throw IllegalStateException(
+            // Parse the value as a Long to allow flexibility
+            // Then convert it to a milliOof double
+            // then parse again
+            check(size <= 2) {
                 "invalid parse state. more than 1 digit delimiter."
-            )
-            else if (size == 2) {
+            }
+            if (size == 2) {
                 // Parse the value as a Long to allow flexibility
                 // Then convert it to a milliOof double
                 // then parse again
