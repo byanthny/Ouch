@@ -1,6 +1,6 @@
 FROM gradle:7-jdk-jammy
 WORKDIR /app
 COPY . .
-EXPOSE 7000
+EXPOSE $PORT
 RUN gradle build
 CMD ["gradle", "run"]
