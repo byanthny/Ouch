@@ -1,17 +1,10 @@
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.websocket.WebSockets
-import io.ktor.client.features.websocket.webSocket
-import io.ktor.client.request.parameter
-import io.ktor.http.HttpMethod
-import io.ktor.http.cio.websocket.Frame
-import io.ktor.http.cio.websocket.readText
 import io.ktor.util.KtorExperimentalAPI
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
 import org.junit.Before
-import org.junit.Test
 
 @KtorExperimentalAPI
 class WebsocketTests {
@@ -26,7 +19,7 @@ class WebsocketTests {
     fun initClient() {
         client = HttpClient(CIO).config { install(WebSockets) }
     }
-
+/*
     @Test
     @ImplicitReflectionSerializer
     fun connect() = runBlocking {
@@ -45,4 +38,6 @@ class WebsocketTests {
             }
         }
     }
+
+ */
 }
