@@ -5,7 +5,7 @@ plugins {
     application
     kotlin("jvm") version "1.3.50"
     id("kotlinx-serialization") version "1.3.50"
-    id("org.jmailen.kotlinter") version "2.1.2"
+    //id("org.jmailen.kotlinter") version "2.1.2"
     id("com.github.johnrengelman.shadow") version "4.0.3"
 }
 
