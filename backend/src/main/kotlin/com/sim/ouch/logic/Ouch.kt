@@ -24,13 +24,13 @@ open class Ouch(var level: Int = 1, var exp: Double = 0.0) {
     }
 
     /** @return `true` if [Ouch.level] increased */
-    fun add(double: Double): Boolean {
-        return if (exp + double in OUCH_RANGE) {
-            if (exp + double > level / 2.0) {
-                exp = (exp + double) - (level++ / 2.0)
+    fun add(incoming: Double): Boolean {
+        return if (exp + incoming in OUCH_RANGE) {
+            if (exp + incoming > level / 2.0) {
+                exp = (exp + incoming) - (level++ / 2.0)
                 true
             } else {
-                exp += double
+                exp += incoming
                 false
             }
         } else false

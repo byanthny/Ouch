@@ -10,11 +10,11 @@ import com.sim.ouch.web.json
 import com.sim.ouch.web.logs
 import com.sim.ouch.web.status
 import io.javalin.Javalin
+import java.lang.System.getenv
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
-import java.lang.System.getenv
 
 object OuchInfo {
     data class Author(val name: String, val url: String)

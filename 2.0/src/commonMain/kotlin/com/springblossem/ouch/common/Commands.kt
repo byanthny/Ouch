@@ -1,5 +1,8 @@
 package com.springblossem.ouch.common
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class Commands(val description: String) {
   BEAN("get beaned"),
   MUSIC("feel the ouchie vibes"),

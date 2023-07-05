@@ -1,9 +1,9 @@
 package com.sim.ouch.datastructures
 
 import com.sim.ouch.extension.removeLastOrNull
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * A Caching Interface which presents a framework for abstracting away from a [Map], allowing for more detailed

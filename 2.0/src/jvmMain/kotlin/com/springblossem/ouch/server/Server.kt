@@ -1,34 +1,46 @@
 package com.springblossem.ouch.server
 
-import com.springblossem.ouch.common.Existence
+import com.springblossem.ouch.common.*
 import com.springblossem.ouch.server.db.connectDB
+import com.springblossem.ouch.server.db.get
 import com.springblossem.ouch.server.db.new
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode.Companion.BadRequest
+import io.ktor.http.HttpStatusCode.Companion.Created
+import io.ktor.http.HttpStatusCode.Companion.InternalServerError
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.Principal
+import io.ktor.server.auth.basic
+import io.ktor.server.auth.principal
+import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.html.respondHtml
-import io.ktor.server.http.content.resources
-import io.ktor.server.http.content.static
-import io.ktor.server.netty.Netty
+import io.ktor.server.http.content.staticResources
+import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.request.path
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
+import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import kotlinx.html.*
+import io.ktor.util.pipeline.PipelineContext
+import kotlinx.serialization.json.Json
+import org.slf4j.event.Level
 import java.util.*
 
-fun HTML.index() {
-  head {
-    title("Hello from Ktor!")
-  }
-  body {
-    div {
-      +"Hello from Ktor"
-    }
-    div {
-      id = "root"
-    }
-    script(src = "/static/untitled.js") {}
-  }
+val PORT = System.getenv("PORT")?.toInt()
+
+data class AuthPrincipal(val id: Int, val username: String) : Principal {
+  constructor(auth: Auth) : this(auth.id, auth.username)
 }
 
 fun main() {
@@ -37,7 +49,7 @@ fun main() {
   println(id)
 
   embeddedServer(
-    Netty,
+    CIO,
     port = 8080,
     host = "127.0.0.1",
     module = Application::server
@@ -45,12 +57,68 @@ fun main() {
 }
 
 fun Application.server() {
-  routing {
-    get("/") {
-      call.respondHtml(HttpStatusCode.OK, HTML::index)
+  install(CORS) {
+    allowMethod(HttpMethod.Options)
+    allowMethod(HttpMethod.Put)
+    allowMethod(HttpMethod.Delete)
+    allowMethod(HttpMethod.Patch)
+    allowHeader(HttpHeaders.Authorization)
+    anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
+  }
+  install(Authentication) {
+    basic(name = "auth") {
+      realm = "ouch-server"
+      validate { (username, password) ->
+        Auth[username]
+          ?.takeIf { verify(password, it.hash!!).isSuccess }
+          ?.let { AuthPrincipal(it) }
+      }
     }
-    static("/static") {
-      resources()
+  }
+  install(ContentNegotiation) {
+    json(Json {
+      prettyPrint = PORT == null
+      ignoreUnknownKeys = true
+    })
+  }
+  install(CallLogging) {
+    level = Level.INFO
+    filter { call -> call.request.path().startsWith("/") }
+  }
+
+  http()
+  socketConfig()
+}
+
+fun Application.http() {
+  routing {
+    staticResources("/static", "assets")
+    get(EndPoint.HOME) { call.respondRedirect(ApplicationInfo.site) }
+    post(EndPoint.REGISTER()) {
+      if (call.principal<AuthPrincipal>() != null) {
+        return@post call.respond(BadRequest, "already logged in")
+      }
+
+      // validate body
+      val registration = runCatching { call.receive<Registration>() }
+        .getOrNull()
+        ?: return@post call.respond(BadRequest, "malformed body")
+
+      // validate password
+      validatePassword(registration.password)
+        .exceptionOrNull()
+        ?.let { return@post call.respond(BadRequest, it.message!!) }
+
+      registration.password.encrypt()
+        .getOrNull()
+        ?.let { Auth.new(registration.username, it) }
+        ?.let { call.respond(Created, Auth(it, registration.username)) }
+        ?: return@post call.respond(InternalServerError)
     }
   }
 }
+
+private fun Route.get(
+  path: EndPoint,
+  body: suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit
+) = get(path(), body)

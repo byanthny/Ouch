@@ -27,12 +27,12 @@ import io.javalin.websocket.WsErrorHandler
 import io.javalin.websocket.WsHandler
 import io.javalin.websocket.WsMessageContext
 import io.javalin.websocket.WsMessageHandler
+import java.util.function.Consumer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
-import java.util.function.Consumer
 
 private val IDLE_TIMOUT_MS = 5.minutes.millisecondsLong
 
