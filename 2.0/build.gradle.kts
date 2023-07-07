@@ -50,7 +50,14 @@ kotlin {
   }
   js(IR) {
     binaries.executable()
+    generateTypeScriptDefinitions()
+    useCommonJs()
+    moduleName = "ouchJS"
     browser {
+      @Suppress("OPT_IN_USAGE")
+      distribution {
+        directory = File("$projectDir/output/web")
+      }
       commonWebpackConfig {
         scssSupport {
           enabled.set(true)
@@ -110,10 +117,8 @@ kotlin {
       dependencies {
         implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.346")
         implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.346")
-        implementation("org.jetbrains.kotlin-wrappers:kotlin-emotion:11.9.3-pre.346")
         implementation("org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:6.3.0-pre.346")
-        implementation("org.jetbrains.kotlin-wrappers:kotlin-redux:4.1.2-pre.346")
-        implementation("org.jetbrains.kotlin-wrappers:kotlin-react-redux:7.2.6-pre.346")
+        implementation("org.jetbrains.kotlin-wrappers:kotlin-emotion:11.9.3-pre.346")
       }
     }
     val jsTest by getting
@@ -133,3 +138,4 @@ tasks.named<JavaExec>("run") {
   dependsOn(tasks.named<Jar>("jvmJar"))
   classpath(tasks.named<Jar>("jvmJar"))
 }
+

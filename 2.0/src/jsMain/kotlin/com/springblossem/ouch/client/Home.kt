@@ -15,8 +15,9 @@ external interface WelcomeProps : Props {
   var name: String
 }
 
-val Welcome = FC<WelcomeProps> { props ->
+val Home = FC<WelcomeProps> { props ->
   var name by useState(props.name)
+
   div {
     css {
       padding = 5.px

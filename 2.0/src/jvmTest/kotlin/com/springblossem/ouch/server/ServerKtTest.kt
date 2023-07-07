@@ -34,7 +34,11 @@ class ServerKtTest {
 
   @BeforeEach
   fun db() {
-    db = connectDB()
+    db = connectDB(
+      user = "server",
+      password = "server",
+      url = "jdbc:postgresql://localhost:8801/postgres",
+    )
   }
 
   @AfterEach
