@@ -1,19 +1,19 @@
 package com.springblossem.ouch.client
 
-import com.springblossem.ouch.client.state.AppState
 import com.springblossem.ouch.client.state.AuthContext
 import com.springblossem.ouch.client.state.AuthContextProvider
-import com.springblossem.ouch.client.state.context
 import com.springblossem.ouch.common.Auth
 import kotlinx.browser.document
-import react.*
+import react.FC
+import react.create
 import react.dom.client.createRoot
 import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.p
 import react.router.Route
 import react.router.Routes
 import react.router.dom.BrowserRouter
-import kotlin.js.Date
+import react.useContext
+import kotlin.random.Random
 
 fun main() {
   // setup react
@@ -29,7 +29,8 @@ fun main() {
 val RootComponent = FC<Nothing> { +AuthContextProvider.create { +App.create() } }
 
 val App = FC<Nothing> {
-  var auth by useContext(AuthContext)
+  val context = useContext(AuthContext)
+  var auth by context.authDel
 
   p {
     +(auth?.id?.toString() ?: "")
@@ -39,7 +40,7 @@ val App = FC<Nothing> {
     +"Update"
     onClick = {
       println("Updating Auth")
-      auth = Auth(Date.now().toInt(), "")
+      auth = Auth(Random.nextInt(), "")
     }
   }
 
