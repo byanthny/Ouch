@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
  * @meta Chat room
  *
  * @property id Unique ID
- * @property name Non-unique name of the [Existence]
  * @property capacity Maximum [Quiddity] capacity of the [Existence]
  * @property public Whether this [Existence] is publicly discoverable
  * @property createdAt Creation timestamp
@@ -16,7 +15,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Existence(
   val id: Int,
-  val name: String,
   val createdAt: Long,
   val public: Boolean = true,
   val capacity: Int? = null,

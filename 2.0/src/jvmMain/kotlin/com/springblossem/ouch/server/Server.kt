@@ -45,7 +45,7 @@ data class AuthPrincipal(val id: Int, val username: String) : Principal {
 
 fun main() {
   connectDB()
-  val id = Existence.new("new existence ${Date().time}", Date().time)
+  val id = Existence.new(Date().time)
   println(id)
 
   embeddedServer(
@@ -66,11 +66,13 @@ fun Application.server() {
     anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
   }
   install(Authentication) {
+    // Use basic auth username+pass
     basic(name = "auth") {
       realm = "ouch-server"
       validate { (username, password) ->
         Auth[username]
           ?.takeIf { verify(password, it.hash!!).isSuccess }
+          // Set principal if verified
           ?.let { AuthPrincipal(it) }
       }
     }

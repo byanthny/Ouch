@@ -10,7 +10,15 @@ data class Auth(
   val id: Int,
   val username: String,
   @Transient val hash: String? = null,
-)
+) {
+
+  override fun hashCode(): Int = id + username.hashCode()
+  override fun equals(other: Any?): Boolean =
+    other
+      ?.takeIf { it is Auth }
+      ?.let { this.hashCode() == it.hashCode() }
+      ?: false
+}
 
 @Serializable
 data class Registration(val username: String, val password: String)
@@ -22,6 +30,6 @@ fun validatePassword(pass: String): Result<Unit> = when {
   !pass.matches("""^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$""".toRegex()) ->
     failure(Error("""password must match ^(?=.*[A-Za-z])(?=.*d)[A-Za-zd]+$"""))
 
-  else                                                          -> success(Unit)
+  else                                                               -> success(Unit)
 }
 
