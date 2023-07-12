@@ -14,10 +14,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.install
-import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.Principal
-import io.ktor.server.auth.basic
-import io.ktor.server.auth.principal
+import io.ktor.server.auth.*
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.http.content.staticResources
@@ -50,7 +47,7 @@ fun main() {
 
   embeddedServer(
     CIO,
-    port = 8080,
+    port = PORT ?: 7000,
     host = "127.0.0.1",
     module = Application::server
   ).start(wait = true)
@@ -67,7 +64,7 @@ fun Application.server() {
   }
   install(Authentication) {
     // Use basic auth username+pass
-    basic(name = "auth") {
+    basic {
       realm = "ouch-server"
       validate { (username, password) ->
         Auth[username]
