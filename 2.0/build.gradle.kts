@@ -13,10 +13,8 @@ object Versions {
   const val kotlin = "1.8.20"
   const val coroutines = "1.7.1"
   const val serialization = "1.5.1"
-  const val ktor = "2.3.1"
-  const val logback = "1.4.7"
-  const val compose = "1.4.2"
-  const val fleks = "SNAPSHOT"
+  const val ktor = "2.3.2"
+  const val logback = "1.4.8"
 }
 
 fun kotlinx(project: String, version: String) =
@@ -34,6 +32,8 @@ object ktor {
     invoke("client-$module", version)
 }
 
+fun wrapper(name: String, version: String) =
+  "org.jetbrains.kotlin-wrappers:kotlin-$name:$version"
 
 repositories {
   mavenCentral()
@@ -56,7 +56,7 @@ kotlin {
     browser {
       @Suppress("OPT_IN_USAGE")
       distribution {
-        directory = File("$projectDir/output/web")
+        directory = File("$projectDir/out/web")
       }
       commonWebpackConfig {
         scssSupport {
@@ -71,6 +71,7 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
+        implementation(ktor("http"))
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
       }
     }
@@ -104,13 +105,16 @@ kotlin {
         implementation("org.postgresql:postgresql:42.6.0")
 
         // logging
-        implementation("io.github.oshai:kotlin-logging-jvm:4.0.0")
+        implementation("ch.qos.logback:logback-classic:${Versions.logback}")
       }
     }
     val jvmTest by getting {
       dependencies {
         implementation(ktor.server("test-host"))
         implementation(ktor.client("content-negotiation"))
+        implementation(ktor.client("websockets"))
+        // logging
+        implementation("ch.qos.logback:logback-classic:${Versions.logback}")
       }
     }
     val jsMain by getting {
@@ -138,4 +142,6 @@ tasks.named<JavaExec>("run") {
   dependsOn(tasks.named<Jar>("jvmJar"))
   classpath(tasks.named<Jar>("jvmJar"))
 }
-
+dependencies {
+  implementation("io.ktor:ktor-server-default-headers-jvm:2.3.2")
+}

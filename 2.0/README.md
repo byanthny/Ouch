@@ -6,12 +6,7 @@ new'
 client -(name, pass)-> http://
 http:// -(authData)-> client
 
-new A
-client -(name, pass, exID)-> ws://existenceID
--| single connection to single existence
--| will be "blind" to any other "known" existences
-
-new B
+new
 client -(name, pass)-> ws://home
 client -(exID)-> ws::existenceID
 ```
