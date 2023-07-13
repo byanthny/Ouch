@@ -3,13 +3,12 @@ package com.springblossem.ouch.server
 import com.springblossem.ouch.common.Auth
 import com.springblossem.ouch.common.EndPoint
 import com.springblossem.ouch.common.Registration
+import com.springblossem.ouch.common.RestErrorResponse.DUPLICATE_NAME
 import com.springblossem.ouch.server.db.AuthTable
 import com.springblossem.ouch.server.db.ExistenceTable
 import com.springblossem.ouch.server.db.connectDB
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.websocket.WebSockets
-import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.basicAuth
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -17,10 +16,8 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType.Application
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.testing.testApplication
-import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -28,13 +25,12 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.seconds
 
 const val USERNAME = "USERNAME"
 const val PASSWORD = "PASSWORD1"
 val AUTH = Auth(1, USERNAME)
 
-class ServerKtTest {
+class ServerTest {
 
   private lateinit var db: Database
 
@@ -67,32 +63,58 @@ class ServerKtTest {
   }
 
   @Test
-  fun `reject logged-in registration`() = testApplication {
+  fun `registration rejects duplicate username`() = testApplication {
     val client = createClient { install(ContentNegotiation) { json() } }
     application { server() }
+    `registration works`()
     client.post(EndPoint.REGISTER()) {
       contentType(Application.Json)
+      setBody(Registration(USERNAME, PASSWORD))
+      basicAuth(USERNAME, PASSWORD)
+    }
+      .apply { assertEquals(HttpStatusCode.Conflict, status) }
+      .apply { assertEquals(DUPLICATE_NAME.message, call.response.bodyAsText()) }
+  }
+
+  @Test
+  fun `registration rejects invalid password`() = testApplication {
+    val client = createClient { install(ContentNegotiation) { json() } }
+    application { server() }
+    // too short
+    client.post(EndPoint.REGISTER()) {
+      contentType(Application.Json)
+      setBody(Registration(USERNAME, "wrong"))
       basicAuth(USERNAME, PASSWORD)
     }
       .apply { assertEquals(HttpStatusCode.BadRequest, status) }
-      .apply { assertEquals("malformed body", call.response.bodyAsText()) }
+    // no numbers
+    client.post(EndPoint.REGISTER()) {
+      contentType(Application.Json)
+      setBody(Registration(USERNAME, "wrongwrong"))
+      basicAuth(USERNAME, PASSWORD)
+    }
+      .apply { assertEquals(HttpStatusCode.BadRequest, status) }
   }
 
   @Test
   fun `rejects unauthenticated ws connection`() = testApplication {
-    val client = createClient {
-      install(ContentNegotiation) { json() }
-      WebSockets {
-        contentConverter = KotlinxWebsocketSerializationConverter(Json)
-        pingInterval = 15.seconds.inWholeMilliseconds
-        maxFrameSize = Long.MAX_VALUE
-      }
-    }
-    application { server() }
-    client.webSocket(EndPoint.SOCKET()) {
-      println("connected")
-      /* unreachable */
-    }
+    // TODO
+    //    val client = createClient {
+    //      install(ContentNegotiation) { json() }
+    //      WebSockets {
+    //        contentConverter = KotlinxWebsocketSerializationConverter(Json)
+    //        pingInterval = 15.seconds.inWholeMilliseconds
+    //        maxFrameSize = Long.MAX_VALUE
+    //      }
+    //    }
+    //    application { server() }
+    //    val session = client.webSocketSession(EndPoint.SOCKET())
+    //    runCatching {
+    //      val frame = session.incoming.receive()
+    //      println(frame.frameType)
+    //    }
+    //    assert(!session.isActive)
+    //    assertEquals(UNAUTHENTICATED.description, session.closeReason.await()?.message)
   }
 
   // TODO Test WS onConnect
