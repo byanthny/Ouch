@@ -5,6 +5,10 @@ import kotlinx.serialization.Transient
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
+/**
+ * @property id Unique SQL ID
+ * @property username Unique username
+ */
 @Serializable
 data class Auth(
   val id: Int,
