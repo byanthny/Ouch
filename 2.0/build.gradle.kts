@@ -119,10 +119,19 @@ kotlin {
     }
     val jsMain by getting {
       dependencies {
-        implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.346")
-        implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.346")
-        implementation("org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:6.3.0-pre.346")
-        implementation("org.jetbrains.kotlin-wrappers:kotlin-emotion:11.9.3-pre.346")
+        // Wrappers
+        implementation(wrapper("react", "18.2.0-pre.346"))
+        implementation(wrapper("react-dom", "18.2.0-pre.346"))
+        implementation(wrapper("react-router-dom", "6.3.0-pre.346"))
+        implementation(wrapper("emotion", "11.9.3-pre.346"))
+        // KTOR
+        implementation(ktor("serialization-kotlinx-json"))
+        implementation(ktor.client("core"))
+        implementation(ktor.client("js"))
+        implementation(ktor.client("content-negotiation"))
+        implementation(ktor.client("websockets"))
+        implementation(ktor.client("auth"))
+        implementation(ktor.client("logging"))
       }
     }
     val jsTest by getting

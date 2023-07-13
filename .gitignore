@@ -33,3 +33,4 @@ build
 package-lock.json
 /node_modules/
 frontend/notes
+*.iml
