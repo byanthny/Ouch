@@ -3,14 +3,16 @@ package com.springblossem.ouch.server
 import com.springblossem.ouch.common.Auth
 import com.springblossem.ouch.common.EndPoint
 import com.springblossem.ouch.common.Registration
-import com.springblossem.ouch.common.RestErrorResponse.ALREADY_LOGGED_IN
-import com.springblossem.ouch.common.RestErrorResponse.DUPLICATE_NAME
-import com.springblossem.ouch.common.RestErrorResponse.INVALID_PASSWORD
-import com.springblossem.ouch.common.RestErrorResponse.MALFORMED_BODY
+import com.springblossem.ouch.common.RestErrorResponses.ALREADY_LOGGED_IN
+import com.springblossem.ouch.common.RestErrorResponses.DUPLICATE_NAME
+import com.springblossem.ouch.common.RestErrorResponses.MALFORMED_BODY
 import com.springblossem.ouch.common.validatePassword
 import com.springblossem.ouch.server.db.get
 import com.springblossem.ouch.server.db.new
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.HttpStatusCode.Companion.BadRequest
+import io.ktor.http.HttpStatusCode.Companion.Conflict
+import io.ktor.http.HttpStatusCode.Companion.Unauthorized
 import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.auth.principal
@@ -27,22 +29,22 @@ fun Application.api() {
     get(EndPoint.HOME()) { call.respond("STATUS: OK") }
     post(EndPoint.REGISTER()) {
       if (call.principal<AuthPrincipal>() != null) {
-        return@post call.respond(ALREADY_LOGGED_IN.code, ALREADY_LOGGED_IN.message)
+        return@post call.respond(Unauthorized, ALREADY_LOGGED_IN)
       }
 
       // validate body
       val registration = runCatching { call.receive<Registration>() }
         .getOrNull()
-        ?: return@post call.respond(MALFORMED_BODY.code, MALFORMED_BODY.message)
+        ?: return@post call.respond(BadRequest, MALFORMED_BODY)
 
       // check duplicates
       Auth[registration.username]
-        ?.let { return@post call.respond(DUPLICATE_NAME.code, DUPLICATE_NAME.message) }
+        ?.let { return@post call.respond(Conflict, DUPLICATE_NAME) }
 
       // validate password
       validatePassword(registration.password)
         .exceptionOrNull()
-        ?.let { return@post call.respond(INVALID_PASSWORD.code, it.message!!) }
+        ?.let { return@post call.respond(BadRequest, it.message!!) }
 
       registration.password.encrypt()
         .getOrNull()

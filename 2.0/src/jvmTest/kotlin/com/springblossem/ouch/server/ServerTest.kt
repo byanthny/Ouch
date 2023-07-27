@@ -3,7 +3,7 @@ package com.springblossem.ouch.server
 import com.springblossem.ouch.common.Auth
 import com.springblossem.ouch.common.EndPoint
 import com.springblossem.ouch.common.Registration
-import com.springblossem.ouch.common.RestErrorResponse.DUPLICATE_NAME
+import com.springblossem.ouch.common.RestErrorResponses.DUPLICATE_NAME
 import com.springblossem.ouch.server.db.AuthTable
 import com.springblossem.ouch.server.db.ExistenceTable
 import com.springblossem.ouch.server.db.connectDB
@@ -73,7 +73,7 @@ class ServerTest {
       basicAuth(USERNAME, PASSWORD)
     }
       .apply { assertEquals(HttpStatusCode.Conflict, status) }
-      .apply { assertEquals(DUPLICATE_NAME.message, call.response.bodyAsText()) }
+      .apply { assertEquals(DUPLICATE_NAME, call.response.bodyAsText()) }
   }
 
   @Test

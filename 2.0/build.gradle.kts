@@ -71,7 +71,6 @@ kotlin {
   sourceSets {
     val commonMain by getting {
       dependencies {
-        implementation(ktor("http"))
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
       }
     }
@@ -130,7 +129,6 @@ kotlin {
         implementation(ktor.client("js"))
         implementation(ktor.client("content-negotiation"))
         implementation(ktor.client("websockets"))
-        implementation(ktor.client("auth"))
         implementation(ktor.client("logging"))
       }
     }
@@ -139,7 +137,7 @@ kotlin {
 }
 
 application {
-  mainClass.set("com.springblossem.ouch.server.application.ServerKt")
+  mainClass.set("com.springblossem.ouch.server.ServerKt")
 }
 
 tasks.named<Copy>("jvmProcessResources") {
@@ -150,7 +148,4 @@ tasks.named<Copy>("jvmProcessResources") {
 tasks.named<JavaExec>("run") {
   dependsOn(tasks.named<Jar>("jvmJar"))
   classpath(tasks.named<Jar>("jvmJar"))
-}
-dependencies {
-  implementation("io.ktor:ktor-server-default-headers-jvm:2.3.2")
 }

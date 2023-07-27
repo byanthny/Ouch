@@ -1,9 +1,8 @@
 package com.springblossem.ouch.common
 
-import io.ktor.http.HttpStatusCode
 import kotlin.time.Duration.Companion.minutes
 
-enum class EndPoint(val path: String) {
+enum class EndPoint(private val path: String) {
   HOME("/"),
   EXISTENCES("/existences"),
   SOCKET("/ws"),
@@ -12,11 +11,12 @@ enum class EndPoint(val path: String) {
   operator fun invoke() = path
 }
 
-enum class RestErrorResponse(val code: HttpStatusCode, val message: String) {
-  DUPLICATE_NAME(HttpStatusCode.Conflict, "name already exists"),
-  ALREADY_LOGGED_IN(HttpStatusCode.Unauthorized, "already logged in"),
-  INVALID_PASSWORD(HttpStatusCode.BadRequest, "invalid password"),
-  MALFORMED_BODY(HttpStatusCode.BadRequest, "malformed body");
+object RestErrorResponses {
+
+  const val DUPLICATE_NAME = "name already exists"
+  const val ALREADY_LOGGED_IN = "already logged in"
+  const val INVALID_PASSWORD = "invalid password"
+  const val MALFORMED_BODY = "malformed body"
 }
 
 enum class SocketCloseCodes(val code: Short, val description: String) {
