@@ -55,7 +55,6 @@ fun Application.plugins() {
     allowMethod(HttpMethod.Delete)
     allowNonSimpleContentTypes = true
     allowCredentials = true
-    println(methods)
     allowHeaders { true }
     allowOrigins { true }
     anyHost()

@@ -34,3 +34,4 @@ object SocketConfig {
 
   val IDLE_TIMEOUT = 5.minutes
 }
+

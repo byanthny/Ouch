@@ -1,9 +1,6 @@
 package com.springblossem.ouch.server.websocket
 
-import com.springblossem.ouch.common.Auth
-import com.springblossem.ouch.common.EndPoint
-import com.springblossem.ouch.common.SocketCloseCodes
-import com.springblossem.ouch.common.SocketConfig
+import com.springblossem.ouch.common.*
 import com.springblossem.ouch.server.AuthPrincipal
 import com.springblossem.ouch.server.PRODUCTION
 import com.springblossem.ouch.server.db.get
@@ -21,11 +18,11 @@ import io.ktor.websocket.close
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.serialization.json.Json
 import java.time.Duration
-import java.util.Collections.synchronizedSet
+import java.util.Collections.synchronizedMap
 
 private typealias DWSSSession = DefaultWebSocketServerSession
 
-private val connections = synchronizedSet(mutableSetOf<Connection>())
+private val connections = synchronizedMap(mutableMapOf<Int, Connection>())
 
 data class Connection(
   val id: Int,
@@ -52,13 +49,20 @@ fun Application.socketConfig() {
 private suspend fun handler(session: DWSSSession) {
   // onConnect
   onConnect(session)
+  // onMessage
+  val error = runCatching { session.readFrames() }
+  // TODO onClose/onError
+  println(error)
 }
 
 private suspend fun onConnect(session: DWSSSession) {
   // authenticate
   val (uid, username) = session.call.principal<AuthPrincipal>()
     ?: return session.close(SocketCloseCodes.UNAUTHENTICATED)
-  TODO("register connection")
+  // save connection info
+  connections[uid] = Connection(uid, session)
+  // Send Auth info
+  session.sendSerialized(packetOf(Auth[uid]!!))
 }
 
 private suspend fun DWSSSession.readFrames() = incoming.consumeEach { frame ->

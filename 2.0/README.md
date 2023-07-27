@@ -2,12 +2,9 @@
 old
 client -(name, exID)-> ws://existenceID
 
-new'
-client -(name, pass)-> http://
-http:// -(authData)-> client
-
 new
 client -(name, pass)-> ws://home
+ws:// -(auth, existences)-> client
 client -(exID)-> ws::existenceID
 ```
 
