@@ -40,7 +40,7 @@ fun Application.socketConfig() {
     masking = PRODUCTION
   }
   routing {
-    authenticate(optional = true) {
+    authenticate(/*optional = true*/) {
       webSocket(EndPoint.SOCKET()) { handler(this) }
     }
   }
