@@ -1,7 +1,7 @@
 package com.sim.ouch.extension
 
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.ISO8601
+import korlibs.time.DateTime
+import korlibs.time.ISO8601
 
 /** The current UTC time as [ISO8601.DATETIME_COMPLETE]. */
 val DateTime.iso get() = DateTime.now().format(ISO8601.DATETIME_COMPLETE)

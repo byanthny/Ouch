@@ -42,9 +42,9 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.0")
 
   // Database
-  implementation(
-    "org.litote.kmongo", "kmongo-coroutine-serialization", Version.kmongo
-  )
+  //implementation(
+  //  "org.litote.kmongo", "kmongo-coroutine-serialization", Version.kmongo
+  //)
   // Cache
   implementation("com.github.ben-manes.caffeine:caffeine:3.1.0")
 
@@ -72,3 +72,8 @@ task("stage") {
   dependsOn("build", "clean")
 }
 
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of("11"))
+  }
+}

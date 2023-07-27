@@ -9,32 +9,15 @@ import com.sim.ouch.logic.Quiddity
 import com.sim.ouch.logic.action.Action
 import com.sim.ouch.logic.action.asAction
 import com.sim.ouch.logic.parseOof
-import com.sim.ouch.web.PacketType.ACTION
-import com.sim.ouch.web.PacketType.CHAT
-import com.sim.ouch.web.PacketType.ENTER
-import com.sim.ouch.web.PacketType.ERR
-import com.sim.ouch.web.PacketType.EXIT
-import com.sim.ouch.web.PacketType.INTERNAL
-import com.sim.ouch.web.PacketType.PING
-import com.sim.ouch.web.PacketType.QUIDDITY
-import com.soywiz.klock.minutes
-import io.javalin.websocket.WsCloseContext
-import io.javalin.websocket.WsConnectContext
-import io.javalin.websocket.WsConnectHandler
-import io.javalin.websocket.WsContext
-import io.javalin.websocket.WsErrorContext
-import io.javalin.websocket.WsErrorHandler
-import io.javalin.websocket.WsHandler
-import io.javalin.websocket.WsMessageContext
-import io.javalin.websocket.WsMessageHandler
-import java.util.function.Consumer
+import com.sim.ouch.web.PacketType.*
+import io.javalin.websocket.*
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.UnstableDefault
+import java.util.function.Consumer
+import kotlin.time.Duration.Companion.minutes
 
-private val IDLE_TIMOUT_MS = 5.minutes.millisecondsLong
+private val IDLE_TIMOUT_MS = 5.minutes
 
 private val sl = Slogger("Socket Handler")
 
@@ -48,9 +31,7 @@ object Err {
 }
 
 /** Server side [WsHandler] implementation. */
-@UnstableDefault
-@ImplicitReflectionSerializer
-val Websocket = Consumer<WsHandler> { wsHandler ->
+val Websocket = Consumer<WsConfig> { wsHandler ->
 
     val connect = WsConnectHandler ch@{ ctx: WsConnectContext ->
         // Check for reconnection token
@@ -108,8 +89,6 @@ val Websocket = Consumer<WsHandler> { wsHandler ->
  * @param name
  * @param exID
  */
-@UnstableDefault
-@ImplicitReflectionSerializer
 private suspend fun newConnection(
     context: WsConnectContext,
     name: Name,
@@ -124,7 +103,7 @@ private suspend fun newConnection(
     ex.modify {
         val (tkn, qdy) = join(name, context)
 
-        context.session.idleTimeout = IDLE_TIMOUT_MS
+        //context.session.idleTimeout = IDLE_TIMOUT_MS
 
         context.initWith(ex, qdy, tkn)
 
@@ -140,25 +119,21 @@ private suspend fun newConnection(
  * @param context
  * @param token
  */
-@UnstableDefault
-@ImplicitReflectionSerializer
 private fun reconnect(context: WsConnectContext, token: Token) {
     // Attempt to validate the token
     val (info, tkn) = token.refresh() ?: return context.close(Err.BAD_TOKEN)
     // Attempt to locate existence
     val ex = getExistence(info.ec) ?: return context.close(Err.EX_NOT_FOUND)
     val q = ex.qOf(info.qc) ?: return context.close(Err.Q_NOT_FOUND)
-    context.session.idleTimeout = IDLE_TIMOUT_MS
+    //context.session.idleTimeout = IDLE_TIMOUT_MS
     context.initWith(ex, q, tkn)
     ex.broadcast(packetOf(ENTER, q), context.sessionId)
     sl.slog("Init reconnect session. Ex=${ex.id} SID=${context.sessionId}")
 }
 
-@UnstableDefault
-@ImplicitReflectionSerializer
 private suspend fun handleMessage(context: WsMessageContext) {
     val sd = context.info ?: return
-    val packet = context.message<Packet>()
+    val packet = context.messageAsClass<Packet>()
     val ex = getExistence(sd.ec)
     val qd = sd.let { ex?.qOf(it.qc) }
     when (packet.type) {
@@ -180,8 +155,6 @@ private suspend fun handleMessage(context: WsMessageContext) {
 }
 
 /** Handle chat broadcasting and parsing. */
-@UnstableDefault
-@ImplicitReflectionSerializer
 private suspend fun handleChat(ex: Existence, qd: Quiddity, text: String) {
     ex.modify {
         // Update chat

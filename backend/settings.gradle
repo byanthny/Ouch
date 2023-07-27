@@ -11,4 +11,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'Ouch'
+rootProject.name = 'ouch-1.0'

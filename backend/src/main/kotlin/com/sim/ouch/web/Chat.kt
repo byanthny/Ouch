@@ -1,14 +1,10 @@
 package com.sim.ouch.web
 
 import com.sim.ouch.logic.Quiddity
-import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.UnstableDefault
 
 /** An easy way to make an outgoing typed [Packet] with a message. */
 @PacketDsl
-@UnstableDefault
-@ImplicitReflectionSerializer
 fun chatPacket(message: Chat.Message) = packetOf(PacketType.CHAT, message)
 
 @Serializable
