@@ -1,6 +1,7 @@
 package com.springblossem.ouch.server
 
 import com.springblossem.ouch.common.Auth
+import com.springblossem.ouch.common.JsonConfig
 import com.springblossem.ouch.server.db.connectDB
 import com.springblossem.ouch.server.db.get
 import com.springblossem.ouch.server.websocket.socketConfig
@@ -71,12 +72,7 @@ fun Application.plugins() {
       }
     }
   }
-  install(ContentNegotiation) {
-    json(Json {
-      prettyPrint = PORT == null
-      ignoreUnknownKeys = true
-    })
-  }
+  install(ContentNegotiation) { json(JsonConfig) }
   install(CallLogging) {
     level = Level.TRACE
   }

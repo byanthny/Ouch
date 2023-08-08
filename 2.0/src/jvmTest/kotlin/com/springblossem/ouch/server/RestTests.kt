@@ -1,15 +1,14 @@
 package com.springblossem.ouch.server
 
 import com.springblossem.ouch.common.Auth
-import com.springblossem.ouch.common.EndPoint
+import com.springblossem.ouch.common.api.EndPoint
 import com.springblossem.ouch.common.Registration
-import com.springblossem.ouch.common.RestErrorResponses.DUPLICATE_NAME
+import com.springblossem.ouch.common.api.RestErrorResponses.DUPLICATE_NAME
 import com.springblossem.ouch.server.db.AuthTable
 import com.springblossem.ouch.server.db.ExistenceTable
 import com.springblossem.ouch.server.db.connectDB
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.basicAuth
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText

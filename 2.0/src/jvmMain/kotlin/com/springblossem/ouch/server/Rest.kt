@@ -1,11 +1,11 @@
 package com.springblossem.ouch.server
 
 import com.springblossem.ouch.common.Auth
-import com.springblossem.ouch.common.EndPoint
+import com.springblossem.ouch.common.api.EndPoint
 import com.springblossem.ouch.common.Registration
-import com.springblossem.ouch.common.RestErrorResponses.ALREADY_LOGGED_IN
-import com.springblossem.ouch.common.RestErrorResponses.DUPLICATE_NAME
-import com.springblossem.ouch.common.RestErrorResponses.MALFORMED_BODY
+import com.springblossem.ouch.common.api.RestErrorResponses.ALREADY_LOGGED_IN
+import com.springblossem.ouch.common.api.RestErrorResponses.DUPLICATE_NAME
+import com.springblossem.ouch.common.api.RestErrorResponses.MALFORMED_BODY
 import com.springblossem.ouch.common.validatePassword
 import com.springblossem.ouch.server.db.get
 import com.springblossem.ouch.server.db.new

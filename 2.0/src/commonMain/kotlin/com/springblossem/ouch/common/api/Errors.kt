@@ -1,15 +1,4 @@
-package com.springblossem.ouch.common
-
-import kotlin.time.Duration.Companion.minutes
-
-enum class EndPoint(private val path: String) {
-  HOME("/"),
-  EXISTENCES("/existences"),
-  SOCKET("/ws"),
-  REGISTER("/auth/register");
-
-  operator fun invoke() = path
-}
+package com.springblossem.ouch.common.api
 
 object RestErrorResponses {
 
@@ -29,9 +18,3 @@ enum class SocketCloseCodes(val code: Short, val description: String) {
   UNAUTHENTICATED(4007, "unauthenticated"),
   UNAUTHORIZED(4008, "unauthorized"),
 }
-
-object SocketConfig {
-
-  val IDLE_TIMEOUT = 5.minutes
-}
-

@@ -1,6 +1,7 @@
 package com.springblossem.ouch.client.api
 
 import com.springblossem.ouch.common.*
+import com.springblossem.ouch.common.api.EndPoint
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.js.Js

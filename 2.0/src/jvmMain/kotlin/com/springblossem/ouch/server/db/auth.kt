@@ -22,7 +22,7 @@ object AuthTable : IntIdTable() {
 fun Query.toAuths(): List<Auth> = map {
   Auth(
     id = it[AuthTable.id].value,
-    username = it[AuthTable.username],
+    username = it[AuthTable.usernameRaw],
     hash = it[AuthTable.hash]
   )
 }
